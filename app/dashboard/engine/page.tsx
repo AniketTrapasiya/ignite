@@ -741,6 +741,231 @@ export default function EnginePage() {
           </div>
         </div>
       </div>
+
+      {/* ════ FULL-WIDTH RESULT PANEL ════ */}
+      {(isRunning || isDone || chunks.length > 0) && (
+        <div className="mx-4 mb-4 rounded-2xl border overflow-hidden transition-all duration-500"
+          style={{
+            background: "#09091a",
+            borderColor: isDone
+              ? engineState === "success" ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"
+              : "rgba(249,115,22,0.2)",
+            boxShadow: isDone
+              ? engineState === "success" ? "0 0 30px rgba(34,197,94,0.06)" : "0 0 30px rgba(239,68,68,0.06)"
+              : "0 0 30px rgba(249,115,22,0.06)",
+          }}
+        >
+          {/* Panel header */}
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.05]">
+            <div
+              className="flex items-center gap-2"
+            >
+              {isRunning ? (
+                <>
+                  <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                  <span className="text-sm font-semibold text-orange-300">Engine Running…</span>
+                </>
+              ) : engineState === "success" ? (
+                <>
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-semibold text-emerald-300">Run Complete</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-5 h-5 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center">
+                    <span className="text-red-400 text-xs font-bold">✗</span>
+                  </div>
+                  <span className="text-sm font-semibold text-red-300">Run Failed</span>
+                </>
+              )}
+            </div>
+
+            {/* Prompt recap */}
+            <div className="flex-1 min-w-0 mx-4">
+              <p className="text-xs text-white/30 truncate">
+                <span className="text-white/20 mr-1">prompt:</span>
+                {prompt}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {isDone && fullOutput && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(fullOutput)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy
+                </button>
+              )}
+              {isDone && !runError && !savedToMemory && fullOutput && (
+                <button
+                  onClick={() => setSaveModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-xs text-indigo-300 hover:bg-indigo-500/20 transition-all"
+                >
+                  🧠 Save
+                </button>
+              )}
+              {savedToMemory && (
+                <span className="text-xs text-emerald-400 flex items-center gap-1">
+                  <span>✓</span> Saved
+                </span>
+              )}
+              {isDone && (
+                <button
+                  onClick={reset}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
+                >
+                  + New Run
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Panel body — step timeline + output */}
+          <div className="flex gap-0 min-h-[200px]">
+
+            {/* LEFT: Step timeline */}
+            <div className="w-56 flex-shrink-0 border-r border-white/[0.05] p-4 space-y-1">
+              <p className="text-[9px] font-semibold text-white/20 uppercase tracking-widest mb-3">Execution Steps</p>
+              {outputLines.filter((l) => l.type === "step").length === 0 && isRunning && (
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-5 rounded bg-white/[0.03] animate-pulse" style={{ width: `${70 + i * 8}%` }} />
+                  ))}
+                </div>
+              )}
+              {outputLines.filter((l) => l.type === "step").map((line, i) => {
+                const isLast = i === outputLines.filter((l) => l.type === "step").length - 1;
+                const stillRunning = isLast && isRunning;
+                return (
+                  <div key={i} className="flex items-start gap-2 group">
+                    {/* Step dot */}
+                    <div className="flex flex-col items-center mt-0.5 flex-shrink-0">
+                      <div
+                        className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                        style={{
+                          background: stillRunning ? "rgba(249,115,22,0.2)" : "rgba(34,197,94,0.15)",
+                          border: `1.5px solid ${stillRunning ? "#f97316" : "#22c55e"}`,
+                          color: stillRunning ? "#f97316" : "#22c55e",
+                        }}
+                      >
+                        {stillRunning ? (
+                          <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                        ) : (
+                          <svg className="w-2 h-2" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      {/* Connector */}
+                      {i < outputLines.filter((l) => l.type === "step").length - 1 && (
+                        <div className="w-px h-3 bg-white/10 mt-0.5" />
+                      )}
+                    </div>
+                    <p className="text-[10px] text-white/45 leading-tight pt-0.5 line-clamp-2">
+                      {line.content}
+                    </p>
+                  </div>
+                );
+              })}
+              {isDone && outputLines.filter((l) => l.type === "step").length > 0 && (
+                <div className="pt-2 border-t border-white/5 mt-2">
+                  <p className="text-[9px] text-white/20">
+                    {outputLines.filter((l) => l.type === "step").length} steps · {Math.floor(fullOutput.length / 5)} words
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT: Main output */}
+            <div className="flex-1 p-5 overflow-y-auto max-h-[500px] scrollbar-hide space-y-4">
+              {/* Streaming raw text (non-step, non-result lines) */}
+              {outputLines.filter((l) => l.type === "text").length > 0 && (
+                <div className="font-mono text-sm text-white/40 space-y-1 leading-relaxed">
+                  {outputLines.filter((l) => l.type === "text").map((line, i) => (
+                    <p key={i}>{line.content}</p>
+                  ))}
+                </div>
+              )}
+
+              {/* RESULT block — the main output */}
+              {outputLines.filter((l) => l.type === "result").map((line, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border p-4 space-y-2"
+                  style={{
+                    background: "rgba(34,197,94,0.05)",
+                    borderColor: "rgba(34,197,94,0.2)",
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="text-xs font-semibold text-emerald-400 uppercase tracking-widest">Result</span>
+                  </div>
+                  <p className="text-sm text-white/80 leading-relaxed whitespace-pre-wrap">{line.content}</p>
+                </div>
+              ))}
+
+              {/* Full raw output as a fallback when RESULT not parsed yet but running */}
+              {isRunning && outputLines.filter((l) => l.type === "result").length === 0 && (
+                <div className="font-mono text-xs text-white/30 leading-relaxed whitespace-pre-wrap">
+                  {fullOutput.split("\n").filter((l) => !l.startsWith("STEP:")).join("\n")}
+                </div>
+              )}
+
+              {/* Show full raw output (collapsible) when done and has content */}
+              {isDone && fullOutput && (
+                <details className="group">
+                  <summary className="text-[10px] text-white/20 cursor-pointer hover:text-white/40 transition-colors list-none flex items-center gap-1.5 select-none">
+                    <svg className="w-3 h-3 group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                    View raw output
+                  </summary>
+                  <pre className="mt-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] text-white/30 font-mono whitespace-pre-wrap overflow-x-auto leading-relaxed">
+                    {fullOutput}
+                  </pre>
+                </details>
+              )}
+
+              {/* Error state */}
+              {runError && (
+                <div className="rounded-xl border border-red-500/25 bg-red-500/8 p-4 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-400" />
+                    <span className="text-xs font-semibold text-red-400 uppercase tracking-widest">Error</span>
+                  </div>
+                  <p className="text-sm text-red-300/80">{runError}</p>
+                </div>
+              )}
+
+              {/* Still streaming hint */}
+              {isRunning && (
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="w-1 h-1 rounded-full bg-orange-400/60 animate-bounce"
+                        style={{ animationDelay: `${i * 0.12}s` }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-white/20">streaming…</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

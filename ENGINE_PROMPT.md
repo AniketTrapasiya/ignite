@@ -382,7 +382,7 @@ lib/
 ## 9. Environment Variables Needed (New)
 
 ```env
-ANTHROPIC_API_KEY=          # Claude for agent + optional embeddings
+GEMINI_API_KEY=          # Claude for agent + optional embeddings
 PINECONE_API_KEY=           # Long-term vector memory
 PINECONE_INDEX_NAME=        # e.g. "autoflow-memory"
 ENCRYPTION_KEY=             # 32-char random string for AES-256 credential encryption

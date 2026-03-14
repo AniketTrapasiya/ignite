@@ -88,7 +88,7 @@
 ### Day 8 — AI SDK Setup
 
 - [ ] Install Vercel AI SDK: `npm install ai @ai-sdk/anthropic`
-- [ ] Add `ANTHROPIC_API_KEY` to `.env` and `.env.example`
+- [ ] Add `GEMINI_API_KEY` to `.env` and `.env.example`
 - [ ] Create `lib/ai-agent.ts` — system prompt + workflow JSON schema
 - [ ] Define `WorkflowStepSchema` type (step name, description, tool, inputs, outputs)
 - [ ] Test AI generation in isolation with a sample prompt
@@ -337,7 +337,7 @@ SMTP_FROM=
 NEXT_PUBLIC_APP_URL=
 
 # To add
-ANTHROPIC_API_KEY=        # Week 2, Day 8
+GEMINI_API_KEY=        # Week 2, Day 8
 YOUTUBE_API_KEY=          # Week 3, Day 19
 ```
 
