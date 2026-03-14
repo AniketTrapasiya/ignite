@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { signToken, setAuthCookie } from "@/lib/auth";
+import { signToken, setAuthCookie, generateOtp } from "@/lib/auth";
+import { sendMail, otpEmailTemplate } from "@/lib/email";
 import { normalizeEmail } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
@@ -34,6 +35,28 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user.emailVerified) {
+      // Invalidate old OTPs and send a fresh one
+      await prisma.otp.updateMany({
+        where: { userId: user.id, type: "EMAIL_VERIFICATION", used: false },
+        data: { used: true },
+      });
+
+      const otpCode = generateOtp();
+      await prisma.otp.create({
+        data: {
+          code: otpCode,
+          userId: user.id,
+          type: "EMAIL_VERIFICATION",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
+
+      await sendMail({
+        to: user.email,
+        subject: "Verify your email - AutoFlow AI",
+        html: otpEmailTemplate(user.name, otpCode),
+      });
+
       return NextResponse.json(
         { error: "Please verify your email before signing in", userId: user.id },
         { status: 403 }
