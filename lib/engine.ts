@@ -19,18 +19,29 @@ export async function runEngine(
   userId: string,
   prompt: string,
   selectedMemoryIds: string[],
-  selectedMods: string[]
+  selectedMods: string[],
+  modelId = "gemini-2.0-flash"
 ): Promise<{ runId: string; stream: ReturnType<typeof streamText> }> {
-  // Load selected memories
-  const allMemories = await searchMemories(userId, prompt, 5);
-  const memories = selectedMemoryIds.length > 0
-    ? allMemories.filter((m) => selectedMemoryIds.includes(m.id))
-    : allMemories.slice(0, 3);
+  // Load selected memories — fail gracefully if DB is down
+  let memories: Awaited<ReturnType<typeof searchMemories>> = [];
+  try {
+    const allMemories = await searchMemories(userId, prompt, 5);
+    memories = selectedMemoryIds.length > 0
+      ? allMemories.filter((m) => selectedMemoryIds.includes(m.id))
+      : allMemories.slice(0, 3);
+  } catch {
+    // Continue without memories if DB is unavailable
+  }
 
-  // Load active mods (use provided selection or all connected)
-  const activeServices = selectedMods.length > 0
-    ? selectedMods
-    : await getActiveServices(userId);
+  // Load active mods — fail gracefully
+  let activeServices: string[] = selectedMods;
+  try {
+    if (selectedMods.length === 0) {
+      activeServices = await getActiveServices(userId);
+    }
+  } catch {
+    // Continue without mods if DB is unavailable
+  }
 
   // Build context
   const memoryContext = formatMemoriesForPrompt(memories);
@@ -40,43 +51,56 @@ export async function runEngine(
     .filter(Boolean)
     .join("\n\n");
 
-  // Create run record
-  const run = await prisma.engineRun.create({
-    data: {
-      userId,
-      prompt,
-      memories: memories.map((m) => m.id),
-      mods: activeServices,
-      status: "RUNNING",
-    },
-  });
+  // Create run record — optional, continue if DB is down
+  let runId = `local-${Date.now()}`;
+  try {
+    const run = await prisma.engineRun.create({
+      data: {
+        userId,
+        prompt,
+        memories: memories.map((m) => m.id),
+        mods: activeServices,
+        status: "RUNNING",
+      },
+    });
+    runId = run.id;
+  } catch {
+    // DB not available — run without persistence
+  }
 
   const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY! });
 
   const stream = streamText({
-    model: google("gemini-2.0-flash"),
+    model: google(modelId),
     system: fullSystemPrompt,
     prompt,
-    maxOutputTokens: 2048,
+    maxOutputTokens: 4096,
     onFinish: async ({ text }) => {
-      await prisma.engineRun.update({
-        where: { id: run.id },
-        data: {
-          output: text,
-          status: "COMPLETED",
-        },
-      });
+      try {
+        if (!runId.startsWith("local-")) {
+          await prisma.engineRun.update({
+            where: { id: runId },
+            data: { output: text, status: "COMPLETED" },
+          });
+        }
+      } catch {
+        // Ignore DB update failure
+      }
     },
   });
 
-  return { runId: run.id, stream };
+  return { runId, stream };
 }
 
 export async function cancelRun(runId: string, userId: string): Promise<void> {
-  await prisma.engineRun.updateMany({
-    where: { id: runId, userId, status: "RUNNING" },
-    data: { status: "CANCELLED" },
-  });
+  try {
+    await prisma.engineRun.updateMany({
+      where: { id: runId, userId, status: "RUNNING" },
+      data: { status: "CANCELLED" },
+    });
+  } catch {
+    // Ignore
+  }
 }
 
 export async function getRunHistory(userId: string, limit = 10) {

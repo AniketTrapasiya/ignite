@@ -13,22 +13,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
-  const { prompt, memoryIds = [], mods = [] } = body;
+  let body: { prompt?: string; memoryIds?: string[]; mods?: string[]; model?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { prompt, memoryIds = [], mods = [], model = "gemini-2.0-flash" } = body;
 
   if (!prompt?.trim()) {
     return NextResponse.json({ error: "prompt is required" }, { status: 400 });
   }
 
-  const { runId, stream } = await runEngine(user.userId, prompt.trim(), memoryIds, mods);
+  let runId: string;
+  let stream: Awaited<ReturnType<typeof runEngine>>["stream"];
 
-  // Stream the response as text/event-stream
+  try {
+    const result = await runEngine(user.userId, prompt.trim(), memoryIds, mods, model);
+    runId = result.runId;
+    stream = result.stream;
+  } catch (err) {
+    return NextResponse.json(
+      { error: `Engine failed to start: ${err instanceof Error ? err.message : String(err)}` },
+      { status: 500 }
+    );
+  }
+
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
-      // First: send the runId
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ runId })}\n\n`));
-
       try {
         for await (const chunk of stream.textStream) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`));

@@ -96,13 +96,13 @@ function PhaseTracker({ phase }: { phase: Phase }) {
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500"
                 style={
                   isDone
-                    ? { background: "#6366f1", borderColor: "#6366f1", color: "#fff" }
+                    ? { background: "#7c3aed", borderColor: "#7c3aed", color: "#fff", boxShadow: "0 0 10px rgba(124,58,237,0.55)" }
                     : isActive
                     ? {
-                        background: "rgba(249,115,22,0.15)",
-                        borderColor: "#f97316",
-                        color: "#f97316",
-                        boxShadow: "0 0 16px #f9731666",
+                        background: "rgba(233,30,140,0.15)",
+                        borderColor: "#e91e8c",
+                        color: "#e91e8c",
+                        boxShadow: "0 0 18px rgba(233,30,140,0.55)",
                       }
                     : {
                         background: "transparent",
@@ -120,9 +120,9 @@ function PhaseTracker({ phase }: { phase: Phase }) {
                 )}
               </div>
               <span
-                className="text-[9px] font-semibold tracking-widest transition-all duration-300"
+                className="text-[9px] font-bold tracking-widest transition-all duration-300"
                 style={{
-                  color: isDone ? "#6366f1" : isActive ? "#f97316" : "rgba(255,255,255,0.2)",
+                  color: isDone ? "#a855f7" : isActive ? "#e91e8c" : "rgba(255,255,255,0.2)",
                 }}
               >
                 {label}
@@ -131,16 +131,16 @@ function PhaseTracker({ phase }: { phase: Phase }) {
 
             {/* Connector line */}
             {i < PHASES.length - 1 && (
-              <div
-                className="w-12 h-px mx-1 mb-4 transition-all duration-500"
-                style={{
-                  background:
-                    phase > nodeIndex
-                      ? "linear-gradient(to right, #6366f1, #6366f1)"
-                      : "rgba(255,255,255,0.08)",
-                  borderStyle: "dashed",
-                }}
-              />
+              <div className="flex items-center w-12 mx-1 mb-4">
+                <div
+                  className="w-full transition-all duration-500"
+                  style={{
+                    borderTop: `1.5px ${phase > nodeIndex ? "solid" : "dashed"} ${
+                      phase > nodeIndex ? "#7c3aed" : "rgba(255,255,255,0.12)"
+                    }`,
+                  }}
+                />
+              </div>
             )}
           </div>
         );
@@ -190,9 +190,16 @@ export default function EnginePage() {
   const [loadedMemoryIds, setLoadedMemoryIds] = useState<string[]>([]);
   const [connectedIntegrations, setConnectedIntegrations] = useState<ConnectedIntegration[]>([]);
   const [activeMods, setActiveMods] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
 
   const abortRef = useRef<AbortController | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+
+  // Load model preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("autoflow-model");
+    if (saved) setSelectedModel(saved);
+  }, []);
 
   // Load data
   useEffect(() => {
@@ -265,7 +272,7 @@ export default function EnginePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: abort.signal,
-        body: JSON.stringify({ prompt, memoryIds: loadedMemoryIds, mods: activeMods }),
+        body: JSON.stringify({ prompt, memoryIds: loadedMemoryIds, mods: activeMods, model: selectedModel }),
       });
 
       if (!res.ok) {
@@ -346,10 +353,10 @@ export default function EnginePage() {
       {/* ── Top Header ── */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#e91e8c", textShadow: "0 0 30px rgba(233,30,140,0.45)" }}>
             ENGINE ROOM
           </h1>
-          <p className="text-white/25 text-xs mt-0.5 tracking-wide">Fuel it. Prime it. Ignite.</p>
+          <p className="text-white/30 text-xs mt-0.5 tracking-widest uppercase">Fuel it. Prime it. Ignite.</p>
         </div>
 
         <PhaseTracker phase={phase} />
@@ -390,15 +397,17 @@ export default function EnginePage() {
           <div
             className="rounded-2xl border p-4 flex flex-col gap-3 flex-shrink-0"
             style={{
-              background: "#0d0b1f",
-              borderColor: prompt.trim() ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.07)",
-              boxShadow: prompt.trim() ? "0 0 20px rgba(99,102,241,0.15), inset 0 0 20px rgba(99,102,241,0.05)" : "none",
+              background: "linear-gradient(145deg, #0e0b22 0%, #0b0918 100%)",
+              borderColor: prompt.trim() ? "rgba(147,51,234,0.55)" : "rgba(120,50,255,0.22)",
+              boxShadow: prompt.trim()
+                ? "0 0 28px rgba(147,51,234,0.18), inset 0 0 20px rgba(147,51,234,0.06)"
+                : "0 0 0px transparent",
               transition: "all 0.3s ease",
             }}
           >
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-indigo-400" />
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Fuel Input</span>
+              <div className="w-2 h-2 rounded-full" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">Fuel Input</span>
               <span className="ml-auto text-xs text-white/20">{prompt.length > 0 ? `${prompt.length} chars` : "⌘+Enter to run"}</span>
             </div>
 
@@ -424,7 +433,7 @@ export default function EnginePage() {
                   <button
                     key={s.l}
                     onClick={() => setPrompt(s.p)}
-                    className="px-2.5 py-1 rounded-full text-[10px] border border-white/10 text-white/30 hover:border-indigo-500/40 hover:text-indigo-300 hover:bg-indigo-500/10 transition-all"
+                    className="px-2.5 py-1 rounded-full text-[10px] border border-purple-500/25 text-purple-300/60 hover:border-purple-400/60 hover:text-purple-200 hover:bg-purple-500/15 transition-all"
                   >
                     {s.l}
                   </button>
@@ -432,23 +441,26 @@ export default function EnginePage() {
               </div>
             )}
 
-            {/* Loaded memory + mods pills */}
             <div className="flex items-center gap-2 pt-1 border-t border-white/5">
-              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border font-medium transition-all ${
                 loadedMemoryIds.length > 0
-                  ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-300"
+                  ? "border-purple-500/50 bg-purple-500/15 text-purple-200"
                   : "border-white/8 text-white/25"
               }`}>
                 <span>🧠</span>
-                {loadedMemoryIds.length > 0 ? `${loadedMemoryIds.length} loaded` : "No memory"}
+                {loadedMemoryIds.length > 0 ? `${loadedMemoryIds.length} Memories Loaded` : "No memory"}
               </div>
-              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
                 activeMods.length > 0
-                  ? "border-orange-500/50 bg-orange-500/10 text-orange-300"
+                  ? "text-white"
                   : "border-white/8 text-white/25"
-              }`}>
+              }`} style={activeMods.length > 0 ? {
+                background: "linear-gradient(90deg, #ea580c, #f97316)",
+                borderColor: "transparent",
+                boxShadow: "0 0 14px rgba(249,115,22,0.35)",
+              } : undefined}>
                 <span>⚡</span>
-                {activeMods.length > 0 ? `${activeMods.length} mods` : "No mods"}
+                {activeMods.length > 0 ? `${activeMods.length} Mods Active` : "No mods"}
               </div>
             </div>
           </div>
@@ -456,14 +468,14 @@ export default function EnginePage() {
           {/* MEMORY TANK */}
           <div
             className="rounded-2xl border flex flex-col gap-3 flex-1 overflow-hidden"
-            style={{ background: "#0d0b1f", borderColor: "rgba(255,255,255,0.07)" }}
+            style={{ background: "linear-gradient(145deg, #0e0b22 0%, #0b0918 100%)", borderColor: "rgba(120,50,255,0.28)", boxShadow: "0 0 20px rgba(100,30,255,0.06)" }}
           >
             <div className="flex items-center gap-2 px-4 pt-4">
               <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#a855f7", boxShadow: "0 0 4px #a855f7" }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#7c3aed", boxShadow: "0 0 4px #7c3aed" }} />
               </div>
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Memory Tank</span>
+              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">Memory Tank</span>
               {loadedMemoryIds.length > 0 && (
                 <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
                   {loadedMemoryIds.length} loaded
@@ -540,7 +552,12 @@ export default function EnginePage() {
 
         {/* ════ CENTER COLUMN ════ */}
         <div className="flex flex-col items-center gap-4 py-4">
-          <p className="text-[9px] font-semibold text-white/20 uppercase tracking-[0.25em]">Engine Chamber</p>
+          <p
+            className="text-xs font-extrabold uppercase tracking-[0.3em]"
+            style={{ color: "#22d3ee", textShadow: "0 0 20px rgba(34,211,238,0.5)" }}
+          >
+            Engine Chamber
+          </p>
 
           {/* Mascot */}
           <AgentMascot state={engineState} />
@@ -548,7 +565,11 @@ export default function EnginePage() {
           {/* ── Power gauge + status bars ── */}
           <div
             className="w-full max-w-[260px] rounded-2xl border p-4 space-y-3"
-            style={{ background: "#0c0a1e", borderColor: "rgba(255,255,255,0.07)" }}
+            style={{
+              background: "linear-gradient(145deg, #0d0b1e 0%, #080614 100%)",
+              borderColor: "rgba(120,50,255,0.2)",
+              boxShadow: "0 0 20px rgba(100,20,255,0.08)",
+            }}
           >
             {/* Arc gauge */}
             <div className="flex items-center justify-center">
@@ -570,6 +591,37 @@ export default function EnginePage() {
               <StatusBar label="TEMP" value={gaugeTemp} color="#a855f7" />
               <StatusBar label="LOAD" value={gaugeLoad}
                 color={engineState === "running" ? "#f97316" : "#6366f1"} />
+            </div>
+          </div>
+
+          {/* ── Model selector ── */}
+          <div className="w-full max-w-[260px]">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl border"
+              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(120,50,255,0.25)" }}>
+              <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(168,85,247,0.2)" }}>
+                <svg className="w-2.5 h-2.5" fill="none" stroke="#a855f7" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21a48.309 48.309 0 01-8.135-.687c-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                </svg>
+              </div>
+              <select
+                value={selectedModel}
+                onChange={(e) => {
+                  setSelectedModel(e.target.value);
+                  localStorage.setItem("autoflow-model", e.target.value);
+                }}
+                disabled={isRunning}
+                className="flex-1 bg-transparent text-xs font-mono focus:outline-none disabled:opacity-50"
+                style={{ color: "#a855f7" }}
+              >
+                <optgroup label="── Gemini (Google)">
+                  <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                  <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+                  <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                  <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                  <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+                </optgroup>
+              </select>
             </div>
           </div>
 
@@ -599,7 +651,10 @@ export default function EnginePage() {
                   whileTap={prompt.trim() ? { scale: 0.97 } : {}}
                   className="relative w-full py-4 rounded-2xl text-base font-extrabold text-white disabled:opacity-25 disabled:cursor-not-allowed overflow-hidden"
                   style={{
-                    background: "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #f97316 100%)",
+                    background: prompt.trim()
+                      ? "linear-gradient(135deg, #ea580c 0%, #f97316 60%, #fb923c 100%)"
+                      : "linear-gradient(135deg, #78350f 0%, #92400e 100%)",
+                    boxShadow: prompt.trim() ? "0 0 24px rgba(249,115,22,0.4), 0 4px 20px rgba(234,88,12,0.3)" : "none",
                   }}
                 >
                   {/* Pulse ring on hover */}
@@ -607,9 +662,9 @@ export default function EnginePage() {
                     <motion.span
                       className="absolute inset-0 rounded-2xl"
                       animate={{ boxShadow: [
-                        "0 0 0px rgba(99,102,241,0)",
-                        "0 0 35px rgba(99,102,241,0.5), 0 0 70px rgba(249,115,22,0.2)",
-                        "0 0 0px rgba(99,102,241,0)",
+                        "0 0 0px rgba(249,115,22,0)",
+                        "0 0 40px rgba(249,115,22,0.6), 0 0 80px rgba(234,88,12,0.3)",
+                        "0 0 0px rgba(249,115,22,0)",
                       ]}}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
@@ -684,20 +739,20 @@ export default function EnginePage() {
           {/* LIVE OUTPUT */}
           <div
             className="rounded-2xl border flex flex-col flex-1 overflow-hidden"
-            style={{ background: "#070710", borderColor: "rgba(255,255,255,0.07)" }}
+            style={{ background: "linear-gradient(145deg, #07060f 0%, #0b0918 100%)", borderColor: "rgba(120,50,255,0.25)", boxShadow: "0 0 20px rgba(100,30,255,0.05)" }}
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05] flex-shrink-0">
               <div className="flex gap-1">
                 <div
                   className="w-1.5 h-1.5 rounded-full transition-all"
-                  style={{ background: isRunning ? "#f97316" : "rgba(255,255,255,0.15)" }}
+                  style={{ background: isRunning ? "#f97316" : "rgba(255,255,255,0.15)", boxShadow: isRunning ? "0 0 5px #f97316" : "none" }}
                 />
                 <div
                   className="w-1.5 h-1.5 rounded-full transition-all"
-                  style={{ background: isRunning ? "#a855f7" : "rgba(255,255,255,0.07)" }}
+                  style={{ background: isRunning ? "#a855f7" : "rgba(255,255,255,0.07)", boxShadow: isRunning ? "0 0 5px #a855f7" : "none" }}
                 />
               </div>
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">
+              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">
                 Live Output / Exhaust
               </span>
               {isRunning && (
@@ -787,14 +842,14 @@ export default function EnginePage() {
           {/* MODS / NITRO */}
           <div
             className="rounded-2xl border flex-shrink-0"
-            style={{ background: "#0d0b1f", borderColor: "rgba(255,255,255,0.07)" }}
+            style={{ background: "linear-gradient(145deg, #0e0b22 0%, #0b0918 100%)", borderColor: "rgba(120,50,255,0.28)", boxShadow: "0 0 20px rgba(100,30,255,0.06)" }}
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
               <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#f97316", boxShadow: "0 0 5px #f97316" }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#fbbf24", boxShadow: "0 0 5px #fbbf24" }} />
               </div>
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Mods / Nitro</span>
+              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">Mods / Nitro</span>
               <span className="ml-auto text-[10px] text-white/25">
                 {activeMods.length}/{connectedIntegrations.length} active
               </span>
@@ -838,19 +893,28 @@ export default function EnginePage() {
                       <span className="text-xs text-white/60 flex-1 truncate">
                         {config?.name ?? conn.service}
                       </span>
-                      {/* Toggle */}
-                      <button
-                        onClick={() => toggleMod(conn.service)}
-                        className="flex-shrink-0 relative w-9 h-5 rounded-full transition-all duration-300"
-                        style={{
-                          background: isActive ? (config?.color ?? "#6366f1") : "rgba(255,255,255,0.08)",
-                        }}
-                      >
-                        <div
-                          className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300"
-                          style={{ left: isActive ? "calc(100% - 18px)" : "2px" }}
-                        />
-                      </button>
+                      {/* Toggle + label */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <span
+                          className="text-[9px] font-bold uppercase tracking-wider"
+                          style={{ color: isActive ? (config?.color ?? "#a855f7") : "rgba(255,255,255,0.2)" }}
+                        >
+                          {isActive ? "ON" : "OFF"}
+                        </span>
+                        <button
+                          onClick={() => toggleMod(conn.service)}
+                          className="flex-shrink-0 relative w-9 h-5 rounded-full transition-all duration-300"
+                          style={{
+                            background: isActive ? (config?.color ?? "#a855f7") : "rgba(255,255,255,0.08)",
+                            boxShadow: isActive ? `0 0 10px ${config?.color ?? "#a855f7"}66` : "none",
+                          }}
+                        >
+                          <div
+                            className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300"
+                            style={{ left: isActive ? "calc(100% - 18px)" : "2px" }}
+                          />
+                        </button>
+                      </div>
                     </div>
                   );
                 })
