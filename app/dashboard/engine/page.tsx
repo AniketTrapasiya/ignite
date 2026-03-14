@@ -1,9 +1,63 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import AgentMascot, { type EngineState } from "@/components/engine/agent-mascot";
 import SaveMemoryModal from "@/components/engine/save-memory-modal";
 import { INTEGRATIONS } from "@/lib/integrations-config";
+
+// ── Engine Power Gauge (SVG arc) ───────────────────────────────────────────
+function PowerGauge({ power, color }: { power: number; color: string }) {
+  const r = 38;
+  const circ = 2 * Math.PI * r;
+  const arc = circ * 0.72; // 260° arc
+  const offset = arc * (1 - power / 100);
+  return (
+    <svg width="110" height="80" viewBox="0 0 110 95">
+      {/* Track */}
+      <circle cx="55" cy="60" r={r} fill="none"
+        stroke="rgba(255,255,255,0.06)" strokeWidth="7"
+        strokeDasharray={`${arc} ${circ}`}
+        strokeLinecap="round"
+        transform="rotate(144 55 60)"
+      />
+      {/* Fill */}
+      <circle cx="55" cy="60" r={r} fill="none"
+        stroke={color} strokeWidth="7"
+        strokeDasharray={`${arc} ${circ}`}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform="rotate(144 55 60)"
+        style={{ transition: "stroke-dashoffset 0.8s ease, stroke 0.5s ease", filter: `drop-shadow(0 0 6px ${color}80)` }}
+      />
+      {/* Center text */}
+      <text x="55" y="58" textAnchor="middle" fill={color}
+        fontSize="18" fontWeight="bold" fontFamily="monospace">
+        {Math.round(power)}
+      </text>
+      <text x="55" y="73" textAnchor="middle" fill="rgba(255,255,255,0.2)"
+        fontSize="8" fontFamily="monospace" letterSpacing="2">
+        POWER
+      </text>
+    </svg>
+  );
+}
+
+// ── Mini status bar ────────────────────────────────────────────────────────
+function StatusBar({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[9px] text-white/25 uppercase tracking-widest w-9 flex-shrink-0">{label}</span>
+      <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${value}%`, background: color, boxShadow: `0 0 6px ${color}` }}
+        />
+      </div>
+      <span className="text-[9px] font-mono w-7 text-right flex-shrink-0" style={{ color }}>{value}%</span>
+    </div>
+  );
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Memory {
@@ -127,6 +181,9 @@ export default function EnginePage() {
   const [runError, setRunError] = useState<string | null>(null);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [savedToMemory, setSavedToMemory] = useState(false);
+  const [gaugePower, setGaugePower] = useState(0);
+  const [gaugeTemp, setGaugeTemp] = useState(0);
+  const [gaugeLoad, setGaugeLoad] = useState(0);
 
   // Inline panels data
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -168,6 +225,21 @@ export default function EnginePage() {
     else if (engineState === "running") setPhase(3);
     else if (engineState === "success" || engineState === "error") setPhase(4);
   }, [engineState, prompt, isDone]);
+
+  // Update engine gauges based on state
+  useEffect(() => {
+    const targets: Record<EngineState, [number, number, number]> = {
+      idle:     [0,  0,  0],
+      thinking: [35, 28, 22],
+      running:  [88, 74, 95],
+      success:  [100, 60, 100],
+      error:    [12, 20, 8],
+    };
+    const [p, t, l] = targets[engineState];
+    setGaugePower(p);
+    setGaugeTemp(t);
+    setGaugeLoad(l);
+  }, [engineState]);
 
   function toggleMemory(id: string) {
     setLoadedMemoryIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
@@ -467,44 +539,103 @@ export default function EnginePage() {
         </div>
 
         {/* ════ CENTER COLUMN ════ */}
-        <div className="flex flex-col items-center justify-center gap-5 py-4">
-          <p className="text-xs font-semibold text-white/25 uppercase tracking-[0.2em]">Engine Chamber</p>
+        <div className="flex flex-col items-center gap-4 py-4">
+          <p className="text-[9px] font-semibold text-white/20 uppercase tracking-[0.25em]">Engine Chamber</p>
 
-          {/* Orb + mascot */}
+          {/* Mascot */}
           <AgentMascot state={engineState} />
 
-          {/* Ignite / Stop */}
-          <div className="w-full max-w-[260px] space-y-3">
-            {isRunning ? (
-              <button
-                onClick={stop}
-                className="w-full py-4 rounded-2xl text-sm font-bold text-white border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 transition-all"
-              >
-                ■ &nbsp;Stop Engine
-              </button>
-            ) : (
-              <button
-                onClick={ignite}
-                disabled={!prompt.trim()}
-                className="relative w-full py-4 rounded-2xl text-base font-extrabold text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all duration-300 overflow-hidden group"
-                style={{
-                  background: "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #f97316 100%)",
-                  boxShadow: prompt.trim()
-                    ? "0 0 40px rgba(99,102,241,0.4), 0 0 80px rgba(249,115,22,0.2)"
-                    : "none",
-                }}
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span className="text-xl">⚡</span>
-                  IGNITE ENGINE
-                </span>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-              </button>
-            )}
+          {/* ── Power gauge + status bars ── */}
+          <div
+            className="w-full max-w-[260px] rounded-2xl border p-4 space-y-3"
+            style={{ background: "#0c0a1e", borderColor: "rgba(255,255,255,0.07)" }}
+          >
+            {/* Arc gauge */}
+            <div className="flex items-center justify-center">
+              <PowerGauge
+                power={gaugePower}
+                color={
+                  engineState === "success" ? "#22c55e"
+                  : engineState === "error" ? "#ef4444"
+                  : engineState === "running" ? "#f97316"
+                  : "#7c3aed"
+                }
+              />
+            </div>
+
+            {/* Status bars */}
+            <div className="space-y-1.5">
+              <StatusBar label="PWR" value={gaugePower}
+                color={engineState === "running" ? "#f97316" : engineState === "success" ? "#22c55e" : "#7c3aed"} />
+              <StatusBar label="TEMP" value={gaugeTemp} color="#a855f7" />
+              <StatusBar label="LOAD" value={gaugeLoad}
+                color={engineState === "running" ? "#f97316" : "#6366f1"} />
+            </div>
+          </div>
+
+          {/* ── Ignite / Stop button ── */}
+          <div className="w-full max-w-[260px] space-y-2.5">
+            <AnimatePresence mode="wait">
+              {isRunning ? (
+                <motion.button
+                  key="stop"
+                  onClick={stop}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full py-4 rounded-2xl text-sm font-bold text-white border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                >
+                  ■ &nbsp;Stop Engine
+                </motion.button>
+              ) : (
+                <motion.button
+                  key="ignite"
+                  onClick={ignite}
+                  disabled={!prompt.trim()}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  whileHover={prompt.trim() ? { scale: 1.03 } : {}}
+                  whileTap={prompt.trim() ? { scale: 0.97 } : {}}
+                  className="relative w-full py-4 rounded-2xl text-base font-extrabold text-white disabled:opacity-25 disabled:cursor-not-allowed overflow-hidden"
+                  style={{
+                    background: "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #f97316 100%)",
+                  }}
+                >
+                  {/* Pulse ring on hover */}
+                  {prompt.trim() && (
+                    <motion.span
+                      className="absolute inset-0 rounded-2xl"
+                      animate={{ boxShadow: [
+                        "0 0 0px rgba(99,102,241,0)",
+                        "0 0 35px rgba(99,102,241,0.5), 0 0 70px rgba(249,115,22,0.2)",
+                        "0 0 0px rgba(99,102,241,0)",
+                      ]}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <motion.span
+                      className="text-xl"
+                      animate={prompt.trim() ? { rotate: [0, 15, -10, 0] } : {}}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
+                    >
+                      ⚡
+                    </motion.span>
+                    IGNITE ENGINE
+                  </span>
+                </motion.button>
+              )}
+            </AnimatePresence>
 
             {/* Run stats */}
             {(isRunning || isDone) && (
-              <div className="flex gap-2 text-center">
+              <motion.div
+                className="flex gap-2 text-center"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
                 <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.02] py-2">
                   <p className="text-lg font-bold text-orange-400">{stepsDone}</p>
                   <p className="text-[9px] text-white/25 uppercase tracking-wider">Steps</p>
@@ -514,37 +645,35 @@ export default function EnginePage() {
                   <p className="text-[9px] text-white/25 uppercase tracking-wider">Words</p>
                 </div>
                 <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.02] py-2">
-                  <p
-                    className="text-lg font-bold"
-                    style={{
-                      color:
-                        engineState === "success"
-                          ? "#22c55e"
-                          : engineState === "error"
-                          ? "#ef4444"
-                          : "#f97316",
-                    }}
-                  >
+                  <p className="text-lg font-bold" style={{
+                    color: engineState === "success" ? "#22c55e" : engineState === "error" ? "#ef4444" : "#f97316",
+                  }}>
                     {engineState === "success" ? "✓" : engineState === "error" ? "✗" : "…"}
                   </p>
                   <p className="text-[9px] text-white/25 uppercase tracking-wider">Status</p>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Save to memory */}
             {isDone && !runError && !savedToMemory && fullOutput && (
-              <button
+              <motion.button
                 onClick={() => setSaveModalOpen(true)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 className="w-full py-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20 transition-all"
               >
                 🧠 Save to Memory
-              </button>
+              </motion.button>
             )}
             {savedToMemory && (
-              <div className="text-center text-xs text-emerald-400 py-1">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center text-xs text-emerald-400 py-1"
+              >
                 ✓ Saved to memory
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
