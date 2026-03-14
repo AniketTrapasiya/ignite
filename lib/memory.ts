@@ -53,22 +53,55 @@ function getPineconeClient(): Pinecone | null {
 }
 
 /**
- * Embed text via OpenAI-compatible API.
- * Requires OPENAI_API_KEY env var. Returns empty array if unavailable.
+ * Embed text via OpenAI or Gemini API.
+ * Tries OpenAI first, falls back to Gemini if available.
+ * Returns empty array if no embedding API is available.
  */
 async function getEmbedding(text: string): Promise<number[]> {
-  if (!process.env.OPENAI_API_KEY) return [];
-  const res = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: text }),
-  });
-  if (!res.ok) return [];
-  const json = await res.json() as { data: { embedding: number[] }[] };
-  return json.data[0]?.embedding ?? [];
+  // Try OpenAI first
+  if (process.env.OPENAI_API_KEY) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: "text-embedding-3-small", input: text }),
+      });
+      if (res.ok) {
+        const json = await res.json() as { data: { embedding: number[] }[] };
+        return json.data[0]?.embedding ?? [];
+      }
+    } catch {
+      // Fall through to Gemini
+    }
+  }
+
+  // Fallback to Gemini embedding API
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "models/text-embedding-004",
+            content: { parts: [{ text }] },
+          }),
+        }
+      );
+      if (res.ok) {
+        const json = await res.json() as { embedding: { values: number[] } };
+        return json.embedding?.values ?? [];
+      }
+    } catch {
+      // Silent fail
+    }
+  }
+
+  return [];
 }
 
 async function upsertToPinecone(
@@ -104,7 +137,8 @@ export async function searchMemories(
 ): Promise<MemoryItem[]> {
   const pc = getPineconeClient();
 
-  if (pc && process.env.OPENAI_API_KEY) {
+  // Try vector search if Pinecone is configured and we can generate embeddings
+  if (pc && (process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY)) {
     try {
       const vector = await getEmbedding(query);
       if (vector.length > 0) {

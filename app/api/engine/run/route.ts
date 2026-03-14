@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { runEngine } from "@/lib/engine";
 
+export const maxDuration = 60; // Allow longer streaming responses
+
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,30 +15,54 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
-  const { prompt, memoryIds = [], mods = [] } = body;
+  let body: { prompt?: string; memoryIds?: string[]; mods?: string[]; model?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { prompt, memoryIds = [], mods = [], model = "gemini-2.0-flash" } = body;
 
   if (!prompt?.trim()) {
     return NextResponse.json({ error: "prompt is required" }, { status: 400 });
   }
 
-  const { runId, stream } = await runEngine(user.userId, prompt.trim(), memoryIds, mods);
+  let runId: string;
+  let stream: Awaited<ReturnType<typeof runEngine>>["stream"];
 
-  // Stream the response as text/event-stream
+  try {
+    const result = await runEngine(user.userId, prompt.trim(), memoryIds, mods, model);
+    runId = result.runId;
+    stream = result.stream;
+  } catch (err) {
+    console.error("Engine failed to start:", err);
+    return NextResponse.json(
+      { error: `Engine failed to start: ${err instanceof Error ? err.message : String(err)}` },
+      { status: 500 }
+    );
+  }
+
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
-      // First: send the runId
+      // Send initial runId
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ runId })}\n\n`));
 
       try {
+        // Stream text chunks
         for await (const chunk of stream.textStream) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`));
+          if (chunk) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`));
+          }
         }
+
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
       } catch (err) {
+        console.error("Streaming error:", err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
         controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ error: String(err) })}\n\n`)
+          encoder.encode(`data: ${JSON.stringify({ error: errorMessage })}\n\n`)
         );
       } finally {
         controller.close();
@@ -47,8 +73,9 @@ export async function POST(request: NextRequest) {
   return new Response(readable, {
     headers: {
       "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
+      "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }
