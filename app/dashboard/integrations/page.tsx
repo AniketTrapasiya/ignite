@@ -18,18 +18,31 @@ interface ConnectModalProps {
 function ConnectModal({ service, onClose, onConnected }: ConnectModalProps) {
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
+  const [extraValues, setExtraValues] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   if (!service) return null;
 
+  type ExtraField = { key: string; label: string; placeholder: string; type?: string };
+  const extraFields: ExtraField[] =
+    (service as unknown as { extraFields?: ExtraField[] }).extraFields ?? [];
+
   async function connect() {
     if (!service) return;
     if (!apiKey.trim()) { setError("API key is required"); return; }
+
+    for (const f of extraFields) {
+      if (!extraValues[f.key]?.trim()) { setError(`${f.label} is required`); return; }
+    }
+
     setSaving(true);
     setError("");
     const credentials: Record<string, string> = { apiKey: apiKey.trim() };
     if (service.service === "custom" && baseUrl.trim()) credentials.baseUrl = baseUrl.trim();
+    for (const f of extraFields) {
+      if (extraValues[f.key]?.trim()) credentials[f.key] = extraValues[f.key].trim();
+    }
 
     const res = await fetch("/api/integrations", {
       method: "POST",
@@ -101,6 +114,18 @@ function ConnectModal({ service, onClose, onConnected }: ConnectModalProps) {
               />
             </div>
           )}
+          {extraFields.map((f) => (
+            <div key={f.key} className="space-y-1.5">
+              <label className="text-xs text-white/50">{f.label}</label>
+              <input
+                type={f.type ?? "text"}
+                value={extraValues[f.key] ?? ""}
+                onChange={(e) => setExtraValues((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                placeholder={f.placeholder}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-indigo-500/50"
+              />
+            </div>
+          ))}
           {error && <p className="text-xs text-red-400">{error}</p>}
         </div>
 
@@ -212,16 +237,16 @@ export default function IntegrationsPage() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border flex items-center gap-1.5 ${activeCategory === cat
-                  ? "bg-indigo-600 border-indigo-500 text-white"
-                  : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
+                ? "bg-indigo-600 border-indigo-500 text-white"
+                : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
                 }`}
             >
               {cat}
               {count > 0 && (
                 <span
                   className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold leading-none ${activeCategory === cat
-                      ? "bg-white/20 text-white"
-                      : "bg-emerald-500/20 text-emerald-400"
+                    ? "bg-white/20 text-white"
+                    : "bg-emerald-500/20 text-emerald-400"
                     }`}
                 >
                   {count}
@@ -248,8 +273,8 @@ export default function IntegrationsPage() {
               <div
                 key={integration.service}
                 className={`relative rounded-2xl border p-4 flex flex-col gap-3 transition-all duration-200 ${isConnected
-                    ? "border-white/20 bg-white/[0.04]"
-                    : "border-white/8 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.03]"
+                  ? "border-white/20 bg-white/[0.04]"
+                  : "border-white/8 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.03]"
                   }`}
               >
                 {/* Connected badge */}

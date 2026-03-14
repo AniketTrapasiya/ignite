@@ -1,8 +1,10 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { streamText } from "ai";
 import { prisma } from "./prisma";
 import { formatMemoriesForPrompt, searchMemories } from "./memory";
-import { buildModsContext, getActiveServices } from "./integrations";
+import { buildModsContext, getActiveServices, getCredentials } from "./integrations";
+import { sendTelegramMessage, extractResultForTelegram } from "./integrations/telegram";
 
 const SYSTEM_PROMPT = `You are AutoFlow — an intelligent automation engine.
 You are powerful, precise, and execution-focused.
@@ -68,17 +70,26 @@ export async function runEngine(
     // DB not available — run without persistence
   }
 
-  const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY! });
-
-  // Ensure model ID is valid
+  // Select AI model — Anthropic for claude-*, Google for everything else
   const validModelId = modelId.startsWith("models/") ? modelId.replace("models/", "") : modelId;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let aiModel: any;
+  if (validModelId.startsWith("claude-")) {
+    const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+    aiModel = anthropic(validModelId);
+  } else {
+    const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY! });
+    aiModel = google(validModelId);
+  }
+
   const stream = streamText({
-    model: google(validModelId),
+    model: aiModel,
     system: fullSystemPrompt,
     prompt,
     maxOutputTokens: 4096,
     onFinish: async ({ text }) => {
+      // Persist run output
       try {
         if (!runId.startsWith("local-")) {
           await prisma.engineRun.update({
@@ -88,6 +99,23 @@ export async function runEngine(
         }
       } catch {
         // Ignore DB update failure
+      }
+
+      // Send to Telegram if it's an active mod
+      if (activeServices.includes("telegram")) {
+        try {
+          const creds = await getCredentials(userId, "telegram");
+          if (creds?.apiKey && creds?.chatId) {
+            const message = extractResultForTelegram(text);
+            await sendTelegramMessage(
+              creds.apiKey,
+              creds.chatId,
+              `🤖 <b>AutoFlow Result</b>\n\n${message}`
+            );
+          }
+        } catch {
+          // Silent — Telegram is optional
+        }
       }
     },
   });

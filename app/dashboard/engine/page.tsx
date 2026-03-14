@@ -190,6 +190,7 @@ export default function EnginePage() {
   const [gaugePower, setGaugePower] = useState(0);
   const [gaugeTemp, setGaugeTemp] = useState(0);
   const [gaugeLoad, setGaugeLoad] = useState(0);
+  const [stepsPopupOpen, setStepsPopupOpen] = useState(false);
 
   // Inline panels data
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -287,6 +288,7 @@ export default function EnginePage() {
     setIsDone(false);
     setRunError(null);
     setSavedToMemory(false);
+    setStepsPopupOpen(false);
     setEngineState("thinking");
 
     const abort = new AbortController();
@@ -406,6 +408,7 @@ export default function EnginePage() {
     setPhase(0);
     setPrompt("");
     setSavedToMemory(false);
+    setStepsPopupOpen(false);
   }
 
   const isRunning = engineState === "running" || engineState === "thinking";
@@ -801,9 +804,9 @@ export default function EnginePage() {
                 </div>
                 <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.02] py-2">
                   <p className="text-lg font-bold" style={{
-                    color: engineState === "success" ? "#22c55e" : engineState === "error" ? "#ef4444" : "#f97316",
+                    color: !isRunning && isDone ? (!runError ? "#22c55e" : "#ef4444") : "#f97316",
                   }}>
-                    {engineState === "success" ? "✓" : engineState === "error" ? "✗" : "…"}
+                    {!isRunning && isDone ? (!runError ? "✓" : "✗") : "…"}
                   </p>
                   <p className="text-[9px] text-white/25 uppercase tracking-wider">Status</p>
                 </div>
@@ -838,9 +841,16 @@ export default function EnginePage() {
 
           {/* LIVE OUTPUT */}
           <div
-            className="rounded-2xl border flex flex-col flex-1 overflow-hidden"
-            style={{ background: "linear-gradient(145deg, #07060f 0%, #0b0918 100%)", borderColor: "rgba(120,50,255,0.25)", boxShadow: "0 0 20px rgba(100,30,255,0.05)" }}
+            className="rounded-2xl border flex flex-col overflow-hidden"
+            style={{
+              background: "linear-gradient(145deg, #07060f 0%, #0b0918 100%)",
+              borderColor: "rgba(120,50,255,0.25)",
+              boxShadow: "0 0 20px rgba(100,30,255,0.05)",
+              height: "420px",
+              flexShrink: 0,
+            }}
           >
+            {/* Header */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05] flex-shrink-0">
               <div className="flex gap-1">
                 <div
@@ -855,25 +865,120 @@ export default function EnginePage() {
               <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">
                 Live Output / Exhaust
               </span>
-              {isRunning && (
-                <div className="ml-auto flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-                  <span className="text-[10px] text-orange-400/70">streaming</span>
-                </div>
-              )}
-              {isDone && fullOutput && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(fullOutput)}
-                  className="ml-auto text-[10px] text-white/25 hover:text-white/60 transition-colors px-2 py-0.5 rounded border border-white/8 hover:border-white/15"
-                >
-                  copy
-                </button>
-              )}
+
+              <div className="ml-auto flex items-center gap-2">
+                {/* Steps popup badge */}
+                {stepsDone > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setStepsPopupOpen((v) => !v)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border"
+                      style={{
+                        background: stepsPopupOpen ? "rgba(249,115,22,0.2)" : "rgba(249,115,22,0.1)",
+                        borderColor: "rgba(249,115,22,0.35)",
+                        color: "#f97316",
+                        boxShadow: stepsPopupOpen ? "0 0 12px rgba(249,115,22,0.3)" : "none",
+                      }}
+                    >
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      {stepsDone} step{stepsDone !== 1 ? "s" : ""}
+                    </button>
+
+                    {/* Steps popup */}
+                    {stepsPopupOpen && (
+                      <>
+                        {/* Backdrop */}
+                        <div className="fixed inset-0 z-40" onClick={() => setStepsPopupOpen(false)} />
+                        <div
+                          className="absolute right-0 top-8 z-50 w-72 rounded-xl border shadow-2xl overflow-hidden"
+                          style={{
+                            background: "linear-gradient(145deg, #0f0d24, #0b0918)",
+                            borderColor: "rgba(249,115,22,0.3)",
+                            boxShadow: "0 0 40px rgba(249,115,22,0.1), 0 20px 40px rgba(0,0,0,0.6)",
+                          }}
+                        >
+                          {/* Popup header */}
+                          <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.07]">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-orange-400" style={{ boxShadow: "0 0 5px #f97316" }} />
+                              <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.15em]">Execution Steps</span>
+                            </div>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                              style={{ background: "rgba(249,115,22,0.15)", color: "#f97316" }}>
+                              {stepsDone} / {stepsDone}
+                            </span>
+                          </div>
+
+                          {/* Steps list */}
+                          <div className="max-h-60 overflow-y-auto p-2 space-y-1 scrollbar-hide">
+                            {outputLines.filter((l) => l.type === "step").map((step, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-2.5 px-2.5 py-2 rounded-lg transition-all"
+                                style={{ background: "rgba(249,115,22,0.05)", border: "1px solid rgba(249,115,22,0.1)" }}
+                              >
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5"
+                                  style={{ background: "rgba(34,197,94,0.15)", border: "1.5px solid #22c55e", color: "#22c55e" }}
+                                >
+                                  {step.stepNum}
+                                </div>
+                                <p className="text-[10px] text-white/60 leading-snug">{step.content}</p>
+                              </div>
+                            ))}
+                            {isRunning && (
+                              <div className="flex items-center gap-2 px-2.5 py-2">
+                                <div className="flex gap-0.5">
+                                  {[0, 1, 2].map((i) => (
+                                    <div key={i} className="w-1 h-1 rounded-full bg-orange-400/50 animate-bounce"
+                                      style={{ animationDelay: `${i * 0.1}s` }} />
+                                  ))}
+                                </div>
+                                <span className="text-[9px] text-white/25">Running…</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Popup footer */}
+                          <div className="px-3 py-2 border-t border-white/[0.05]">
+                            <p className="text-[9px] text-white/20">
+                              {Math.floor(fullOutput.length / 5)} words · {outputLines.filter(l => l.type === "result").length > 0 ? "✓ Result received" : isRunning ? "Streaming…" : "Done"}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {isRunning && stepsDone === 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                    <span className="text-[10px] text-orange-400/70">streaming</span>
+                  </div>
+                )}
+
+                {isDone && fullOutput && (
+                  <button
+                    onClick={() => navigator.clipboard.writeText(fullOutput)}
+                    className="text-[10px] text-white/25 hover:text-white/60 transition-colors px-2 py-0.5 rounded border border-white/8 hover:border-white/15"
+                  >
+                    copy
+                  </button>
+                )}
+              </div>
             </div>
 
+            {/* Scrollable output body */}
             <div
               ref={outputRef}
-              className="flex-1 overflow-y-auto p-4 font-mono text-sm space-y-1.5 scrollbar-hide"
+              className="flex-1 overflow-y-auto p-4 font-mono text-sm space-y-1.5"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
             >
               {outputLines.length === 0 && !isRunning ? (
                 <div className="flex flex-col items-center gap-3 py-8">
@@ -1041,10 +1146,10 @@ export default function EnginePage() {
           style={{
             background: "#09091a",
             borderColor: isDone
-              ? engineState === "success" ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"
+              ? !runError ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"
               : "rgba(249,115,22,0.2)",
             boxShadow: isDone
-              ? engineState === "success" ? "0 0 30px rgba(34,197,94,0.06)" : "0 0 30px rgba(239,68,68,0.06)"
+              ? !runError ? "0 0 30px rgba(34,197,94,0.06)" : "0 0 30px rgba(239,68,68,0.06)"
               : "0 0 30px rgba(249,115,22,0.06)",
           }}
         >
@@ -1058,7 +1163,7 @@ export default function EnginePage() {
                   <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
                   <span className="text-sm font-semibold text-orange-300">Engine Running…</span>
                 </>
-              ) : engineState === "success" ? (
+              ) : !runError ? (
                 <>
                   <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
                     <svg className="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">

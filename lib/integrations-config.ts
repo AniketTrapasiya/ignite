@@ -65,6 +65,14 @@ export const INTEGRATIONS = [
     description: "Send messages and alerts via Telegram Bot API",
     authMethod: "api_key" as const,
     keyLabel: "Telegram Bot Token (from @BotFather)",
+    extraFields: [
+      {
+        key: "chatId",
+        label: "Chat ID / Username",
+        placeholder: "@username or numeric chat ID (e.g. 123456789)",
+        type: "text",
+      },
+    ] as { key: string; label: string; placeholder: string; type?: string }[],
     color: "#2CA5E0",
     capabilities: ["Send messages", "Send photos", "Notify channels"],
     docsUrl: "https://core.telegram.org/bots#botfather",
