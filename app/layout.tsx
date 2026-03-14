@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     default: "AutoFlow AI",
     template: "%s | AutoFlow AI",
   },
+  icons: {
+    icon: "/favicon.png",
+  },
   description: "AI-powered workflow automation platform",
 };
 
