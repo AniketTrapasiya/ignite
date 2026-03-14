@@ -39,6 +39,16 @@ export async function sendTelegramMessage(
 }
 
 /**
+ * Escapes special HTML characters so raw AI output is safe inside parse_mode: HTML.
+ */
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
  * Extracts the RESULT: section from engine output, or falls back to the full text.
  */
 export function extractResultForTelegram(engineOutput: string): string {

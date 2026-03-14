@@ -4,7 +4,7 @@ import { streamText } from "ai";
 import { prisma } from "./prisma";
 import { formatMemoriesForPrompt, searchMemories } from "./memory";
 import { buildModsContext, getActiveServices, getCredentials } from "./integrations";
-import { sendTelegramMessage, extractResultForTelegram } from "./integrations/telegram";
+import { sendTelegramMessage, extractResultForTelegram, escapeHtml } from "./integrations/telegram";
 
 const SYSTEM_PROMPT = `You are AutoFlow — an intelligent automation engine.
 You are powerful, precise, and execution-focused.
@@ -106,15 +106,20 @@ export async function runEngine(
         try {
           const creds = await getCredentials(userId, "telegram");
           if (creds?.apiKey && creds?.chatId) {
-            const message = extractResultForTelegram(text);
-            await sendTelegramMessage(
+            const message = escapeHtml(extractResultForTelegram(text));
+            const result = await sendTelegramMessage(
               creds.apiKey,
               creds.chatId,
               `🤖 <b>AutoFlow Result</b>\n\n${message}`
             );
+            if (!result.ok) {
+              console.error("[Telegram] Failed to send message:", result.description);
+            }
+          } else {
+            console.warn("[Telegram] Credentials incomplete — apiKey:", !!creds?.apiKey, "chatId:", !!creds?.chatId);
           }
-        } catch {
-          // Silent — Telegram is optional
+        } catch (err) {
+          console.error("[Telegram] Unexpected error:", err);
         }
       }
     },
