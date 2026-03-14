@@ -651,10 +651,10 @@ function ToolsTab() {
                 style={{ background: "rgba(34,211,238,0.05)", borderColor: "rgba(34,211,238,0.2)" }}>
                 <div className="flex items-center gap-3 px-3 py-2.5">
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${tool.method === "GET" ? "bg-green-500/20 text-green-400" :
-                      tool.method === "POST" ? "bg-blue-500/20 text-blue-400" :
-                        tool.method === "PUT" ? "bg-yellow-500/20 text-yellow-400" :
-                          tool.method === "DELETE" ? "bg-red-500/20 text-red-400" :
-                            "bg-purple-500/20 text-purple-400"
+                    tool.method === "POST" ? "bg-blue-500/20 text-blue-400" :
+                      tool.method === "PUT" ? "bg-yellow-500/20 text-yellow-400" :
+                        tool.method === "DELETE" ? "bg-red-500/20 text-red-400" :
+                          "bg-purple-500/20 text-purple-400"
                     }`}>{tool.method}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-white/75 truncate">{tool.name}</p>
@@ -792,8 +792,8 @@ function ToolsTab() {
                           type="button"
                           onClick={() => setNewTool((p) => ({ ...p, bodyType: type }))}
                           className={`px-2 py-1 rounded text-[10px] font-medium transition-all ${newTool.bodyType === type
-                              ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                              : "bg-white/[0.03] text-white/30 border border-white/[0.06] hover:text-white/50"
+                            ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                            : "bg-white/[0.03] text-white/30 border border-white/[0.06] hover:text-white/50"
                             }`}
                         >
                           {type === "none" ? "None" : type === "json" ? "JSON" : "Form Data"}

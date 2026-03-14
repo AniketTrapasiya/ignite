@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
     runId = result.runId;
     stream = result.stream;
   } catch (err) {
-    console.error("Engine failed to start:", err);
     return NextResponse.json(
       { error: `Engine failed to start: ${err instanceof Error ? err.message : String(err)}` },
       { status: 500 }
@@ -46,9 +45,7 @@ export async function POST(request: NextRequest) {
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
-      // Send initial runId
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ runId })}\n\n`));
-
       try {
         // Stream text chunks
         for await (const chunk of stream.textStream) {

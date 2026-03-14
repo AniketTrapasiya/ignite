@@ -520,15 +520,15 @@ export default function EnginePage() {
 
             <div className="flex items-center gap-2 pt-1 border-t border-white/5">
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border font-medium transition-all ${loadedMemoryIds.length > 0
-                  ? "border-purple-500/50 bg-purple-500/15 text-purple-200"
-                  : "border-white/8 text-white/25"
+                ? "border-purple-500/50 bg-purple-500/15 text-purple-200"
+                : "border-white/8 text-white/25"
                 }`}>
                 <span>🧠</span>
                 {loadedMemoryIds.length > 0 ? `${loadedMemoryIds.length} Memories Loaded` : "No memory"}
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${activeMods.length > 0
-                  ? "text-white"
-                  : "border-white/8 text-white/25"
+                ? "text-white"
+                : "border-white/8 text-white/25"
                 }`} style={activeMods.length > 0 ? {
                   background: "linear-gradient(90deg, #ea580c, #f97316)",
                   borderColor: "transparent",
