@@ -45,14 +45,14 @@ export default function StepTracker({ chunks, isDone, isRunning }: StepTrackerPr
   if (steps.length === 0 && !isRunning) return null;
 
   return (
-    <div className="w-full rounded-xl border border-white/8 bg-white/[0.02] p-4 space-y-3">
+    <div className="w-full rounded-xl border border-white/8 bg-white/2 p-4 space-y-3">
       <p className="text-xs text-white/30 uppercase tracking-widest">Progress</p>
 
       <div className="space-y-2">
         {steps.map((step) => (
           <div key={step.index} className="flex items-start gap-3">
             {/* Step indicator */}
-            <div className="flex-shrink-0 mt-0.5">
+            <div className="shrink-0 mt-0.5">
               {step.status === "done" ? (
                 <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
                   <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -73,10 +73,10 @@ export default function StepTracker({ chunks, isDone, isRunning }: StepTrackerPr
             {/* Step text */}
             <p
               className={`text-sm leading-relaxed ${step.status === "done"
-                  ? "text-white/60"
-                  : step.status === "active"
-                    ? "text-white"
-                    : "text-white/25"
+                ? "text-white/60"
+                : step.status === "active"
+                  ? "text-white"
+                  : "text-white/25"
                 }`}
             >
               {step.text}
@@ -87,7 +87,7 @@ export default function StepTracker({ chunks, isDone, isRunning }: StepTrackerPr
         {/* Running indicator when no steps yet */}
         {isRunning && steps.length === 0 && (
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full bg-orange-500/20 border border-orange-500/50 flex items-center justify-center flex-shrink-0">
+            <div className="w-5 h-5 rounded-full bg-orange-500/20 border border-orange-500/50 flex items-center justify-center shrink-0">
               <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
             </div>
             <p className="text-sm text-white/50 animate-pulse">Engine starting up...</p>
@@ -102,7 +102,7 @@ export default function StepTracker({ chunks, isDone, isRunning }: StepTrackerPr
               <div className="ml-2.5 w-px h-3 bg-emerald-500/30" />
             )}
             <div className="flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center shrink-0">
                 <span className="text-[9px] text-emerald-300 font-bold">✓</span>
               </div>
               <p className="text-sm text-emerald-300 font-medium leading-relaxed">{resultText}</p>

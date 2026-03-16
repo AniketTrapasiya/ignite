@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateChallenge, reviewChallenge } from "@/lib/skills";
+import { upsertLearningEntry } from "@/lib/skills-rag";
 
 type CurriculumDay = { day: number; title: string; focus: string };
 type CurriculumWeek = { week: number; topic: string; description: string; days: CurriculumDay[] };
@@ -161,6 +162,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   } catch {
     // Memory save failure is non-critical
   }
+
+  // Store in Pinecone namespace (skills-{userId}) for RAG chatbot
+  const curriculum = goal.curriculum as { curriculum: { week: number; topic: string; days: { day: number }[] }[] } | null;
+  const weekForDay = curriculum?.curriculum?.find((w) => w.days.some((d) => d.day === challenge.day));
+  upsertLearningEntry(
+    user.userId,
+    updated.id,
+    goal.title,
+    challenge.day,
+    weekForDay?.topic ?? goal.title,
+    challenge.title,
+    submission.trim(),
+    review.feedback,
+    review.score
+  ).catch(() => null); // non-blocking, silent fail
 
   // Streak milestone notifications
   if ([3, 7, 14, 30].includes(newStreak)) {

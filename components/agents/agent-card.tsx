@@ -91,7 +91,7 @@ export default function AgentCard({
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+              className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               {icon}
@@ -104,7 +104,7 @@ export default function AgentCard({
 
           {/* Status badge */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold flex-shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0"
             style={{ background: ss.bg, color: ss.color }}
           >
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: ss.dot }} />

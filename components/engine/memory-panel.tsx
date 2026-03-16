@@ -17,10 +17,6 @@ export default function MemoryPanel({ isOpen, onClose, selectedIds, onToggle }: 
   const [content, setContent] = useState("");
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) loadMemories();
-  }, [isOpen]);
-
   async function loadMemories() {
     setLoading(true);
     const res = await fetch("/api/engine/memory");
@@ -30,6 +26,10 @@ export default function MemoryPanel({ isOpen, onClose, selectedIds, onToggle }: 
     }
     setLoading(false);
   }
+
+  useEffect(() => {
+    if (isOpen) loadMemories();
+  }, [isOpen]);
 
   async function addMemory() {
     if (!title.trim() || !content.trim()) return;
@@ -86,8 +86,8 @@ export default function MemoryPanel({ isOpen, onClose, selectedIds, onToggle }: 
               <div
                 key={m.id}
                 className={`rounded-xl p-3 border transition-all cursor-pointer group ${selectedIds.includes(m.id)
-                    ? "bg-indigo-500/20 border-indigo-500/50"
-                    : "bg-white/[0.03] border-white/10 hover:border-white/20"
+                  ? "bg-indigo-500/20 border-indigo-500/50"
+                  : "bg-white/3 border-white/10 hover:border-white/20"
                   }`}
                 onClick={() => onToggle(m.id)}
               >
@@ -96,7 +96,7 @@ export default function MemoryPanel({ isOpen, onClose, selectedIds, onToggle }: 
                     <p className="text-sm font-medium text-white truncate">{m.title}</p>
                     <p className="text-xs text-white/40 mt-0.5 line-clamp-2">{m.content}</p>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     {selectedIds.includes(m.id) && (
                       <span className="text-indigo-400 text-xs">✓</span>
                     )}

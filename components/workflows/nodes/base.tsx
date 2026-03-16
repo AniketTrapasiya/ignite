@@ -64,7 +64,7 @@ export function BaseNode({
         <span className="text-base leading-none">{icon}</span>
         <span className="text-white/90 text-xs font-semibold tracking-wide truncate flex-1">{label}</span>
         {/* Accent dot */}
-        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-80" style={{ background: palette.dot }} />
+        <span className="w-1.5 h-1.5 rounded-full shrink-0 opacity-80" style={{ background: palette.dot }} />
       </div>
 
       {/* Content */}

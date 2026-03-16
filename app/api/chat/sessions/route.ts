@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const title = (body.title as string | undefined) ?? "New Chat";
-  const model = (body.model as string | undefined) ?? "gemini-2.0-flash";
+  const model = (body.model as string | undefined) ?? "gemini-2.5-flash";
 
   const session = await prisma.chatSession.create({
     data: {

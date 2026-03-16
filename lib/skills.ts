@@ -70,7 +70,7 @@ export async function generateCurriculum(
 ): Promise<Curriculum> {
   const fallback = buildFallbackCurriculum(title);
   try {
-    const model = await resolveTextModel(userId, "gemini-2.0-flash");
+    const model = await resolveTextModel(userId, "gemini-2.5-flash");
     const { text } = await generateText({
       model,
       system: "You are an expert curriculum designer. Return only valid JSON, no markdown, no code blocks, no extra text.",
@@ -133,7 +133,7 @@ export async function generateChallenge(
     ],
   };
   try {
-    const model = await resolveTextModel(userId, "gemini-2.0-flash");
+    const model = await resolveTextModel(userId, "gemini-2.5-flash");
     const { text } = await generateText({
       model,
       system: "You are an expert learning coach. Return only valid JSON, no markdown, no code blocks.",
@@ -178,7 +178,7 @@ export async function reviewChallenge(
     xpEarned: base,
   };
   try {
-    const model = await resolveTextModel(userId, "gemini-2.0-flash");
+    const model = await resolveTextModel(userId, "gemini-2.5-flash");
     const { text } = await generateText({
       model,
       system: "You are an encouraging expert mentor. Return only valid JSON, no markdown.",

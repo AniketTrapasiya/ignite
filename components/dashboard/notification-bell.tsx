@@ -103,7 +103,7 @@ export function NotificationBell() {
         </svg>
         {unread > 0 && (
           <span
-            className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold text-white px-1"
+            className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center rounded-full text-[9px] font-bold text-white px-1"
             style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}
           >
             {unread > 9 ? "9+" : unread}
@@ -153,7 +153,7 @@ export function NotificationBell() {
                 const inner = (
                   <div
                     key={n.id}
-                    className="flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] cursor-pointer transition-all hover:bg-white/[0.03] relative"
+                    className="flex items-start gap-3 px-4 py-3 border-b border-white/4 cursor-pointer transition-all hover:bg-white/3 relative"
                     style={{ opacity: n.read ? 0.6 : 1 }}
                     onClick={() => !n.read && markRead(n.id)}
                   >
@@ -168,7 +168,7 @@ export function NotificationBell() {
                     </div>
                     <button
                       onClick={(e) => dismiss(n.id, e)}
-                      className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-white/20 hover:text-white/50 hover:bg-white/[0.08] transition-all mt-0.5"
+                      className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-white/20 hover:text-white/50 hover:bg-white/8 transition-all mt-0.5"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

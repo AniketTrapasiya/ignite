@@ -46,7 +46,7 @@ export async function runEngine(
   prompt: string,
   selectedMemoryIds: string[],
   selectedMods: string[],
-  modelId = "gemini-2.0-flash",
+  modelId = "gemini-2.5-flash",
   mediaContext?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ runId: string; stream: any }> {

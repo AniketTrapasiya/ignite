@@ -15,7 +15,7 @@ representing that workflow in the AutoFlow system.
 
 Node types:
   trigger  — The entry point. data must include: { label, triggerType: "manual"|"webhook"|"schedule", config: {} }
-  llm      — AI text generation/classification. data must include: { label, model: "gemini-2.0-flash", prompt: "<template>" }
+  llm      — AI text generation/classification. data must include: { label, model: "gemini-2.5-flash", prompt: "<template>" }
   http     — HTTP API request. data must include: { label, method: "GET"|"POST"|"PUT"|"DELETE", url: "<url>", headers: {}, body: {} }
   condition — If/else branch. data must include: { label, expression: "<condition>" }
              Edges from condition nodes must have sourceHandle: "true" or "false"
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let aiModel: any;
   try {
-    aiModel = await resolveTextModel(user.userId, body.model ?? "gemini-2.0-flash");
+    aiModel = await resolveTextModel(user.userId, body.model ?? "gemini-2.5-flash");
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "AI model unavailable" },

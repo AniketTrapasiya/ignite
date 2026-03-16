@@ -63,13 +63,13 @@ export default function ModsPanel({ isOpen, onClose, selectedMods, onToggle }: M
                       <div
                         key={integration.service}
                         className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedMods.includes(integration.service)
-                            ? "border-orange-500/50 bg-orange-500/10"
-                            : "border-white/10 bg-white/[0.03] hover:border-white/20"
+                          ? "border-orange-500/50 bg-orange-500/10"
+                          : "border-white/10 bg-white/3 hover:border-white/20"
                           }`}
                         onClick={() => onToggle(integration.service)}
                       >
                         <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                           style={{ background: integration.color + "33", border: `1px solid ${integration.color}44` }}
                         >
                           {integration.name.slice(0, 2)}
@@ -79,9 +79,9 @@ export default function ModsPanel({ isOpen, onClose, selectedMods, onToggle }: M
                           <p className="text-xs text-white/40 truncate">{integration.capabilities[0]}</p>
                         </div>
                         <div
-                          className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-colors ${selectedMods.includes(integration.service)
-                              ? "bg-orange-500 border-orange-500"
-                              : "border-white/20"
+                          className={`w-4 h-4 rounded-full border-2 shrink-0 transition-colors ${selectedMods.includes(integration.service)
+                            ? "bg-orange-500 border-orange-500"
+                            : "border-white/20"
                             }`}
                         />
                       </div>
@@ -100,7 +100,7 @@ export default function ModsPanel({ isOpen, onClose, selectedMods, onToggle }: M
                         className="flex items-center gap-3 p-2.5 rounded-xl border border-white/5 opacity-40"
                       >
                         <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                           style={{ background: integration.color + "22" }}
                         >
                           {integration.name.slice(0, 2)}

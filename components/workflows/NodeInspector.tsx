@@ -15,8 +15,8 @@ interface Props {
 }
 
 const modelOptions = [
-  "gemini-2.0-flash", "gemini-1.5-pro", "gpt-4o", "gpt-4o-mini",
-  "claude-3-5-sonnet-20241022", "llama-3.3-70b-versatile",
+  "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-pro",
+  "gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet-20241022", "llama-3.3-70b-versatile",
 ];
 
 const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
@@ -248,7 +248,7 @@ export function NodeInspector({ node, onChange, onCommit, onDelete }: Props) {
         {renderFields()}
 
         {/* Notes field - available on all nodes */}
-        <div className="border-t border-white/[0.06] pt-4">
+        <div className="border-t border-white/6 pt-4">
           {field("Notes (optional)", "notes", { rows: 2, placeholder: "Describe what this node does..." })}
         </div>
       </div>

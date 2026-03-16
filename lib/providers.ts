@@ -16,6 +16,7 @@ export type AIProvider = "openai" | "gemini" | "groq" | "anthropic";
 export function getProviderFromModelId(modelId: string): AIProvider {
   if (modelId.startsWith("gpt-") || modelId.startsWith("o1") || modelId.startsWith("o3") || modelId.startsWith("dall-e") || modelId.startsWith("tts-")) return "openai";
   if (modelId.startsWith("claude-")) return "anthropic";
+  if (modelId.startsWith("imagen")) return "gemini";
   if (
     modelId.startsWith("llama") ||
     modelId.startsWith("mixtral") ||
@@ -84,23 +85,49 @@ export async function generateImage(
   const model = options.model ?? "dall-e-3";
   const provider = getProviderFromModelId(model);
   const apiKey = await resolveApiKey(userId, provider);
-  if (!apiKey) return { error: `No API key for ${provider}. Add your OpenAI key in Settings → AI Keys.` };
+  if (!apiKey) return { error: `No API key for ${provider}. Add your key in Settings → AI Keys.` };
 
+  // ── OpenAI DALL-E ──────────────────────────────────────────────────────
   if (provider === "openai") {
     const size = (options.size ?? "1024x1024") as "1024x1024" | "1792x1024" | "1024x1792";
     const quality = (options.quality ?? "standard") as "standard" | "hd";
     const res = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt, n: 1, size, quality, response_format: "b64_json" }),
+      body: JSON.stringify({ model: "dall-e-3", prompt, n: 1, size, quality, response_format: "b64_json" }),
       signal: AbortSignal.timeout(60000),
     });
     const data = await res.json() as { data?: { b64_json: string }[]; error?: { message: string } };
-    if (!res.ok) return { error: data.error?.message ?? "Image generation failed" };
+    if (!res.ok) return { error: data.error?.message ?? "DALL-E image generation failed" };
     return { b64: data.data?.[0]?.b64_json };
   }
 
-  return { error: "Image generation not yet supported for this provider" };
+  // ── Google Imagen ──────────────────────────────────────────────────────
+  if (provider === "gemini") {
+    const imagenModel = model.startsWith("imagen") ? model : "imagen-3.0-generate-002";
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${imagenModel}:predict?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instances: [{ prompt }],
+          parameters: { sampleCount: 1 },
+        }),
+        signal: AbortSignal.timeout(60000),
+      }
+    );
+    const data = await res.json() as {
+      predictions?: { bytesBase64Encoded?: string; mimeType?: string }[];
+      error?: { message: string };
+    };
+    if (!res.ok) return { error: data.error?.message ?? "Imagen generation failed" };
+    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+    if (!b64) return { error: "No image returned from Imagen" };
+    return { b64 };
+  }
+
+  return { error: "Image generation not supported for this provider" };
 }
 
 /** Generate audio via OpenAI TTS */

@@ -190,7 +190,6 @@ export default function IntegrationsPage() {
   const [testing, setTesting] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, { ok: boolean; message: string }>>({});
 
-  useEffect(() => { loadIntegrations(); }, []);
 
   async function loadIntegrations() {
     setLoading(true);
@@ -201,6 +200,13 @@ export default function IntegrationsPage() {
     }
     setLoading(false);
   }
+
+  useEffect(() => {
+    async function fetchIntegrations() {
+      await loadIntegrations();
+    }
+    fetchIntegrations();
+  }, []);
 
   async function disconnect(service: string) {
     await fetch(`/api/integrations/${service}`, { method: "DELETE" });
@@ -280,7 +286,7 @@ export default function IntegrationsPage() {
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-40 rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
+            <div key={i} className="h-40 rounded-2xl bg-white/2 border border-white/5 animate-pulse" />
           ))}
         </div>
       ) : (
@@ -292,8 +298,8 @@ export default function IntegrationsPage() {
               <div
                 key={integration.service}
                 className={`relative rounded-2xl border p-4 flex flex-col gap-3 transition-all duration-200 ${isConnected
-                  ? "border-white/20 bg-white/[0.04]"
-                  : "border-white/8 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.03]"
+                  ? "border-white/20 bg-white/4"
+                  : "border-white/8 bg-white/2 hover:border-white/15 hover:bg-white/3"
                   }`}
               >
                 {/* Connected badge */}
@@ -307,7 +313,7 @@ export default function IntegrationsPage() {
                 {/* Icon + Name row */}
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
                     style={{
                       background: integration.color + "22",
                       border: `1.5px solid ${integration.color}44`,
@@ -364,7 +370,7 @@ export default function IntegrationsPage() {
                       href={integration.docsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-shrink-0 py-2 px-3 rounded-xl text-xs border border-white/10 text-white/30 hover:text-white/60 hover:border-white/20 transition-colors"
+                      className="shrink-0 py-2 px-3 rounded-xl text-xs border border-white/10 text-white/30 hover:text-white/60 hover:border-white/20 transition-colors"
                       title="Get API Key"
                     >
                       🔑

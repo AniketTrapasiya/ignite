@@ -97,7 +97,7 @@ function StepCard({ step, index, total }: { step: WorkflowStep; index: number; t
         className={`w-full rounded-2xl border ${colors.border} ${colors.bg} p-5 flex items-start gap-4 transition-all group`}
       >
         {/* Step number + icon */}
-        <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+        <div className="flex flex-col items-center gap-1.5 shrink-0">
           <div
             className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${colors.bg} border ${colors.border}`}
           >
@@ -115,7 +115,7 @@ function StepCard({ step, index, total }: { step: WorkflowStep; index: number; t
         </div>
 
         {/* Step index */}
-        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-white/25 font-mono">
+        <div className="shrink-0 w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-white/25 font-mono">
           {index + 1}
         </div>
       </div>
@@ -277,7 +277,7 @@ export default function NewWorkflowPage() {
     return (
       <div className="min-h-screen bg-[#080810] flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-white/6">
           <Link
             href="/dashboard/workflows"
             className="text-xs text-white/30 hover:text-white/60 transition-colors"
@@ -327,7 +327,7 @@ export default function NewWorkflowPage() {
                       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate();
                     }}
                     placeholder="e.g. When I receive a webhook with a new order, use AI to check if it's a high-value customer, send them a personalised thank-you email, and post to our #sales Slack channel…"
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-4 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-indigo-400/50 focus:ring-1 focus:ring-indigo-400/20 leading-relaxed transition-colors"
+                    className="w-full bg-white/4 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-indigo-400/50 focus:ring-1 focus:ring-indigo-400/20 leading-relaxed transition-colors"
                   />
                   <div className="absolute bottom-3.5 right-3.5 text-[10px] text-white/20">
                     ⌘↵ to generate
@@ -363,7 +363,7 @@ export default function NewWorkflowPage() {
                         setDescription(ex.prompt);
                         setTimeout(() => textareaRef.current?.focus(), 50);
                       }}
-                      className="flex items-start gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.12] text-left transition-all"
+                      className="flex items-start gap-3 p-4 rounded-2xl bg-white/3 border border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.12] text-left transition-all"
                     >
                       <span className="text-xl">{ex.icon}</span>
                       <div>
@@ -389,7 +389,7 @@ export default function NewWorkflowPage() {
     return (
       <div className="min-h-screen bg-[#080810] flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06] flex-shrink-0">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-white/6 shrink-0">
           <button
             onClick={regenerate}
             className="text-xs text-white/30 hover:text-white/60 transition-colors"
@@ -453,7 +453,7 @@ export default function NewWorkflowPage() {
             </div>
 
             {/* Description recap */}
-            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.07] p-4 text-xs text-white/35 leading-relaxed">
+            <div className="rounded-2xl bg-white/3 border border-white/[0.07] p-4 text-xs text-white/35 leading-relaxed">
               <span className="text-white/20 mr-2">Your description:</span>
               {description}
             </div>
@@ -489,14 +489,14 @@ export default function NewWorkflowPage() {
                 <button
                   onClick={() => save(false)}
                   disabled={state === "saving"}
-                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white/60 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-all disabled:opacity-50"
+                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white/60 bg-white/4 border border-white/[0.08] hover:bg-white/[0.07] transition-all disabled:opacity-50"
                 >
                   Save without editing
                 </button>
                 <button
                   onClick={regenerate}
                   disabled={state === "saving"}
-                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white/60 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-all disabled:opacity-50"
+                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white/60 bg-white/4 border border-white/[0.08] hover:bg-white/[0.07] transition-all disabled:opacity-50"
                 >
                   ↺ Regenerate
                 </button>

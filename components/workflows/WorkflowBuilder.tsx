@@ -1,4 +1,4 @@
-﻿/**
+/**
  * components/workflows/WorkflowBuilder.tsx
  * Visual node-based workflow editor powered by @xyflow/react.
  * Features: drag-and-drop, keyboard shortcuts, auto-layout, run log panel,
@@ -17,19 +17,19 @@ import { nodeTypes } from "./nodes";
 import { NodeInspector } from "./NodeInspector";
 import { WorkflowNode, NodeType } from "@/lib/workflow-executor";
 
-// â”€â”€ Palette definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Palette definitions ───────────────────────────────────────────────────────
 const PALETTE_NODES: {
   type: NodeType; label: string; icon: string; colorKey: string;
   defaultData: Record<string, unknown>; description: string;
 }[] = [
-    { type: "trigger", label: "Trigger", icon: "âš¡", colorKey: "yellow", defaultData: { triggerType: "manual" }, description: "Start of workflow" },
-    { type: "llm", label: "AI / LLM", icon: "ðŸ¤–", colorKey: "blue", defaultData: { model: "gemini-2.0-flash", prompt: "" }, description: "Generate text with AI" },
+    { type: "trigger", label: "Trigger", icon: "⚡", colorKey: "yellow", defaultData: { triggerType: "manual" }, description: "Start of workflow" },
+    { type: "llm", label: "AI / LLM", icon: "🤖", colorKey: "blue", defaultData: { model: "gemini-2.5-flash", prompt: "" }, description: "Generate text with AI" },
     { type: "http", label: "HTTP", icon: "ðŸŒ", colorKey: "green", defaultData: { method: "GET", url: "" }, description: "Call any REST API" },
-    { type: "condition", label: "Condition", icon: "ðŸ”€", colorKey: "purple", defaultData: { left: "", operator: "==", right: "" }, description: "Branch on true / false" },
-    { type: "action", label: "Action", icon: "âš™ï¸", colorKey: "orange", defaultData: { actionType: "log", message: "" }, description: "Email, Slack, Telegramâ€¦" },
+    { type: "condition", label: "Condition", icon: "🔀", colorKey: "purple", defaultData: { left: "", operator: "==", right: "" }, description: "Branch on true / false" },
+    { type: "action", label: "Action", icon: "⚙ï¸", colorKey: "orange", defaultData: { actionType: "log", message: "" }, description: "Email, Slack, Telegram…" },
     { type: "delay", label: "Delay", icon: "â±", colorKey: "neutral", defaultData: { delayMs: 5000 }, description: "Wait before next step" },
-    { type: "transform", label: "Transform", icon: "âš—ï¸", colorKey: "cyan", defaultData: { expression: "input" }, description: "Reshape / map data" },
-    { type: "output", label: "Output", icon: "ðŸ“¤", colorKey: "pink", defaultData: { format: "json" }, description: "Final result / response" },
+    { type: "transform", label: "Transform", icon: "⚗ï¸", colorKey: "cyan", defaultData: { expression: "input" }, description: "Reshape / map data" },
+    { type: "output", label: "Output", icon: "📤", colorKey: "pink", defaultData: { format: "json" }, description: "Final result / response" },
   ];
 
 const PALETTE_COLORS: Record<string, string> = {
@@ -41,14 +41,14 @@ const PALETTE_COLORS: Record<string, string> = {
 
 let nodeCounter = 1;
 
-// â”€â”€ Edge styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Edge styles ───────────────────────────────────────────────────────────────
 const EDGE_DEFAULTS: Partial<Edge> = {
   animated: true,
   style: { stroke: "#6366f1", strokeWidth: 2 },
   markerEnd: { type: MarkerType.ArrowClosed, color: "#6366f1", width: 18, height: 18 },
 };
 
-// â”€â”€ Auto-layout (simple top-down DAG) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Auto-layout (simple top-down DAG) ────────────────────────────────────────
 function autoLayout(nodes: Node[], edges: Edge[]): Node[] {
   if (nodes.length === 0) return nodes;
 
@@ -105,7 +105,7 @@ function autoLayout(nodes: Node[], edges: Edge[]): Node[] {
   });
 }
 
-// â”€â”€ Execution log types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Execution log types ───────────────────────────────────────────────────────
 interface StepLog { nodeId: string; nodeType: string; status: string; input?: unknown; output?: unknown; error?: string; startedAt: string; completedAt?: string }
 interface ExecutionRecord { id: string; status: string; createdAt: string; completedAt?: string; stepLogs: StepLog[]; output?: unknown; error?: string }
 
@@ -116,7 +116,7 @@ interface Props {
   onSave?: (nodes: WorkflowNode[], edges: Edge[]) => Promise<void>;
 }
 
-// â”€â”€ History (undo/redo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── History (undo/redo) ───────────────────────────────────────────────────────
 type Snapshot = { nodes: Node[]; edges: Edge[] };
 
 function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: Props) {
@@ -171,14 +171,14 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) as WorkflowNode | undefined;
 
-  // â”€â”€ Connections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Connections ─────────────────────────────────────────────────────────────
   const onConnect = useCallback((connection: Connection) => {
     const newEdges = addEdge({ ...connection, ...EDGE_DEFAULTS }, edges);
     setEdges(newEdges);
     pushHistory(nodes, newEdges);
   }, [setEdges, edges, nodes, pushHistory]);
 
-  // â”€â”€ Drag-and-drop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Drag-and-drop ────────────────────────────────────────────────────────────
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
@@ -198,7 +198,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     setSelectedNodeId(id);
   }, [rfInstance, setNodes, nodes, edges, pushHistory]);
 
-  // â”€â”€ Node events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Node events ──────────────────────────────────────────────────────────────
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);
     setCtxMenu(null);
@@ -214,7 +214,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     setCtxMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
   }, []);
 
-  // â”€â”€ Context menu actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Context menu actions ─────────────────────────────────────────────────────
   const duplicateNode = (nodeId: string) => {
     const orig = nodes.find((n) => n.id === nodeId);
     if (!orig) return;
@@ -235,7 +235,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     setCtxMenu(null);
   }, [nodes, edges, setNodes, setEdges, pushHistory, selectedNodeId]);
 
-  // â”€â”€ Keyboard shortcuts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Keyboard shortcuts ───────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName;
@@ -253,11 +253,11 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNodeId, deleteNode, undo, redo]);
 
-  // â”€â”€ Inspector change â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Inspector change ─────────────────────────────────────────────────────────
   const handleNodeDataChange = (id: string, data: Record<string, unknown>) => {
     const newNodes = nodes.map((n) => (n.id === id ? { ...n, data } : n));
     setNodes(newNodes);
-    // Don't push to history on every keystroke â€” only on blur (handled below)
+    // Don't push to history on every keystroke — only on blur (handled below)
   };
 
   const handleNodeDataCommit = (id: string, data: Record<string, unknown>) => {
@@ -265,13 +265,13 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     pushHistory(newNodes, edges);
   };
 
-  // â”€â”€ Save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Save ─────────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!onSave) return;
     setSaving(true);
     try {
       await onSave(nodes as WorkflowNode[], edges);
-      setRunStatus({ type: "success", msg: "Saved âœ“" });
+      setRunStatus({ type: "success", msg: "Saved ✓" });
       setTimeout(() => setRunStatus(null), 3000);
     } catch {
       setRunStatus({ type: "error", msg: "Save failed" });
@@ -280,10 +280,10 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     }
   };
 
-  // â”€â”€ Run + poll â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Run + poll ───────────────────────────────────────────────────────────────
   const handleRun = async () => {
     setRunning(true);
-    setRunStatus({ type: "info", msg: "Startingâ€¦" });
+    setRunStatus({ type: "info", msg: "Starting…" });
     try {
       const res = await fetch(`/api/workflows/${workflowId}`, {
         method: "POST",
@@ -292,7 +292,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
       });
       const data = await res.json() as { executionId?: string; error?: string };
       if (res.ok && data.executionId) {
-        setRunStatus({ type: "info", msg: `Running â€” ${data.executionId.slice(0, 8)}â€¦` });
+        setRunStatus({ type: "info", msg: `Running — ${data.executionId.slice(0, 8)}…` });
         setActiveTab("logs");
         // Poll for completion
         let attempts = 0;
@@ -310,7 +310,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
               setRunning(false);
               setRunStatus({
                 type: latest.status === "COMPLETED" ? "success" : "error",
-                msg: latest.status === "COMPLETED" ? "Completed âœ“" : `Failed: ${latest.error ?? "unknown"}`,
+                msg: latest.status === "COMPLETED" ? "Completed ✓" : `Failed: ${latest.error ?? "unknown"}`,
               });
             }
           } catch { clearInterval(poll); setRunning(false); }
@@ -325,7 +325,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     }
   };
 
-  // â”€â”€ Load executions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Load executions ───────────────────────────────────────────────────────────
   const loadLogs = async () => {
     setLoadingLogs(true);
     try {
@@ -339,7 +339,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
 
   useEffect(() => { if (activeTab === "logs") loadLogs(); }, [activeTab]);
 
-  // â”€â”€ Auto layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Auto layout ───────────────────────────────────────────────────────────────
   const handleAutoLayout = () => {
     const laid = autoLayout(nodes, edges);
     setNodes(laid);
@@ -347,12 +347,12 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     setTimeout(() => rfInstance?.fitView({ padding: 0.15 }), 50);
   };
 
-  // â”€â”€ Filtered palette â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Filtered palette ──────────────────────────────────────────────────────────
   const filteredPalette = PALETTE_NODES.filter(
     (p) => !paletteSearch || p.label.toLowerCase().includes(paletteSearch.toLowerCase()) || p.description.toLowerCase().includes(paletteSearch.toLowerCase())
   );
 
-  // â”€â”€ Status badge colours â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Status badge colours ───────────────────────────────────────────────────────
   const statusColor = (s: string) => {
     if (s === "COMPLETED") return "text-green-400";
     if (s === "FAILED") return "text-red-400";
@@ -364,19 +364,19 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
     : runStatus?.type === "error" ? "text-red-400"
       : "text-neutral-400";
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ────────────────────────────────────────────────────────────────────────────
   // Render
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ────────────────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-full relative" onClick={() => setCtxMenu(null)}>
-      {/* â”€â”€ Palette sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <aside className="w-48 flex-shrink-0 bg-[#0c0c14] border-r border-white/[0.07] flex flex-col">
+      {/* ── Palette sidebar ─────────────────────────────────────────────────── */}
+      <aside className="w-48 shrink-0 bg-[#0c0c14] border-r border-white/[0.07] flex flex-col">
         <div className="p-2 border-b border-white/[0.07]">
           <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-2 px-1">Nodes</p>
           <input
             value={paletteSearch}
             onChange={(e) => setPaletteSearch(e.target.value)}
-            placeholder="Searchâ€¦"
+            placeholder="Search…"
             className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white/70 placeholder-white/20 focus:outline-none focus:border-indigo-400/50"
           />
         </div>
@@ -386,7 +386,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             return (
               <div
                 key={p.type}
-                className={`flex items-start gap-2 px-2.5 py-2.5 rounded-xl border ${colClasses} bg-white/[0.03] cursor-grab active:cursor-grabbing hover:bg-white/[0.07] transition-all`}
+                className={`flex items-start gap-2 px-2.5 py-2.5 rounded-xl border ${colClasses} bg-white/3 cursor-grab active:cursor-grabbing hover:bg-white/[0.07] transition-all`}
                 draggable
                 onDragStart={(e) => {
                   e.dataTransfer.setData("application/reactflow-type", p.type);
@@ -405,8 +405,8 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
         </div>
 
         {/* Keyboard shortcut hint */}
-        <div className="p-2 border-t border-white/[0.06] space-y-0.5">
-          {[["Del", "Delete node"], ["âŒ˜S", "Save"], ["âŒ˜Z", "Undo"], ["âŒ˜D", "Duplicate"]].map(([k, d]) => (
+        <div className="p-2 border-t border-white/6 space-y-0.5">
+          {[["Del", "Delete node"], ["⌘S", "Save"], ["⌘Z", "Undo"], ["⌘D", "Duplicate"]].map(([k, d]) => (
             <div key={k} className="flex justify-between text-[10px] text-white/20">
               <kbd className="font-mono">{k}</kbd><span>{d}</span>
             </div>
@@ -414,22 +414,22 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
         </div>
       </aside>
 
-      {/* â”€â”€ Main area â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Main area ────────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-[#0c0c14] border-b border-white/[0.07] flex-shrink-0">
+        <div className="flex items-center gap-2 px-3 py-2 bg-[#0c0c14] border-b border-white/[0.07] shrink-0">
           {/* Tabs */}
-          <div className="flex rounded-lg bg-white/[0.04] border border-white/[0.07] p-0.5 mr-1">
+          <div className="flex rounded-lg bg-white/4 border border-white/[0.07] p-0.5 mr-1">
             {(["canvas", "logs"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors capitalize ${activeTab === tab
-                    ? "bg-indigo-600 text-white"
-                    : "text-white/40 hover:text-white/70"
+                  ? "bg-indigo-600 text-white"
+                  : "text-white/40 hover:text-white/70"
                   }`}
               >
-                {tab === "canvas" ? "ðŸŽ¨ Canvas" : "ðŸ“‹ Run Log"}
+                {tab === "canvas" ? "🎨 Canvas" : "📋 Run Log"}
               </button>
             ))}
           </div>
@@ -442,7 +442,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             disabled={saving || !onSave}
             className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white/90 text-xs font-medium transition-colors"
           >
-            {saving ? "Savingâ€¦" : "ðŸ’¾ Save"}
+            {saving ? "Saving…" : "💾 Save"}
           </button>
 
           {/* Run */}
@@ -451,14 +451,14 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             disabled={running}
             className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white/90 text-xs font-medium transition-colors"
           >
-            {running ? "â³ Runningâ€¦" : "â–¶ Run"}
+            {running ? "â³ Running…" : "▶ Run"}
           </button>
 
           <div className="w-px h-4 bg-white/10 mx-1" />
 
           {/* Undo/Redo */}
-          <button onClick={undo} title="Undo (âŒ˜Z)" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">â†©</button>
-          <button onClick={redo} title="Redo (âŒ˜Y)" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">â†ª</button>
+          <button onClick={undo} title="Undo (⌘Z)" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">↩</button>
+          <button onClick={redo} title="Redo (⌘Y)" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">↪</button>
 
           {/* Auto-layout */}
           <button
@@ -466,7 +466,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             title="Auto-layout"
             className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors"
           >
-            âŠž Layout
+            ⊞ Layout
           </button>
 
           {/* Fit view */}
@@ -475,7 +475,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             title="Fit view"
             className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors"
           >
-            âŠ¡ Fit
+            ⊡ Fit
           </button>
 
           {/* Snap toggle */}
@@ -484,7 +484,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             className={`px-2 py-1.5 rounded-lg text-xs transition-colors ${snapToGrid ? "text-indigo-400 bg-indigo-500/10" : "text-white/30 hover:bg-white/5"
               }`}
           >
-            âŠ¹ Snap
+            ⊹ Snap
           </button>
 
           {/* Status message */}
@@ -544,9 +544,9 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
           {/* Empty state */}
           {nodes.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none text-center">
-              <span className="text-5xl opacity-20">ðŸ”—</span>
+              <span className="text-5xl opacity-20">🔗</span>
               <p className="text-sm text-white/25">Drag nodes from the left panel to get started</p>
-              <p className="text-xs text-white/15">or use âŠž Layout after pasting AI-generated nodes</p>
+              <p className="text-xs text-white/15">or use ⊞ Layout after pasting AI-generated nodes</p>
             </div>
           )}
         </div>
@@ -561,24 +561,24 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                 disabled={loadingLogs}
                 className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white/50 transition-colors disabled:opacity-40"
               >
-                {loadingLogs ? "Loadingâ€¦" : "â†º Refresh"}
+                {loadingLogs ? "Loading…" : "↺ Refresh"}
               </button>
             </div>
 
             {executions.length === 0 && !loadingLogs && (
               <div className="text-center py-16 text-white/25 text-sm">
-                <p className="text-3xl mb-3">ðŸ“‹</p>
-                <p>No executions yet. Press <strong>â–¶ Run</strong> to start.</p>
+                <p className="text-3xl mb-3">📋</p>
+                <p>No executions yet. Press <strong>▶ Run</strong> to start.</p>
               </div>
             )}
 
             <div className="space-y-3">
               {executions.map((exec) => (
-                <div key={exec.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
+                <div key={exec.id} className="rounded-2xl border border-white/[0.07] bg-white/2 overflow-hidden">
                   {/* Exec header */}
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.05]">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
                     <span className={`font-semibold text-xs ${statusColor(exec.status)}`}>
-                      {exec.status === "COMPLETED" ? "âœ“" : exec.status === "FAILED" ? "âœ—" : exec.status === "RUNNING" ? "â³" : "â—‹"} {exec.status}
+                      {exec.status === "COMPLETED" ? "✓" : exec.status === "FAILED" ? "✗" : exec.status === "RUNNING" ? "⏳" : "○"} {exec.status}
                     </span>
                     <span className="text-xs text-white/25 font-mono">{exec.id.slice(0, 8)}</span>
                     <span className="text-xs text-white/20 ml-auto">
@@ -596,8 +596,8 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                     <div className="divide-y divide-white/[0.04]">
                       {exec.stepLogs.map((step, i) => (
                         <div key={i} className="px-4 py-2.5 flex items-start gap-3">
-                          <span className={`text-xs mt-0.5 flex-shrink-0 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : step.status === "running" ? "text-blue-400" : "text-neutral-500"}`}>
-                            {step.status === "completed" ? "âœ“" : step.status === "failed" ? "âœ—" : step.status === "running" ? "â³" : "â—‹"}
+                          <span className={`text-xs mt-0.5 shrink-0 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : step.status === "running" ? "text-blue-400" : "text-neutral-500"}`}>
+                            {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : step.status === "running" ? "⏳" : "○"}
                           </span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -607,7 +607,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                             {step.error && <div className="text-xs text-red-400 mt-1 font-mono truncate">{step.error}</div>}
                             {step.output != null && (
                               <div className="text-[10px] text-white/30 mt-1 font-mono truncate">
-                                â†’ {typeof step.output === "string" ? step.output.slice(0, 120) : JSON.stringify(step.output).slice(0, 120)}
+                                → {typeof step.output === "string" ? step.output.slice(0, 120) : JSON.stringify(step.output).slice(0, 120)}
                               </div>
                             )}
                           </div>
@@ -626,15 +626,105 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
         )}
       </div>
 
-      {/* â”€â”€ Inspector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <aside className="w-68 flex-shrink-0 bg-[#0c0c14] border-l border-white/[0.07] overflow-y-auto" style={{ width: 272 }}>
+      {/* ── Inspector ────────────────────────────────────────────────────────── */}
+      <aside className="w-68 shrink-0 bg-[#0c0c14] border-l border-white/[0.07] overflow-y-auto" style={{ width: 272 }}>
         {selectedNode ? (
           <NodeInspector node={selectedNode} onChange={handleNodeDataChange} onCommit={handleNodeDataCommit} onDelete={deleteNode} />
+        ) : activeTab === "logs" && executions.length > 0 ? (
+          <div className="p-4 space-y-4">
+            <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">Latest Run</p>
+            {(() => {
+              const latest = executions[0];
+              return (
+                <div className="space-y-3">
+                  {/* Status */}
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/6 bg-white/2">
+                    <span className={`text-sm ${latest.status === "COMPLETED" ? "text-green-400" : latest.status === "FAILED" ? "text-red-400" : latest.status === "RUNNING" ? "text-blue-400" : "text-neutral-400"}`}>
+                      {latest.status === "COMPLETED" ? "✓" : latest.status === "FAILED" ? "✗" : latest.status === "RUNNING" ? "⏳" : "○"}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-bold ${latest.status === "COMPLETED" ? "text-green-400" : latest.status === "FAILED" ? "text-red-400" : latest.status === "RUNNING" ? "text-blue-400" : "text-neutral-400"}`}>{latest.status}</p>
+                      <p className="text-[10px] text-white/25 font-mono">{latest.id.slice(0, 8)}</p>
+                    </div>
+                    {latest.completedAt && (
+                      <span className="text-[10px] text-white/30 shrink-0">
+                        {Math.round((new Date(latest.completedAt).getTime() - new Date(latest.createdAt).getTime()) / 1000)}s
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Final output */}
+                  {latest.output != null && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Output</p>
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                        <pre className="text-[11px] text-emerald-300/80 font-mono whitespace-pre-wrap break-all leading-relaxed max-h-48 overflow-y-auto">
+                          {typeof latest.output === "string" ? latest.output : JSON.stringify(latest.output, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {latest.error && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Error</p>
+                      <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
+                        <p className="text-[11px] text-red-300/80 font-mono break-all">{latest.error}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step summary */}
+                  {latest.stepLogs && latest.stepLogs.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Steps ({latest.stepLogs.length})</p>
+                      <div className="space-y-1">
+                        {latest.stepLogs.map((step, i) => (
+                          <div key={i} className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-white/2 border border-white/4">
+                            <span className={`text-xs shrink-0 mt-0.5 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : "text-blue-400"}`}>
+                              {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : "⏳"}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono text-white/40 truncate">{step.nodeId}</span>
+                                <span className="text-[9px] px-1 rounded bg-white/5 text-white/25 capitalize shrink-0">{step.nodeType}</span>
+                              </div>
+                              {step.output != null && (
+                                <p className="text-[10px] text-white/30 font-mono truncate mt-0.5">
+                                  → {typeof step.output === "string" ? step.output.slice(0, 80) : JSON.stringify(step.output).slice(0, 80)}
+                                </p>
+                              )}
+                              {step.error && <p className="text-[10px] text-red-400/80 font-mono truncate mt-0.5">{step.error}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-[9px] text-white/20 text-center">
+                    {new Date(latest.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              );
+            })()}
+          </div>
+        ) : activeTab === "logs" && running ? (
+          <div className="p-5 flex flex-col items-center gap-3 pt-12">
+            <div className="flex gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
+            <p className="text-xs text-white/30 text-center">Executing workflow…</p>
+            {runStatus && <p className="text-xs text-blue-400/70 text-center font-mono">{runStatus.msg}</p>}
+          </div>
         ) : (
           <div className="p-5 space-y-4">
             <p className="text-xs font-semibold text-white/40">Inspector</p>
             <p className="text-xs text-white/25 leading-relaxed">Click any node to configure it here.</p>
-            <div className="border-t border-white/[0.06] pt-4 space-y-2">
+            <div className="border-t border-white/6 pt-4 space-y-2">
               <p className="text-[10px] text-white/20 font-semibold uppercase tracking-widest">Quick tip</p>
               <p className="text-xs text-white/20 leading-relaxed">
                 Connect nodes by dragging from the dot at the bottom of one node to the top of another.
@@ -645,7 +735,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
         )}
       </aside>
 
-      {/* â”€â”€ Context menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Context menu ─────────────────────────────────────────────────────── */}
       {ctxMenu && (
         <div
           className="fixed z-50 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[160px]"
@@ -653,11 +743,11 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
           onClick={(e) => e.stopPropagation()}
         >
           {[
-            { label: "âœŽ Configure", action: () => { setSelectedNodeId(ctxMenu.nodeId); setCtxMenu(null); } },
-            { label: "â§‰ Duplicate (âŒ˜D)", action: () => duplicateNode(ctxMenu.nodeId) },
-            { label: "âŠ¡ Copy ID", action: () => { navigator.clipboard.writeText(ctxMenu.nodeId); setCtxMenu(null); } },
+            { label: "✎ Configure", action: () => { setSelectedNodeId(ctxMenu.nodeId); setCtxMenu(null); } },
+            { label: "⧉ Duplicate (⌘D)", action: () => duplicateNode(ctxMenu.nodeId) },
+            { label: "⊡ Copy ID", action: () => { navigator.clipboard.writeText(ctxMenu.nodeId); setCtxMenu(null); } },
             null, // divider
-            { label: "ðŸ—‘ Delete", action: () => deleteNode(ctxMenu.nodeId), danger: true },
+            { label: "🗑 Delete", action: () => deleteNode(ctxMenu.nodeId), danger: true },
           ].map((item, i) =>
             !item ? (
               <div key={i} className="my-1 h-px bg-white/10" />

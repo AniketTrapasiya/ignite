@@ -57,7 +57,7 @@ export function Header({ userName, userEmail, onMenuToggle }: HeaderProps) {
       </header>
 
       {/* Desktop top bar */}
-      <header className="hidden lg:flex sticky top-0 z-20 items-center justify-between px-6 py-3 border-b border-white/[0.05]"
+      <header className="hidden lg:flex sticky top-0 z-20 items-center justify-between px-6 py-3 border-b border-white/5"
         style={{ background: "rgba(7,7,15,0.85)", backdropFilter: "blur(16px)" }}
       >
         {/* Left: breadcrumb placeholder — pages can use <title> */}

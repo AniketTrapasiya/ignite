@@ -190,7 +190,7 @@ export default async function DashboardPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-white truncate">{g.title}</span>
                     {g.streakDays > 0 && (
-                      <span className="text-xs text-orange-400 flex-shrink-0">ðŸ”¥{g.streakDays}</span>
+                      <span className="text-xs text-orange-400 shrink-0">ðŸ”¥{g.streakDays}</span>
                     )}
                   </div>
                   <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>

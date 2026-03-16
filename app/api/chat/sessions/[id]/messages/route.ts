@@ -69,7 +69,7 @@ export async function POST(
     sessionId,
     history,
     userMessage: userContent,
-    modelId: session.model ?? "gemini-2.0-flash",
+    modelId: session.model ?? "gemini-2.5-flash",
     mediaContext: body.mediaContext,
   });
 

@@ -68,7 +68,7 @@ export default function BuilderPage() {
   return (
     <div className="flex flex-col h-screen bg-neutral-950">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-800 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-800 shrink-0">
         <button
           onClick={() => router.push("/dashboard/workflows")}
           className="text-neutral-400 hover:text-white text-sm transition-colors"

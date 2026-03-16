@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { prompt, memoryIds = [], mods = [], model = "gemini-2.0-flash", mediaContext } = body;
+  const { prompt, memoryIds = [], mods = [], model = "gemini-2.5-flash", mediaContext } = body;
 
   if (!prompt?.trim()) {
     return NextResponse.json({ error: "prompt is required" }, { status: 400 });

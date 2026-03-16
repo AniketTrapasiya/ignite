@@ -305,7 +305,7 @@ export async function runAgent(
   agentId: string,
   userId: string,
   triggerData: Record<string, unknown>,
-  modelId = "gemini-2.0-flash"
+  modelId = "gemini-2.5-flash"
 ): Promise<{ runId: string; output: string; actionsLog: ActionResult[] }> {
   // Load agent + ordered actions
   const agent = await prisma.agent.findUnique({

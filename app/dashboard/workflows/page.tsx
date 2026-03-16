@@ -162,7 +162,7 @@ export default function WorkflowsPage() {
               {/* Visual Builder */}
               <button
                 onClick={() => { setShowModePicker(false); setShowCreate(true); }}
-                className="group flex flex-col gap-3 p-5 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/20 text-left transition-all"
+                className="group flex flex-col gap-3 p-5 rounded-2xl border border-white/10 bg-white/3 hover:bg-white/[0.06] hover:border-white/20 text-left transition-all"
               >
                 <span className="text-2xl">🎨</span>
                 <div>
@@ -222,7 +222,7 @@ export default function WorkflowsPage() {
             { label: "Draft", value: workflows.filter((w) => w.status === "DRAFT").length, color: "text-neutral-400" },
             { label: "Total Runs", value: workflows.reduce((s, w) => s + w._count.executions, 0), color: "text-indigo-400" },
           ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+            <div key={s.label} className="rounded-2xl border border-white/[0.08] bg-white/2 p-4">
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
               <p className="text-xs text-white/35 mt-0.5">{s.label}</p>
             </div>
@@ -262,10 +262,10 @@ export default function WorkflowsPage() {
             return (
               <div
                 key={w.id}
-                className="rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                className="rounded-2xl border border-white/[0.07] bg-white/2 hover:bg-white/4 transition-colors"
               >
                 <div className="flex items-center gap-4 px-4 py-4">
-                  <span className="text-xl flex-shrink-0">{triggerIcon[w.triggerType] ?? "⚡"}</span>
+                  <span className="text-xl shrink-0">{triggerIcon[w.triggerType] ?? "⚡"}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-white truncate">{w.name}</span>
@@ -288,7 +288,7 @@ export default function WorkflowsPage() {
                       <p className="text-xs text-indigo-400 mt-1">{runResults[w.id]}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleRun(w.id)}
                       disabled={runningId === w.id}
@@ -299,8 +299,8 @@ export default function WorkflowsPage() {
                     <button
                       onClick={() => handleToggleActive(w)}
                       className={`px-3 py-1.5 rounded-lg text-xs border border-transparent transition-all ${w.status === "ACTIVE"
-                          ? "text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/20"
-                          : "text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20"
+                        ? "text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/20"
+                        : "text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20"
                         }`}
                     >
                       {w.status === "ACTIVE" ? "Pause" : "Activate"}

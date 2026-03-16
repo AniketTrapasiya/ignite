@@ -47,14 +47,14 @@ function PowerGauge({ power, color }: { power: number; color: string }) {
 function StatusBar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[9px] text-white/25 uppercase tracking-widest w-9 flex-shrink-0">{label}</span>
+      <span className="text-[9px] text-white/25 uppercase tracking-widest w-9 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${value}%`, background: color, boxShadow: `0 0 6px ${color}` }}
         />
       </div>
-      <span className="text-[9px] font-mono w-7 text-right flex-shrink-0" style={{ color }}>{value}%</span>
+      <span className="text-[9px] font-mono w-7 text-right shrink-0" style={{ color }}>{value}%</span>
     </div>
   );
 }
@@ -202,7 +202,7 @@ export default function EnginePage() {
   const [loadedMemoryIds, setLoadedMemoryIds] = useState<string[]>([]);
   const [connectedIntegrations, setConnectedIntegrations] = useState<ConnectedIntegration[]>([]);
   const [activeMods, setActiveMods] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
 
   // Multi-modal state
@@ -260,7 +260,7 @@ export default function EnginePage() {
         setAvailableModels(models);
         // Read localStorage directly to avoid stale closure over selectedModel state
         const savedId = localStorage.getItem("autoflow-model");
-        const resolvedId = savedId || "gemini-2.0-flash";
+        const resolvedId = savedId || "gemini-2.5-flash";
         const currentAvailable = models.find((m) => m.id === resolvedId && m.available);
         if (currentAvailable) {
           // Ensure React state matches localStorage
@@ -340,7 +340,7 @@ export default function EnginePage() {
           body: JSON.stringify({
             type: "image",
             prompt: prompt.trim(),
-            model: selectedModel.startsWith("dall-e") ? selectedModel : "dall-e-3",
+            model: selectedModel.startsWith("dall-e") || selectedModel.startsWith("imagen") ? selectedModel : "dall-e-3",
             size: imageSize,
           }),
         });
@@ -545,7 +545,7 @@ export default function EnginePage() {
       />
 
       {/* ── Top Header ── */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#e91e8c", textShadow: "0 0 30px rgba(233,30,140,0.45)" }}>
             ENGINE ROOM
@@ -588,7 +588,7 @@ export default function EnginePage() {
         <div className="flex flex-col gap-4 overflow-hidden">
 
           {/* OUTPUT TYPE SELECTOR */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/8">
+          <div className="flex gap-1 p-1 rounded-xl bg-white/3 border border-white/8">
             {([
               { t: "text" as OutputType, label: "Text", icon: "⌨️", desc: "LLM reasoning" },
               { t: "image" as OutputType, label: "Image", icon: "🎨", desc: "AI generation" },
@@ -619,7 +619,7 @@ export default function EnginePage() {
 
           {/* FUEL INPUT */}
           <div
-            className="rounded-2xl border p-4 flex flex-col gap-3 flex-shrink-0"
+            className="rounded-2xl border p-4 flex flex-col gap-3 shrink-0"
             style={{
               background: "linear-gradient(145deg, #0e0b22 0%, #0b0918 100%)",
               borderColor: prompt.trim() ? "rgba(147,51,234,0.55)" : "rgba(120,50,255,0.22)",
@@ -742,7 +742,7 @@ export default function EnginePage() {
                   </div>
                 ) : (
                   <>
-                    <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/8 flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white/4 border border-white/8 flex items-center justify-center text-sm shrink-0">
                       📎
                     </div>
                     <div>
@@ -819,7 +819,7 @@ export default function EnginePage() {
             <div className="flex-1 overflow-y-auto px-4 space-y-2 pb-3 scrollbar-hide">
               {memories.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-6">
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/8 flex items-center justify-center text-xl">🧠</div>
+                  <div className="w-10 h-10 rounded-xl bg-white/3 border border-white/8 flex items-center justify-center text-xl">🧠</div>
                   <p className="text-xs text-white/25 text-center">No memories yet.<br />Save engine output to build your memory bank.</p>
                 </div>
               ) : (
@@ -838,7 +838,7 @@ export default function EnginePage() {
                     >
                       <div className="flex items-start gap-2">
                         <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-sm"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-sm"
                           style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.25)" }}
                         >
                           {mem.pinned ? "📌" : "💡"}
@@ -852,7 +852,7 @@ export default function EnginePage() {
                           )}
                         </div>
                         <div
-                          className="w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-all"
+                          className="w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-all"
                           style={{
                             borderColor: isLoaded ? "#6366f1" : "rgba(255,255,255,0.15)",
                             background: isLoaded ? "#6366f1" : "transparent",
@@ -897,7 +897,7 @@ export default function EnginePage() {
 
           {/* ── Power gauge + status bars ── */}
           <div
-            className="w-full max-w-[300px] rounded-2xl border p-4 space-y-3"
+            className="w-full max-w-75 rounded-2xl border p-4 space-y-3"
             style={{
               background: "linear-gradient(145deg, #0d0b1e 0%, #080614 100%)",
               borderColor: "rgba(120,50,255,0.2)",
@@ -928,7 +928,7 @@ export default function EnginePage() {
           </div>
 
           {/* ── Model selector ── */}
-          <div className="w-full max-w-[300px] relative" ref={modelDropdownRef}>
+          <div className="w-full max-w-75 relative" ref={modelDropdownRef}>
             <button
               onClick={() => !isRunning && setModelDropdownOpen((v) => !v)}
               disabled={isRunning}
@@ -940,7 +940,7 @@ export default function EnginePage() {
               }}
             >
               <div
-                className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0"
                 style={{
                   background: availableModels.find((m) => m.id === selectedModel)?.provider === "anthropic"
                     ? "rgba(212,167,106,0.2)" : "rgba(99,179,237,0.2)",
@@ -954,7 +954,7 @@ export default function EnginePage() {
                 {availableModels.find((m) => m.id === selectedModel)?.name ?? selectedModel}
               </span>
               <svg
-                className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
+                className={`w-3 h-3 shrink-0 transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
                 fill="none" stroke="#a855f7" strokeWidth={2.5} viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -975,23 +975,33 @@ export default function EnginePage() {
                   {/* Gemini group */}
                   {availableModels.filter((m) => m.provider === "google").length > 0 && (
                     <>
-                      <div className="px-3 py-1.5 border-b border-white/[0.06] sticky top-0" style={{ background: "#0f0d24" }}>
+                      <div className="px-3 py-1.5 border-b border-white/6 sticky top-0" style={{ background: "#0f0d24" }}>
                         <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Gemini · Google</span>
                       </div>
                       {availableModels.filter((m) => m.provider === "google").map((m) => (
                         <button
                           key={m.id}
-                          onClick={() => { if (m.available) { setSelectedModel(m.id); localStorage.setItem("autoflow-model", m.id); setModelDropdownOpen(false); } }}
+                          onClick={() => {
+                            if (m.available) {
+                              setSelectedModel(m.id);
+                              localStorage.setItem("autoflow-model", m.id);
+                              setModelDropdownOpen(false);
+                              if (m.cap?.includes("image") && !m.cap?.includes("text")) setOutputType("image");
+                            }
+                          }}
                           disabled={!m.available}
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
                           style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
                         >
-                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(99,179,237,0.15)", color: "#63b3ed" }}>G</div>
+                          <div className="w-4 h-4 rounded shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(99,179,237,0.15)", color: "#63b3ed" }}>G</div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
+                            {m.cap?.includes("image") && !m.cap?.includes("text") && (
+                              <span className="text-[8px] px-1 rounded bg-purple-500/10 text-purple-400/70">image</span>
+                            )}
                           </div>
                           {selectedModel === m.id && (
-                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
                           )}
                         </button>
                       ))}
@@ -1000,7 +1010,7 @@ export default function EnginePage() {
                   {/* Claude group */}
                   {availableModels.filter((m) => m.provider === "anthropic").length > 0 && (
                     <>
-                      <div className="px-3 py-1.5 border-b border-white/[0.06] border-t border-t-white/[0.04] sticky top-0" style={{ background: "#0f0d24" }}>
+                      <div className="px-3 py-1.5 border-b border-white/6 border-t border-t-white/4 sticky top-0" style={{ background: "#0f0d24" }}>
                         <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Claude · Anthropic</span>
                       </div>
                       {availableModels.filter((m) => m.provider === "anthropic").map((m) => (
@@ -1011,13 +1021,13 @@ export default function EnginePage() {
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
                           style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
                         >
-                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(212,167,106,0.15)", color: "#d4a76a" }}>A</div>
+                          <div className="w-4 h-4 rounded shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(212,167,106,0.15)", color: "#d4a76a" }}>A</div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
                           </div>
-                          {!m.available && <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/5 text-white/25 flex-shrink-0">no key</span>}
+                          {!m.available && <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/5 text-white/25 shrink-0">no key</span>}
                           {selectedModel === m.id && m.available && (
-                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
                           )}
                         </button>
                       ))}
@@ -1026,7 +1036,7 @@ export default function EnginePage() {
                   {/* OpenAI group */}
                   {availableModels.filter((m) => m.provider === "openai").length > 0 && (
                     <>
-                      <div className="px-3 py-1.5 border-b border-white/[0.06] border-t border-t-white/[0.04] sticky top-0" style={{ background: "#0f0d24" }}>
+                      <div className="px-3 py-1.5 border-b border-white/6 border-t border-t-white/4 sticky top-0" style={{ background: "#0f0d24" }}>
                         <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">GPT · OpenAI</span>
                       </div>
                       {availableModels.filter((m) => m.provider === "openai").map((m) => (
@@ -1046,15 +1056,15 @@ export default function EnginePage() {
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
                           style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
                         >
-                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(16,163,127,0.15)", color: "#10a37f" }}>O</div>
+                          <div className="w-4 h-4 rounded shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(16,163,127,0.15)", color: "#10a37f" }}>O</div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
                             <div className="flex gap-0.5 mt-0.5">
-                              {m.cap?.map((c) => <span key={c} className="text-[8px] px-1 rounded bg-white/[0.04] text-white/25">{c}</span>)}
+                              {m.cap?.map((c) => <span key={c} className="text-[8px] px-1 rounded bg-white/4 text-white/25">{c}</span>)}
                             </div>
                           </div>
                           {selectedModel === m.id && m.available && (
-                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
                           )}
                         </button>
                       ))}
@@ -1063,7 +1073,7 @@ export default function EnginePage() {
                   {/* Groq group */}
                   {availableModels.filter((m) => m.provider === "groq").length > 0 && (
                     <>
-                      <div className="px-3 py-1.5 border-b border-white/[0.06] border-t border-t-white/[0.04] sticky top-0" style={{ background: "#0f0d24" }}>
+                      <div className="px-3 py-1.5 border-b border-white/6 border-t border-t-white/4 sticky top-0" style={{ background: "#0f0d24" }}>
                         <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Llama · Groq</span>
                       </div>
                       {availableModels.filter((m) => m.provider === "groq").map((m) => (
@@ -1074,12 +1084,12 @@ export default function EnginePage() {
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
                           style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
                         >
-                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(245,80,54,0.15)", color: "#f55036" }}>⚡</div>
+                          <div className="w-4 h-4 rounded shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(245,80,54,0.15)", color: "#f55036" }}>⚡</div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
                           </div>
                           {selectedModel === m.id && m.available && (
-                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
                           )}
                         </button>
                       ))}
@@ -1092,7 +1102,7 @@ export default function EnginePage() {
                   )}
                 </div>
                 {/* Add keys shortcut */}
-                <div className="p-2 border-t border-white/[0.06]">
+                <div className="p-2 border-t border-white/6">
                   <a href="/dashboard/settings/ai-keys" className="flex items-center justify-center gap-1 text-[10px] text-white/25 hover:text-white/50 transition-colors py-1">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                     Add AI provider keys
@@ -1103,7 +1113,7 @@ export default function EnginePage() {
           </div>
 
           {/* ── Ignite / Stop button ── */}
-          <div className="w-full max-w-[300px] space-y-2.5">
+          <div className="w-full max-w-75 space-y-2.5">
             <AnimatePresence mode="wait">
               {isRunning ? (
                 <motion.button
@@ -1170,15 +1180,15 @@ export default function EnginePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.02] py-2">
+                <div className="flex-1 rounded-xl border border-white/8 bg-white/2 py-2">
                   <p className="text-lg font-bold text-orange-400">{stepsDone}</p>
                   <p className="text-[9px] text-white/25 uppercase tracking-wider">Steps</p>
                 </div>
-                <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.02] py-2">
+                <div className="flex-1 rounded-xl border border-white/8 bg-white/2 py-2">
                   <p className="text-lg font-bold text-indigo-400">{Math.floor(fullOutput.length / 5)}</p>
                   <p className="text-[9px] text-white/25 uppercase tracking-wider">Words</p>
                 </div>
-                <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.02] py-2">
+                <div className="flex-1 rounded-xl border border-white/8 bg-white/2 py-2">
                   <p className="text-lg font-bold" style={{
                     color: !isRunning && isDone ? (!runError ? "#22c55e" : "#ef4444") : "#f97316",
                   }}>
@@ -1227,7 +1237,7 @@ export default function EnginePage() {
             }}
           >
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05] flex-shrink-0">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 shrink-0">
               <div className="flex gap-1">
                 <div
                   className="w-1.5 h-1.5 rounded-full transition-all"
@@ -1296,7 +1306,7 @@ export default function EnginePage() {
                                 style={{ background: "rgba(249,115,22,0.05)", border: "1px solid rgba(249,115,22,0.1)" }}
                               >
                                 <div
-                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5"
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5"
                                   style={{ background: "rgba(34,197,94,0.15)", border: "1.5px solid #22c55e", color: "#22c55e" }}
                                 >
                                   {step.stepNum}
@@ -1318,7 +1328,7 @@ export default function EnginePage() {
                           </div>
 
                           {/* Popup footer */}
-                          <div className="px-3 py-2 border-t border-white/[0.05]">
+                          <div className="px-3 py-2 border-t border-white/5">
                             <p className="text-[9px] text-white/20">
                               {Math.floor(fullOutput.length / 5)} words · {outputLines.filter(l => l.type === "result").length > 0 ? "✓ Result received" : isRunning ? "Streaming…" : "Done"}
                             </p>
@@ -1358,7 +1368,7 @@ export default function EnginePage() {
             >
               {outputLines.length === 0 && !isRunning ? (
                 <div className="flex flex-col items-center gap-3 py-8">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/8 flex items-center justify-center text-2xl">
+                  <div className="w-12 h-12 rounded-xl bg-white/3 border border-white/8 flex items-center justify-center text-2xl">
                     📡
                   </div>
                   <p className="text-xs text-white/20 text-center">
@@ -1385,8 +1395,8 @@ export default function EnginePage() {
                     <div
                       key={ev.id}
                       className={`mb-2 rounded-xl border text-xs overflow-hidden ${ev.type === "call"
-                          ? "border-blue-500/30 bg-blue-500/5"
-                          : "border-green-500/30 bg-green-500/5"
+                        ? "border-blue-500/30 bg-blue-500/5"
+                        : "border-green-500/30 bg-green-500/5"
                         }`}
                     >
                       <div className={`flex items-center gap-2 px-3 py-1.5 border-b ${ev.type === "call" ? "border-blue-500/20 text-blue-400" : "border-green-500/20 text-green-400"}`}>
@@ -1408,7 +1418,7 @@ export default function EnginePage() {
                     <div key={i} className="leading-relaxed flex gap-2">
                       {line.type === "step" && (
                         <>
-                          <span className="font-bold flex-shrink-0" style={{ color: "#f97316" }}>
+                          <span className="font-bold shrink-0" style={{ color: "#f97316" }}>
                             STEP {line.stepNum}:
                           </span>
                           <span className="text-white/70">{line.content}</span>
@@ -1416,7 +1426,7 @@ export default function EnginePage() {
                       )}
                       {line.type === "result" && (
                         <>
-                          <span className="font-bold flex-shrink-0" style={{ color: "#22c55e" }}>
+                          <span className="font-bold shrink-0" style={{ color: "#22c55e" }}>
                             RESULT:
                           </span>
                           <span className="text-emerald-100/80">{line.content}</span>
@@ -1424,7 +1434,7 @@ export default function EnginePage() {
                       )}
                       {line.type === "error" && (
                         <>
-                          <span className="font-bold flex-shrink-0" style={{ color: "#ef4444" }}>
+                          <span className="font-bold shrink-0" style={{ color: "#ef4444" }}>
                             ERROR:
                           </span>
                           <span className="text-red-300/80">{line.content}</span>
@@ -1438,9 +1448,19 @@ export default function EnginePage() {
                 </>
               )}
               {runError && (
-                <div className="flex items-start gap-2 mt-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                  <span className="text-red-400 font-bold text-xs flex-shrink-0">ERR</span>
-                  <span className="text-red-300/80 text-xs">{runError}</span>
+                <div className="flex flex-col gap-2 mt-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-400 font-bold text-xs shrink-0">ERR</span>
+                    <span className="text-red-300/80 text-xs">{runError}</span>
+                  </div>
+                  {(runError.toLowerCase().includes("api key") || runError.toLowerCase().includes("archived") || runError.toLowerCase().includes("no api key") || runError.toLowerCase().includes("unauthorized") || runError.toLowerCase().includes("invalid_api_key")) && (
+                    <a
+                      href="/dashboard/settings/ai-keys"
+                      className="self-start text-[10px] px-2.5 py-1 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 transition-all"
+                    >
+                      🔑 Update API Key →
+                    </a>
+                  )}
                 </div>
               )}
             </div>
@@ -1448,10 +1468,10 @@ export default function EnginePage() {
 
           {/* MODS / NITRO */}
           <div
-            className="rounded-2xl border flex-shrink-0"
+            className="rounded-2xl border shrink-0"
             style={{ background: "linear-gradient(145deg, #0e0b22 0%, #0b0918 100%)", borderColor: "rgba(120,50,255,0.28)", boxShadow: "0 0 20px rgba(100,30,255,0.06)" }}
           >
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
               <div className="flex gap-1">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#f97316", boxShadow: "0 0 5px #f97316" }} />
                 <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#fbbf24", boxShadow: "0 0 5px #fbbf24" }} />
@@ -1488,7 +1508,7 @@ export default function EnginePage() {
                     >
                       {/* Icon */}
                       <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
                         style={{
                           background: `${config?.color ?? "#6366f1"}22`,
                           border: `1.5px solid ${config?.color ?? "#6366f1"}44`,
@@ -1501,7 +1521,7 @@ export default function EnginePage() {
                         {config?.name ?? conn.service}
                       </span>
                       {/* Toggle + label */}
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span
                           className="text-[9px] font-bold uppercase tracking-wider"
                           style={{ color: isActive ? (config?.color ?? "#a855f7") : "rgba(255,255,255,0.2)" }}
@@ -1510,7 +1530,7 @@ export default function EnginePage() {
                         </span>
                         <button
                           onClick={() => toggleMod(conn.service)}
-                          className="flex-shrink-0 relative w-9 h-5 rounded-full transition-all duration-300"
+                          className="shrink-0 relative w-9 h-5 rounded-full transition-all duration-300"
                           style={{
                             background: isActive ? (config?.color ?? "#a855f7") : "rgba(255,255,255,0.08)",
                             boxShadow: isActive ? `0 0 10px ${config?.color ?? "#a855f7"}66` : "none",
@@ -1542,10 +1562,10 @@ export default function EnginePage() {
 
           {/* PUBLISH TARGETS */}
           <div
-            className="rounded-2xl border flex-shrink-0"
+            className="rounded-2xl border shrink-0"
             style={{ background: "linear-gradient(145deg, #0f0d1e 0%, #0b0918 100%)", borderColor: "rgba(99,102,241,0.25)" }}
           >
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
               <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">🚀 Publish</span>
               <span className="ml-auto text-[10px] text-white/25">{publishPlatforms.length} selected</span>
             </div>
@@ -1603,7 +1623,7 @@ export default function EnginePage() {
           }}
         >
           {/* Panel header */}
-          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.05]">
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/5">
             <div
               className="flex items-center gap-2"
             >
@@ -1640,7 +1660,7 @@ export default function EnginePage() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {isDone && fullOutput && (
                 <button
                   onClick={() => navigator.clipboard.writeText(fullOutput)}
@@ -1677,15 +1697,15 @@ export default function EnginePage() {
           </div>
 
           {/* Panel body — step timeline + output */}
-          <div className="flex gap-0 min-h-[200px]">
+          <div className="flex gap-0 min-h-50">
 
             {/* LEFT: Step timeline */}
-            <div className="w-56 flex-shrink-0 border-r border-white/[0.05] p-4 space-y-1">
+            <div className="w-56 shrink-0 border-r border-white/5 p-4 space-y-1">
               <p className="text-[9px] font-semibold text-white/20 uppercase tracking-widest mb-3">Execution Steps</p>
               {outputLines.filter((l) => l.type === "step").length === 0 && isRunning && (
                 <div className="space-y-2">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-5 rounded bg-white/[0.03] animate-pulse" style={{ width: `${70 + i * 8}%` }} />
+                    <div key={i} className="h-5 rounded bg-white/3 animate-pulse" style={{ width: `${70 + i * 8}%` }} />
                   ))}
                 </div>
               )}
@@ -1695,7 +1715,7 @@ export default function EnginePage() {
                 return (
                   <div key={i} className="flex items-start gap-2 group">
                     {/* Step dot */}
-                    <div className="flex flex-col items-center mt-0.5 flex-shrink-0">
+                    <div className="flex flex-col items-center mt-0.5 shrink-0">
                       <div
                         className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
                         style={{
@@ -1733,7 +1753,7 @@ export default function EnginePage() {
             </div>
 
             {/* RIGHT: Main output */}
-            <div className="flex-1 p-5 overflow-y-auto max-h-[500px] scrollbar-hide space-y-4">
+            <div className="flex-1 p-5 overflow-y-auto max-h-125 scrollbar-hide space-y-4">
 
               {/* ─── IMAGE RESULT ─── */}
               {generatedImage && (
@@ -1839,7 +1859,7 @@ export default function EnginePage() {
                     </svg>
                     View raw output
                   </summary>
-                  <pre className="mt-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] text-white/30 font-mono whitespace-pre-wrap overflow-x-auto leading-relaxed">
+                  <pre className="mt-3 p-3 rounded-xl bg-white/2 border border-white/5 text-[10px] text-white/30 font-mono whitespace-pre-wrap overflow-x-auto leading-relaxed">
                     {fullOutput}
                   </pre>
                 </details>
@@ -1847,12 +1867,20 @@ export default function EnginePage() {
 
               {/* Error state */}
               {runError && (
-                <div className="rounded-xl border border-red-500/25 bg-red-500/8 p-4 space-y-1">
+                <div className="rounded-xl border border-red-500/25 bg-red-500/8 p-4 space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-red-400" />
                     <span className="text-xs font-semibold text-red-400 uppercase tracking-widest">Error</span>
                   </div>
                   <p className="text-sm text-red-300/80">{runError}</p>
+                  {(runError.toLowerCase().includes("api key") || runError.toLowerCase().includes("archived") || runError.toLowerCase().includes("no api key") || runError.toLowerCase().includes("unauthorized") || runError.toLowerCase().includes("invalid_api_key")) && (
+                    <a
+                      href="/dashboard/settings/ai-keys"
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 transition-all"
+                    >
+                      🔑 Update API Key in Settings →
+                    </a>
+                  )}
                 </div>
               )}
 

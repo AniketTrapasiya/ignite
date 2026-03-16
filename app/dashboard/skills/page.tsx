@@ -96,7 +96,7 @@ function GoalCard({ goal, onDelete }: { goal: SkillGoal; onDelete: (id: string) 
               <p className="text-xs text-neutral-500 mt-0.5 truncate">{goal.description}</p>
             )}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <span
               className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${LEVEL_COLORS[goal.level] || "bg-indigo-500/15 text-indigo-400 border-indigo-500/25"}`}
             >

@@ -165,7 +165,7 @@ async function processWhatsAppMessage({
         title: `WhatsApp: ${senderPhone}`,
         channel: "whatsapp",
         channelId: senderPhone,
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
       },
     });
   }
@@ -195,7 +195,7 @@ async function processWhatsAppMessage({
     sessionId: session.id,
     history,
     userMessage: text,
-    modelId: session.model ?? "gemini-2.0-flash",
+    modelId: session.model ?? "gemini-2.5-flash",
   });
 
   // Read the entire stream

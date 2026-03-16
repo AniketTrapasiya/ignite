@@ -132,7 +132,7 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
       <div className="px-5 py-5" style={{ borderBottom: "1px solid rgba(120,50,255,0.15)" }}>
         <div className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
             style={{
               background: "linear-gradient(135deg, #7c3aed, #a855f7)",
               boxShadow: "0 0 20px rgba(168,85,247,0.35)",
@@ -250,7 +250,7 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
       <div className="px-3 py-4" style={{ borderTop: "1px solid rgba(120,50,255,0.12)" }}>
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
             style={{
               background: "linear-gradient(135deg, #7c3aed, #e91e8c)",
               boxShadow: "0 0 12px rgba(233,30,140,0.3)",
@@ -265,7 +265,7 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 hover:bg-white/[0.05]"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 hover:bg-white/5"
           style={{ color: "rgba(255,255,255,0.32)" }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">

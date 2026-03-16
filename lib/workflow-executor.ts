@@ -165,7 +165,7 @@ async function executeNode(node: WorkflowNode, ctx: ExecutionContext, userId: st
 
     case "llm": {
       const prompt = interpolate(String(d.prompt ?? ""), ctx);
-      const modelId = String(d.model ?? "gemini-2.0-flash");
+      const modelId = String(d.model ?? "gemini-2.5-flash");
       const systemPrompt = d.systemPrompt ? interpolate(String(d.systemPrompt), ctx) : undefined;
       const aiModel = await resolveTextModel(userId, modelId);
 

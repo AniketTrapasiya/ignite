@@ -53,12 +53,9 @@ interface ChatMessage {
   streaming?: boolean;
 }
 
-const MODELS = [
-  { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-  { id: "gpt-4o", label: "GPT-4o" },
-  { id: "gpt-4o-mini", label: "GPT-4o Mini" },
-  { id: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
-];
+const DEFAULT_MODEL = "gemini-2.5-flash";
+
+interface AvailableModel { id: string; name: string; provider: string; available: boolean; cap?: string[] }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Syntax-highlight code (simple CSS-class based, no extra libs needed)
@@ -226,7 +223,7 @@ function MessageBubble({
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
       {/* Avatar */}
       <div
-        className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold ${isUser ? "bg-purple-600 text-white" : "bg-gradient-to-br from-cyan-500 to-purple-600 text-white"
+        className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-sm font-bold ${isUser ? "bg-purple-600 text-white" : "bg-gradient-to-br from-cyan-500 to-purple-600 text-white"
           }`}
       >
         {isUser ? "U" : "⚡"}
@@ -252,8 +249,8 @@ function MessageBubble({
         {message.content && (
           <div
             className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser
-                ? "bg-purple-600/80 text-white rounded-tr-sm"
-                : "bg-white/5 border border-white/10 text-white/90 rounded-tl-sm"
+              ? "bg-purple-600/80 text-white rounded-tr-sm"
+              : "bg-white/5 border border-white/10 text-white/90 rounded-tl-sm"
               }`}
           >
             {message.streaming && !message.content ? (
@@ -347,14 +344,14 @@ function ArtifactPanel({ artifacts }: { artifacts: CodeArtifact[] }) {
   return (
     <div className="flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex gap-1 p-2 bg-white/3 border-b border-white/10 overflow-x-auto flex-shrink-0">
+      <div className="flex gap-1 p-2 bg-white/3 border-b border-white/10 overflow-x-auto shrink-0">
         {artifacts.map((a, i) => (
           <button
             key={i}
             onClick={() => setActiveIdx(i)}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition-colors ${i === activeIdx
-                ? "bg-purple-500/30 text-purple-300 border border-purple-500/30"
-                : "text-white/40 hover:text-white/70 hover:bg-white/5"
+              ? "bg-purple-500/30 text-purple-300 border border-purple-500/30"
+              : "text-white/40 hover:text-white/70 hover:bg-white/5"
               }`}
           >
             {a.filename}
@@ -406,7 +403,8 @@ export default function WorkshopPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [artifactsPanelOpen, setArtifactsPanelOpen] = useState(true);
   const [allArtifacts, setAllArtifacts] = useState<CodeArtifact[]>([]);
@@ -426,6 +424,22 @@ export default function WorkshopPage() {
     fetch("/api/chat/sessions")
       .then((r) => r.json())
       .then((d) => setSessions(d.sessions ?? []))
+      .catch(() => { });
+
+    // Fetch available models dynamically
+    fetch("/api/settings/models")
+      .then((r) => r.json())
+      .then((d) => {
+        const textModels = (d.models ?? []).filter(
+          (m: AvailableModel) => m.available && (!m.cap || m.cap.includes("text"))
+        );
+        setAvailableModels(textModels);
+        // Auto-select first available model (prefer gemini-2.5-flash)
+        const preferred = textModels.find((m: AvailableModel) => m.id === DEFAULT_MODEL)
+          ?? textModels.find((m: AvailableModel) => m.id.includes("2.5"))
+          ?? textModels[0];
+        if (preferred) setSelectedModel(preferred.id);
+      })
       .catch(() => { });
   }, []);
 
@@ -705,9 +719,9 @@ export default function WorkshopPage() {
             animate={{ width: 240, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col border-r border-white/10 bg-black/20 overflow-hidden flex-shrink-0"
+            className="flex flex-col border-r border-white/10 bg-black/20 overflow-hidden shrink-0"
           >
-            <div className="p-3 border-b border-white/10 flex-shrink-0">
+            <div className="p-3 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">💬</span>
                 <span className="font-semibold text-sm text-white/80">Sessions</span>
@@ -719,11 +733,15 @@ export default function WorkshopPage() {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white/70 mb-2 focus:outline-none focus:border-purple-400/50"
               >
-                {MODELS.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-black">
-                    {m.label}
-                  </option>
-                ))}
+                {availableModels.length > 0 ? (
+                  availableModels.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-black">
+                      {m.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value={selectedModel} className="bg-black">{selectedModel}</option>
+                )}
               </select>
 
               <button
@@ -744,8 +762,8 @@ export default function WorkshopPage() {
                 <div
                   key={s.id}
                   className={`group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${activeSession?.id === s.id
-                      ? "bg-purple-600/20 border border-purple-500/30"
-                      : "hover:bg-white/5"
+                    ? "bg-purple-600/20 border border-purple-500/30"
+                    : "hover:bg-white/5"
                     }`}
                   onClick={() => loadSession(s)}
                 >
@@ -770,7 +788,7 @@ export default function WorkshopPage() {
       {/* ── Chat Panel ─────────────────────────────────────────────────────── */}
       <div className="flex flex-col flex-1 overflow-hidden min-w-0">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 shrink-0">
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             className="text-white/30 hover:text-white/70 transition-colors"
@@ -784,8 +802,8 @@ export default function WorkshopPage() {
           <button
             onClick={() => setArtifactsPanelOpen((v) => !v)}
             className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${artifactsPanelOpen
-                ? "border-purple-500/40 text-purple-400 bg-purple-500/10"
-                : "border-white/10 text-white/30 hover:text-white/60"
+              ? "border-purple-500/40 text-purple-400 bg-purple-500/10"
+              : "border-white/10 text-white/30 hover:text-white/60"
               }`}
           >
             📂 Artifacts {allArtifacts.length > 0 && `(${allArtifacts.length})`}
@@ -875,7 +893,7 @@ export default function WorkshopPage() {
             </div>
 
             {/* Input bar */}
-            <div className="border-t border-white/10 p-4 flex-shrink-0">
+            <div className="border-t border-white/10 p-4 shrink-0">
               <div className="flex gap-3 items-end bg-white/5 border border-white/10 rounded-2xl p-3 focus-within:border-purple-400/40 transition-colors">
                 <textarea
                   ref={inputRef}
@@ -901,9 +919,9 @@ export default function WorkshopPage() {
                     }
                   }}
                   disabled={!streaming && !input.trim()}
-                  className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${streaming
-                      ? "bg-red-500/80 hover:bg-red-500 text-white"
-                      : "bg-purple-600 hover:bg-purple-500 text-white"
+                  className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${streaming
+                    ? "bg-red-500/80 hover:bg-red-500 text-white"
+                    : "bg-purple-600 hover:bg-purple-500 text-white"
                     }`}
                 >
                   {streaming ? "■" : "↑"}
@@ -925,9 +943,9 @@ export default function WorkshopPage() {
             animate={{ width: 480, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col border-l border-white/10 bg-black/20 overflow-hidden flex-shrink-0"
+            className="flex flex-col border-l border-white/10 bg-black/20 overflow-hidden shrink-0"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
               <span className="text-sm font-medium text-white/60">Code Artifacts</span>
               <button
                 onClick={() => setArtifactsPanelOpen(false)}

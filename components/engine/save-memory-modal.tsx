@@ -70,7 +70,7 @@ export default function SaveMemoryModal({
         </p>
 
         {/* Output preview */}
-        <div className="rounded-xl bg-white/[0.03] border border-white/8 p-3">
+        <div className="rounded-xl bg-white/3 border border-white/8 p-3">
           <p className="text-xs text-white/20 uppercase tracking-widest mb-1.5">Output preview</p>
           <p className="text-xs text-white/50 font-mono leading-relaxed whitespace-pre-wrap line-clamp-5">
             {preview}

@@ -171,8 +171,8 @@ export function AIKeysClient() {
       {toast && (
         <div
           className={`fixed top-6 right-6 z-50 px-4 py-3 rounded-xl text-sm font-medium shadow-2xl border transition-all ${toast.type === "success"
-              ? "bg-emerald-950 border-emerald-500/40 text-emerald-300"
-              : "bg-red-950 border-red-500/40 text-red-300"
+            ? "bg-emerald-950 border-emerald-500/40 text-emerald-300"
+            : "bg-red-950 border-red-500/40 text-red-300"
             }`}
         >
           {toast.type === "success" ? "✓ " : "✗ "}{toast.msg}
@@ -191,7 +191,7 @@ export function AIKeysClient() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-2xl bg-white/[0.03] border border-white/8 animate-pulse" />
+            <div key={i} className="h-28 rounded-2xl bg-white/3 border border-white/8 animate-pulse" />
           ))}
         </div>
       ) : (
@@ -216,7 +216,7 @@ export function AIKeysClient() {
                 {/* Card header */}
                 <div className="p-4 flex items-start gap-4">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 border"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 border"
                     style={{ background: `${prov.color}15`, borderColor: `${prov.color}30` }}
                   >
                     {prov.logo}
@@ -240,13 +240,13 @@ export function AIKeysClient() {
                     <p className="text-xs text-white/40 mt-0.5">{prov.description}</p>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {prov.capabilities.map((c) => (
-                        <span key={c} className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/8 text-white/30">
+                        <span key={c} className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/4 border border-white/8 text-white/30">
                           {c}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     {stored && (
                       <button
                         onClick={() => loadModels(stored.id)}
@@ -300,7 +300,7 @@ export function AIKeysClient() {
                 {/* Model list */}
                 {isModelsOpen && models.length > 0 && (
                   <div className="px-4 pb-4">
-                    <div className="border-t border-white/[0.06] pt-3 grid grid-cols-2 gap-2">
+                    <div className="border-t border-white/6 pt-3 grid grid-cols-2 gap-2">
                       {models.map((m) => (
                         <div
                           key={m.id}
@@ -318,7 +318,7 @@ export function AIKeysClient() {
                               {m.cap?.map((c) => (
                                 <span
                                   key={c}
-                                  className="text-[9px] px-1 py-0.5 rounded bg-white/[0.05] text-white/30"
+                                  className="text-[9px] px-1 py-0.5 rounded bg-white/5 text-white/30"
                                 >
                                   {c}
                                 </span>
@@ -326,7 +326,7 @@ export function AIKeysClient() {
                             </div>
                           </div>
                           {m.available && (
-                            <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: prov.color }} />
+                            <div className="w-2 h-2 rounded-full mt-1 shrink-0" style={{ background: prov.color }} />
                           )}
                         </div>
                       ))}
@@ -360,7 +360,7 @@ export function AIKeysClient() {
                         value={newKey}
                         onChange={(e) => setNewKey(e.target.value)}
                         placeholder={prov.keyPlaceholder}
-                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 font-mono"
+                        className="w-full px-3 py-2 rounded-lg bg-white/4 border border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 font-mono"
                       />
 
                       <input
@@ -368,7 +368,7 @@ export function AIKeysClient() {
                         value={newLabel}
                         onChange={(e) => setNewLabel(e.target.value)}
                         placeholder="Label (optional, e.g. Personal, Work)"
-                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20"
+                        className="w-full px-3 py-2 rounded-lg bg-white/4 border border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20"
                       />
 
                       {saveError && (

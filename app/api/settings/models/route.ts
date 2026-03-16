@@ -13,11 +13,11 @@ interface GeminiModel {
 
 // Hardcoded fallback models if API fetch fails
 const FALLBACK_GEMINI: { id: string; name: string; provider: "google"; description: string }[] = [
+  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", provider: "google", description: "Latest and most capable" },
+  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", provider: "google", description: "Most intelligent Gemini" },
   { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", provider: "google", description: "Fast and capable" },
-  { id: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash Lite", provider: "google", description: "Lightweight and fast" },
   { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", provider: "google", description: "Advanced reasoning" },
   { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash", provider: "google", description: "Balanced speed/quality" },
-  { id: "gemini-1.5-flash-8b", name: "Gemini 1.5 Flash 8B", provider: "google", description: "Smallest and fastest" },
 ];
 
 const CLAUDE_MODELS: { id: string; name: string; provider: "anthropic"; description: string }[] = [
@@ -81,6 +81,15 @@ export async function GET() {
     } catch {
       models.push(...FALLBACK_GEMINI.map((m) => ({ ...m, available: true, cap: ["text", "vision"] })));
     }
+    // Add Imagen-3 for image generation when Gemini key is available
+    models.push({
+      id: "imagen-3.0-generate-002",
+      name: "Imagen 3",
+      provider: "google" as const,
+      description: "Google's best image generation model",
+      available: true,
+      cap: ["image"],
+    });
   } else {
     models.push(...FALLBACK_GEMINI.map((m) => ({ ...m, available: false, cap: ["text", "vision"] })));
   }

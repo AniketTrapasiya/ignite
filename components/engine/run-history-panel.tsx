@@ -82,7 +82,7 @@ export default function RunHistoryPanel({ isOpen, onClose, onReplay }: RunHistor
           {loading ? (
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 rounded-xl bg-white/[0.03] animate-pulse" />
+                <div key={i} className="h-16 rounded-xl bg-white/3 animate-pulse" />
               ))}
             </div>
           ) : runs.length === 0 ? (
@@ -99,14 +99,14 @@ export default function RunHistoryPanel({ isOpen, onClose, onReplay }: RunHistor
                 return (
                   <div
                     key={run.id}
-                    className="rounded-xl border border-white/8 bg-white/[0.02] hover:border-white/15 transition-all"
+                    className="rounded-xl border border-white/8 bg-white/2 hover:border-white/15 transition-all"
                   >
                     {/* Run header row */}
                     <div
                       className="flex items-start gap-3 p-3 cursor-pointer"
                       onClick={() => setExpanded(isExpanded ? null : run.id)}
                     >
-                      <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${sc.dot}`} />
+                      <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sc.dot}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-white/80 truncate leading-snug">
                           {run.prompt}

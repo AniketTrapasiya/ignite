@@ -96,7 +96,7 @@ export async function streamChatTurn(opts: {
   modelId?: string;
   mediaContext?: string;     // image/file context (base64 data-URL or description)
 }): Promise<ReadableStream<Uint8Array>> {
-  const { userId, sessionId, userMessage, modelId = "gemini-2.0-flash", mediaContext } = opts;
+  const { userId, sessionId, userMessage, modelId = "gemini-2.5-flash", mediaContext } = opts;
 
   // Resolve AI model
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
