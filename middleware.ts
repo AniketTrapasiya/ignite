@@ -52,6 +52,10 @@ export function middleware(request: NextRequest) {
 
   // Protected routes: require auth
   if (!token) {
+    // API routes should return JSON 401, not redirect to signin HTML
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const signinUrl = new URL("/signin", request.url);
     signinUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(signinUrl);

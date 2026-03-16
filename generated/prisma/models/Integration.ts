@@ -431,10 +431,6 @@ export type IntegrationUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.IntegrationScalarWhereInput | Prisma.IntegrationScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type IntegrationCreateWithoutUserInput = {
   id?: string
   service: string

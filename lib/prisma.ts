@@ -10,6 +10,12 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
+// In dev, always create a fresh client to avoid stale HMR-cached instances
+// that don't include newly-generated Prisma models.
+if (process.env.NODE_ENV !== "production") {
+  delete (globalForPrisma as { prisma?: PrismaClient }).prisma;
+}
+
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

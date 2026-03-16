@@ -39,6 +39,25 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: "Agents",
+    href: "/dashboard/agents",
+    badge: "NEW",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+      </svg>
+    ),
+  },
+  {
+    label: "Templates",
+    href: "/dashboard/agents/templates",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+      </svg>
+    ),
+  },
+  {
     label: "Integrations",
     href: "/dashboard/integrations",
     icon: (
@@ -48,11 +67,40 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: "Workshop",
+    href: "/dashboard/workshop",
+    badge: "NEW",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Skills",
+    href: "/dashboard/skills",
+    badge: "NEW",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
+      </svg>
+    ),
+  },
+  {
     label: "Workflows",
     href: "/dashboard/workflows",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+      </svg>
+    ),
+  },
+  {
+    label: "AI Keys",
+    href: "/dashboard/settings/ai-keys",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
       </svg>
     ),
   },
@@ -122,15 +170,15 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
                 style={
                   isActive
                     ? {
-                        background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-                        color: "#fff",
-                        boxShadow: "0 0 20px rgba(168,85,247,0.35), 0 4px 15px rgba(124,58,237,0.3)",
-                      }
+                      background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                      color: "#fff",
+                      boxShadow: "0 0 20px rgba(168,85,247,0.35), 0 4px 15px rgba(124,58,237,0.3)",
+                    }
                     : {
-                        background: "rgba(168,85,247,0.1)",
-                        border: "1px solid rgba(168,85,247,0.25)",
-                        color: "#c084fc",
-                      }
+                      background: "rgba(168,85,247,0.1)",
+                      border: "1px solid rgba(168,85,247,0.25)",
+                      color: "#c084fc",
+                    }
                 }
               >
                 {item.icon}
@@ -148,15 +196,27 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
               style={
                 isActive
                   ? {
-                      background: "rgba(168,85,247,0.12)",
-                      border: "1px solid rgba(168,85,247,0.2)",
-                      color: "#e2e8f0",
-                    }
+                    background: "rgba(168,85,247,0.12)",
+                    border: "1px solid rgba(168,85,247,0.2)",
+                    color: "#e2e8f0",
+                  }
                   : { color: "rgba(255,255,255,0.38)" }
               }
             >
               {item.icon}
               {item.label}
+              {item.badge && (
+                <span
+                  className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                  style={{
+                    background: "rgba(168,85,247,0.2)",
+                    color: "#c084fc",
+                    border: "1px solid rgba(168,85,247,0.3)",
+                  }}
+                >
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -171,10 +231,10 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
           style={
             pathname.startsWith("/dashboard/settings")
               ? {
-                  background: "rgba(168,85,247,0.12)",
-                  border: "1px solid rgba(168,85,247,0.2)",
-                  color: "#e2e8f0",
-                }
+                background: "rgba(168,85,247,0.12)",
+                border: "1px solid rgba(168,85,247,0.2)",
+                color: "#e2e8f0",
+              }
               : { color: "rgba(255,255,255,0.38)" }
           }
         >

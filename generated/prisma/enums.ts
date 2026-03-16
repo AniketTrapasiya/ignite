@@ -20,11 +20,23 @@ export type OtpType = (typeof OtpType)[keyof typeof OtpType]
 export const WorkflowStatus = {
   DRAFT: 'DRAFT',
   ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED'
 } as const
 
 export type WorkflowStatus = (typeof WorkflowStatus)[keyof typeof WorkflowStatus]
+
+
+export const WorkflowExecutionStatus = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type WorkflowExecutionStatus = (typeof WorkflowExecutionStatus)[keyof typeof WorkflowExecutionStatus]
 
 
 export const EngineRunStatus = {
@@ -35,3 +47,21 @@ export const EngineRunStatus = {
 } as const
 
 export type EngineRunStatus = (typeof EngineRunStatus)[keyof typeof EngineRunStatus]
+
+
+export const AgentStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED'
+} as const
+
+export type AgentStatus = (typeof AgentStatus)[keyof typeof AgentStatus]
+
+
+export const AgentRunStatus = {
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type AgentRunStatus = (typeof AgentRunStatus)[keyof typeof AgentRunStatus]

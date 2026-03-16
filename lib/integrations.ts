@@ -166,5 +166,10 @@ export function buildModsContext(activeServices: string[]): string {
   const lines = mods.map(
     (m) => `- ${m.name}: ${m.capabilities.join(", ")}`
   );
-  return "[ACTIVE TOOLS / MODS]\nYou have access to the following integrations:\n" + lines.join("\n");
+  return [
+    "[OUTPUT CHANNELS — READ ONLY]",
+    "The following integrations are active. Your RESULT will be automatically delivered to them by the backend.",
+    "You MUST NOT attempt to call or invoke any of these as tools. Simply complete the task and output your RESULT.",
+    ...lines,
+  ].join("\n");
 }

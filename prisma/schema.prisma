@@ -17,12 +17,19 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  agents        Agent[]
+  notifications  Notification[]
+  aiCredentials  AICredential[]
+  chatSessions  ChatSession[]
+
   otps          Otp[]
   passwordResets PasswordReset[]
   workflows     Workflow[]
   memories      EngineMemory[]
   integrations  Integration[]
   engineRuns    EngineRun[]
+  workflowExecutions WorkflowExecution[]
+  skillGoals    SkillGoal[]
 
   @@map("users")
 }
@@ -59,14 +66,20 @@ model PasswordReset {
 }
 
 model Workflow {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  steps       Json
-  userId      String
-  status      WorkflowStatus @default(DRAFT)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String         @id @default(uuid())
+  name          String
+  description   String?
+  steps         Json           @default("[]")
+  nodes         Json           @default("[]")
+  edges         Json           @default("[]")
+  triggerType   String         @default("manual")   // manual | webhook | schedule
+  triggerConfig Json           @default("{}")
+  webhookId     String?
+  userId        String
+  status        WorkflowStatus @default(DRAFT)
+  executions    WorkflowExecution[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -82,8 +95,39 @@ enum OtpType {
 enum WorkflowStatus {
   DRAFT
   ACTIVE
+  PAUSED
   COMPLETED
   FAILED
+}
+
+// ── Workflow Execution ────────────────────────────────────────────────────────
+
+model WorkflowExecution {
+  id          String                  @id @default(uuid())
+  workflowId  String
+  userId      String
+  status      WorkflowExecutionStatus @default(PENDING)
+  stepLogs    Json                    @default("[]")
+  trigger     Json                    @default("{}")
+  output      String?
+  error       String?
+  createdAt   DateTime                @default(now())
+  completedAt DateTime?
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([userId])
+  @@map("workflow_executions")
+}
+
+enum WorkflowExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
 
 model EngineMemory {
@@ -124,13 +168,17 @@ model EngineRun {
   id          String        @id @default(uuid())
   userId      String
   prompt      String
-  memories    String[]      @default([])
-  mods        String[]      @default([])
-  output      String?
-  status      EngineRunStatus @default(RUNNING)
-  steps       Json          @default("[]")
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  memories      String[]      @default([])
+  mods          String[]      @default([])
+  output        String?
+  outputType    String        @default("text")   // text | image | audio | video
+  mediaInput    String?                           // URL of input media
+  outputUrl     String?                           // URL of generated output (image/audio)
+  publishLog    Json          @default("[]")      // [{platform, status, url}]
+  status        EngineRunStatus @default(RUNNING)
+  steps         Json          @default("[]")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -143,4 +191,211 @@ enum EngineRunStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+// ── Agentic Automation ────────────────────────────────────────────────────────
+
+model Agent {
+  id             String        @id @default(uuid())
+  userId         String
+  name           String
+  description    String?
+  icon           String        @default("🤖")
+  status         AgentStatus   @default(DRAFT)
+  triggerType    String        @default("manual")
+  triggerConfig  Json          @default("{}")
+  promptTemplate String        @default("")
+  actions        AgentAction[]
+  runs           AgentRun[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("agents")
+}
+
+model AgentAction {
+  id      String @id @default(uuid())
+  agentId String
+  order   Int    @default(0)
+  type    String
+  config  Json   @default("{}")
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@map("agent_actions")
+}
+
+model AgentRun {
+  id          String         @id @default(uuid())
+  agentId     String
+  userId      String
+  triggerData Json           @default("{}")
+  output      String?
+  actionsLog  Json           @default("[]")
+  status      AgentRunStatus @default(RUNNING)
+  error       String?
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@index([userId])
+  @@map("agent_runs")
+}
+
+enum AgentStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+}
+
+enum AgentRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   @default("info")   // info | success | warning | error
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// ── AI Credentials ────────────────────────────────────────────────────────────
+
+model AICredential {
+  id        String   @id @default(uuid())
+  userId    String
+  provider  String   // openai | gemini | groq | anthropic
+  label     String   @default("")
+  apiKey    String   // AES-256-GCM encrypted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("ai_credentials")
+}
+
+// ── Chat Sessions (Human-in-the-Loop + WhatsApp) ──────────────────────────────
+
+model ChatSession {
+  id          String        @id @default(uuid())
+  userId      String
+  title       String        @default("New Chat")
+  channel     String        @default("web")    // web | whatsapp | telegram
+  channelId   String?                           // sender phone for whatsapp
+  model       String        @default("gemini-2.0-flash")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  messages    ChatMessage[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([channel, channelId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  sessionId  String
+  role       String   // user | assistant | system | tool
+  content    String
+  artifacts  Json     @default("[]")   // [{type:"code",language,filename,code}]
+  metadata   Json     @default("{}")   // {toolCalls, credentialRequest, attachments}
+  createdAt  DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("chat_messages")
+}
+
+// ── Pending Credential Requests ───────────────────────────────────────────────
+
+model PendingCredential {
+  id         String   @id @default(uuid())
+  sessionId  String
+  messageId  String?  // which assistant message triggered this
+  toolName   String   // e.g. "sendEmail", "generateCode"
+  schema     Json     // [{name, label, type, placeholder, required}]
+  resolved   Boolean  @default(false)
+  values     Json?    // encrypted resolved values
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+  @@map("pending_credentials")
+}
+
+// ── Skill Accelerator ─────────────────────────────────────────────────────────
+
+model SkillGoal {
+  id            String           @id @default(uuid())
+  userId        String
+  title         String
+  description   String?
+  level         String           @default("beginner")   // beginner | intermediate | advanced
+  curriculum    Json?
+  streakDays    Int              @default(0)
+  longestStreak Int              @default(0)
+  totalXp       Int              @default(0)
+  totalDays     Int              @default(30)
+  currentDay    Int              @default(1)
+  lastActiveAt  DateTime?
+  status        String           @default("active")     // active | paused | completed
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  challenges    SkillChallenge[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("skill_goals")
+}
+
+model SkillChallenge {
+  id          String    @id @default(uuid())
+  goalId      String
+  userId      String
+  day         Int
+  title       String
+  description String
+  type        String    @default("practice")  // practice | code | quiz | reflect | project
+  difficulty  String    @default("medium")    // easy | medium | hard
+  hints       Json?
+  status      String    @default("pending")   // pending | completed
+  submission  String?
+  feedback    String?
+  score       Int?
+  xpEarned    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  goal SkillGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@unique([goalId, day])
+  @@index([goalId])
+  @@index([userId])
+  @@map("skill_challenges")
 }

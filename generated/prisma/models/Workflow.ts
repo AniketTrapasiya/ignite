@@ -28,6 +28,8 @@ export type WorkflowMinAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
+  triggerType: string | null
+  webhookId: string | null
   userId: string | null
   status: $Enums.WorkflowStatus | null
   createdAt: Date | null
@@ -38,6 +40,8 @@ export type WorkflowMaxAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
+  triggerType: string | null
+  webhookId: string | null
   userId: string | null
   status: $Enums.WorkflowStatus | null
   createdAt: Date | null
@@ -49,6 +53,11 @@ export type WorkflowCountAggregateOutputType = {
   name: number
   description: number
   steps: number
+  nodes: number
+  edges: number
+  triggerType: number
+  triggerConfig: number
+  webhookId: number
   userId: number
   status: number
   createdAt: number
@@ -61,6 +70,8 @@ export type WorkflowMinAggregateInputType = {
   id?: true
   name?: true
   description?: true
+  triggerType?: true
+  webhookId?: true
   userId?: true
   status?: true
   createdAt?: true
@@ -71,6 +82,8 @@ export type WorkflowMaxAggregateInputType = {
   id?: true
   name?: true
   description?: true
+  triggerType?: true
+  webhookId?: true
   userId?: true
   status?: true
   createdAt?: true
@@ -82,6 +95,11 @@ export type WorkflowCountAggregateInputType = {
   name?: true
   description?: true
   steps?: true
+  nodes?: true
+  edges?: true
+  triggerType?: true
+  triggerConfig?: true
+  webhookId?: true
   userId?: true
   status?: true
   createdAt?: true
@@ -166,6 +184,11 @@ export type WorkflowGroupByOutputType = {
   name: string
   description: string | null
   steps: runtime.JsonValue
+  nodes: runtime.JsonValue
+  edges: runtime.JsonValue
+  triggerType: string
+  triggerConfig: runtime.JsonValue
+  webhookId: string | null
   userId: string
   status: $Enums.WorkflowStatus
   createdAt: Date
@@ -198,10 +221,16 @@ export type WorkflowWhereInput = {
   name?: Prisma.StringFilter<"Workflow"> | string
   description?: Prisma.StringNullableFilter<"Workflow"> | string | null
   steps?: Prisma.JsonFilter<"Workflow">
+  nodes?: Prisma.JsonFilter<"Workflow">
+  edges?: Prisma.JsonFilter<"Workflow">
+  triggerType?: Prisma.StringFilter<"Workflow"> | string
+  triggerConfig?: Prisma.JsonFilter<"Workflow">
+  webhookId?: Prisma.StringNullableFilter<"Workflow"> | string | null
   userId?: Prisma.StringFilter<"Workflow"> | string
   status?: Prisma.EnumWorkflowStatusFilter<"Workflow"> | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFilter<"Workflow"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workflow"> | Date | string
+  executions?: Prisma.WorkflowExecutionListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -210,10 +239,16 @@ export type WorkflowOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   steps?: Prisma.SortOrder
+  nodes?: Prisma.SortOrder
+  edges?: Prisma.SortOrder
+  triggerType?: Prisma.SortOrder
+  triggerConfig?: Prisma.SortOrder
+  webhookId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  executions?: Prisma.WorkflowExecutionOrderByRelationAggregateInput
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -225,10 +260,16 @@ export type WorkflowWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Workflow"> | string
   description?: Prisma.StringNullableFilter<"Workflow"> | string | null
   steps?: Prisma.JsonFilter<"Workflow">
+  nodes?: Prisma.JsonFilter<"Workflow">
+  edges?: Prisma.JsonFilter<"Workflow">
+  triggerType?: Prisma.StringFilter<"Workflow"> | string
+  triggerConfig?: Prisma.JsonFilter<"Workflow">
+  webhookId?: Prisma.StringNullableFilter<"Workflow"> | string | null
   userId?: Prisma.StringFilter<"Workflow"> | string
   status?: Prisma.EnumWorkflowStatusFilter<"Workflow"> | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFilter<"Workflow"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workflow"> | Date | string
+  executions?: Prisma.WorkflowExecutionListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -237,6 +278,11 @@ export type WorkflowOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   steps?: Prisma.SortOrder
+  nodes?: Prisma.SortOrder
+  edges?: Prisma.SortOrder
+  triggerType?: Prisma.SortOrder
+  triggerConfig?: Prisma.SortOrder
+  webhookId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -254,6 +300,11 @@ export type WorkflowScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Workflow"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Workflow"> | string | null
   steps?: Prisma.JsonWithAggregatesFilter<"Workflow">
+  nodes?: Prisma.JsonWithAggregatesFilter<"Workflow">
+  edges?: Prisma.JsonWithAggregatesFilter<"Workflow">
+  triggerType?: Prisma.StringWithAggregatesFilter<"Workflow"> | string
+  triggerConfig?: Prisma.JsonWithAggregatesFilter<"Workflow">
+  webhookId?: Prisma.StringNullableWithAggregatesFilter<"Workflow"> | string | null
   userId?: Prisma.StringWithAggregatesFilter<"Workflow"> | string
   status?: Prisma.EnumWorkflowStatusWithAggregatesFilter<"Workflow"> | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Workflow"> | Date | string
@@ -264,10 +315,16 @@ export type WorkflowCreateInput = {
   id?: string
   name: string
   description?: string | null
-  steps: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
   status?: $Enums.WorkflowStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  executions?: Prisma.WorkflowExecutionCreateNestedManyWithoutWorkflowInput
   user: Prisma.UserCreateNestedOneWithoutWorkflowsInput
 }
 
@@ -275,11 +332,17 @@ export type WorkflowUncheckedCreateInput = {
   id?: string
   name: string
   description?: string | null
-  steps: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
   userId: string
   status?: $Enums.WorkflowStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  executions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutWorkflowInput
 }
 
 export type WorkflowUpdateInput = {
@@ -287,9 +350,15 @@ export type WorkflowUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executions?: Prisma.WorkflowExecutionUpdateManyWithoutWorkflowNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutWorkflowsNestedInput
 }
 
@@ -298,17 +367,28 @@ export type WorkflowUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutWorkflowNestedInput
 }
 
 export type WorkflowCreateManyInput = {
   id?: string
   name: string
   description?: string | null
-  steps: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
   userId: string
   status?: $Enums.WorkflowStatus
   createdAt?: Date | string
@@ -320,6 +400,11 @@ export type WorkflowUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -330,6 +415,11 @@ export type WorkflowUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -351,6 +441,11 @@ export type WorkflowCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   steps?: Prisma.SortOrder
+  nodes?: Prisma.SortOrder
+  edges?: Prisma.SortOrder
+  triggerType?: Prisma.SortOrder
+  triggerConfig?: Prisma.SortOrder
+  webhookId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -361,6 +456,8 @@ export type WorkflowMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  triggerType?: Prisma.SortOrder
+  webhookId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -371,10 +468,17 @@ export type WorkflowMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  triggerType?: Prisma.SortOrder
+  webhookId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type WorkflowScalarRelationFilter = {
+  is?: Prisma.WorkflowWhereInput
+  isNot?: Prisma.WorkflowWhereInput
 }
 
 export type WorkflowCreateNestedManyWithoutUserInput = {
@@ -427,24 +531,50 @@ export type EnumWorkflowStatusFieldUpdateOperationsInput = {
   set?: $Enums.WorkflowStatus
 }
 
+export type WorkflowCreateNestedOneWithoutExecutionsInput = {
+  create?: Prisma.XOR<Prisma.WorkflowCreateWithoutExecutionsInput, Prisma.WorkflowUncheckedCreateWithoutExecutionsInput>
+  connectOrCreate?: Prisma.WorkflowCreateOrConnectWithoutExecutionsInput
+  connect?: Prisma.WorkflowWhereUniqueInput
+}
+
+export type WorkflowUpdateOneRequiredWithoutExecutionsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkflowCreateWithoutExecutionsInput, Prisma.WorkflowUncheckedCreateWithoutExecutionsInput>
+  connectOrCreate?: Prisma.WorkflowCreateOrConnectWithoutExecutionsInput
+  upsert?: Prisma.WorkflowUpsertWithoutExecutionsInput
+  connect?: Prisma.WorkflowWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkflowUpdateToOneWithWhereWithoutExecutionsInput, Prisma.WorkflowUpdateWithoutExecutionsInput>, Prisma.WorkflowUncheckedUpdateWithoutExecutionsInput>
+}
+
 export type WorkflowCreateWithoutUserInput = {
   id?: string
   name: string
   description?: string | null
-  steps: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
   status?: $Enums.WorkflowStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  executions?: Prisma.WorkflowExecutionCreateNestedManyWithoutWorkflowInput
 }
 
 export type WorkflowUncheckedCreateWithoutUserInput = {
   id?: string
   name: string
   description?: string | null
-  steps: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
   status?: $Enums.WorkflowStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  executions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutWorkflowInput
 }
 
 export type WorkflowCreateOrConnectWithoutUserInput = {
@@ -481,17 +611,107 @@ export type WorkflowScalarWhereInput = {
   name?: Prisma.StringFilter<"Workflow"> | string
   description?: Prisma.StringNullableFilter<"Workflow"> | string | null
   steps?: Prisma.JsonFilter<"Workflow">
+  nodes?: Prisma.JsonFilter<"Workflow">
+  edges?: Prisma.JsonFilter<"Workflow">
+  triggerType?: Prisma.StringFilter<"Workflow"> | string
+  triggerConfig?: Prisma.JsonFilter<"Workflow">
+  webhookId?: Prisma.StringNullableFilter<"Workflow"> | string | null
   userId?: Prisma.StringFilter<"Workflow"> | string
   status?: Prisma.EnumWorkflowStatusFilter<"Workflow"> | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFilter<"Workflow"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workflow"> | Date | string
 }
 
+export type WorkflowCreateWithoutExecutionsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
+  status?: $Enums.WorkflowStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutWorkflowsInput
+}
+
+export type WorkflowUncheckedCreateWithoutExecutionsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
+  userId: string
+  status?: $Enums.WorkflowStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type WorkflowCreateOrConnectWithoutExecutionsInput = {
+  where: Prisma.WorkflowWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkflowCreateWithoutExecutionsInput, Prisma.WorkflowUncheckedCreateWithoutExecutionsInput>
+}
+
+export type WorkflowUpsertWithoutExecutionsInput = {
+  update: Prisma.XOR<Prisma.WorkflowUpdateWithoutExecutionsInput, Prisma.WorkflowUncheckedUpdateWithoutExecutionsInput>
+  create: Prisma.XOR<Prisma.WorkflowCreateWithoutExecutionsInput, Prisma.WorkflowUncheckedCreateWithoutExecutionsInput>
+  where?: Prisma.WorkflowWhereInput
+}
+
+export type WorkflowUpdateToOneWithWhereWithoutExecutionsInput = {
+  where?: Prisma.WorkflowWhereInput
+  data: Prisma.XOR<Prisma.WorkflowUpdateWithoutExecutionsInput, Prisma.WorkflowUncheckedUpdateWithoutExecutionsInput>
+}
+
+export type WorkflowUpdateWithoutExecutionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutWorkflowsNestedInput
+}
+
+export type WorkflowUncheckedUpdateWithoutExecutionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type WorkflowCreateManyUserInput = {
   id?: string
   name: string
   description?: string | null
-  steps: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: string | null
   status?: $Enums.WorkflowStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -502,9 +722,15 @@ export type WorkflowUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executions?: Prisma.WorkflowExecutionUpdateManyWithoutWorkflowNestedInput
 }
 
 export type WorkflowUncheckedUpdateWithoutUserInput = {
@@ -512,9 +738,15 @@ export type WorkflowUncheckedUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutWorkflowNestedInput
 }
 
 export type WorkflowUncheckedUpdateManyWithoutUserInput = {
@@ -522,11 +754,45 @@ export type WorkflowUncheckedUpdateManyWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  nodes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  edges?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  triggerType?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerConfig?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  webhookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type WorkflowCountOutputType
+ */
+
+export type WorkflowCountOutputType = {
+  executions: number
+}
+
+export type WorkflowCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  executions?: boolean | WorkflowCountOutputTypeCountExecutionsArgs
+}
+
+/**
+ * WorkflowCountOutputType without action
+ */
+export type WorkflowCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkflowCountOutputType
+   */
+  select?: Prisma.WorkflowCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * WorkflowCountOutputType without action
+ */
+export type WorkflowCountOutputTypeCountExecutionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WorkflowExecutionWhereInput
+}
 
 
 export type WorkflowSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -534,11 +800,18 @@ export type WorkflowSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name?: boolean
   description?: boolean
   steps?: boolean
+  nodes?: boolean
+  edges?: boolean
+  triggerType?: boolean
+  triggerConfig?: boolean
+  webhookId?: boolean
   userId?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  executions?: boolean | Prisma.Workflow$executionsArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.WorkflowCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workflow"]>
 
 export type WorkflowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -546,6 +819,11 @@ export type WorkflowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   description?: boolean
   steps?: boolean
+  nodes?: boolean
+  edges?: boolean
+  triggerType?: boolean
+  triggerConfig?: boolean
+  webhookId?: boolean
   userId?: boolean
   status?: boolean
   createdAt?: boolean
@@ -558,6 +836,11 @@ export type WorkflowSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   description?: boolean
   steps?: boolean
+  nodes?: boolean
+  edges?: boolean
+  triggerType?: boolean
+  triggerConfig?: boolean
+  webhookId?: boolean
   userId?: boolean
   status?: boolean
   createdAt?: boolean
@@ -570,15 +853,22 @@ export type WorkflowSelectScalar = {
   name?: boolean
   description?: boolean
   steps?: boolean
+  nodes?: boolean
+  edges?: boolean
+  triggerType?: boolean
+  triggerConfig?: boolean
+  webhookId?: boolean
   userId?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type WorkflowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "steps" | "userId" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["workflow"]>
+export type WorkflowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "steps" | "nodes" | "edges" | "triggerType" | "triggerConfig" | "webhookId" | "userId" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["workflow"]>
 export type WorkflowInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  executions?: boolean | Prisma.Workflow$executionsArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.WorkflowCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WorkflowIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -590,6 +880,7 @@ export type WorkflowIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $WorkflowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Workflow"
   objects: {
+    executions: Prisma.$WorkflowExecutionPayload<ExtArgs>[]
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -597,6 +888,11 @@ export type $WorkflowPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     name: string
     description: string | null
     steps: runtime.JsonValue
+    nodes: runtime.JsonValue
+    edges: runtime.JsonValue
+    triggerType: string
+    triggerConfig: runtime.JsonValue
+    webhookId: string | null
     userId: string
     status: $Enums.WorkflowStatus
     createdAt: Date
@@ -995,6 +1291,7 @@ readonly fields: WorkflowFieldRefs;
  */
 export interface Prisma__WorkflowClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  executions<T extends Prisma.Workflow$executionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workflow$executionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkflowExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1029,6 +1326,11 @@ export interface WorkflowFieldRefs {
   readonly name: Prisma.FieldRef<"Workflow", 'String'>
   readonly description: Prisma.FieldRef<"Workflow", 'String'>
   readonly steps: Prisma.FieldRef<"Workflow", 'Json'>
+  readonly nodes: Prisma.FieldRef<"Workflow", 'Json'>
+  readonly edges: Prisma.FieldRef<"Workflow", 'Json'>
+  readonly triggerType: Prisma.FieldRef<"Workflow", 'String'>
+  readonly triggerConfig: Prisma.FieldRef<"Workflow", 'Json'>
+  readonly webhookId: Prisma.FieldRef<"Workflow", 'String'>
   readonly userId: Prisma.FieldRef<"Workflow", 'String'>
   readonly status: Prisma.FieldRef<"Workflow", 'WorkflowStatus'>
   readonly createdAt: Prisma.FieldRef<"Workflow", 'DateTime'>
@@ -1431,6 +1733,30 @@ export type WorkflowDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Workflows to delete.
    */
   limit?: number
+}
+
+/**
+ * Workflow.executions
+ */
+export type Workflow$executionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkflowExecution
+   */
+  select?: Prisma.WorkflowExecutionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkflowExecution
+   */
+  omit?: Prisma.WorkflowExecutionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowExecutionInclude<ExtArgs> | null
+  where?: Prisma.WorkflowExecutionWhereInput
+  orderBy?: Prisma.WorkflowExecutionOrderByWithRelationInput | Prisma.WorkflowExecutionOrderByWithRelationInput[]
+  cursor?: Prisma.WorkflowExecutionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WorkflowExecutionScalarFieldEnum | Prisma.WorkflowExecutionScalarFieldEnum[]
 }
 
 /**

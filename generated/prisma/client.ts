@@ -62,6 +62,11 @@ export type PasswordReset = Prisma.PasswordResetModel
  */
 export type Workflow = Prisma.WorkflowModel
 /**
+ * Model WorkflowExecution
+ * 
+ */
+export type WorkflowExecution = Prisma.WorkflowExecutionModel
+/**
  * Model EngineMemory
  * 
  */
@@ -76,3 +81,53 @@ export type Integration = Prisma.IntegrationModel
  * 
  */
 export type EngineRun = Prisma.EngineRunModel
+/**
+ * Model Agent
+ * 
+ */
+export type Agent = Prisma.AgentModel
+/**
+ * Model AgentAction
+ * 
+ */
+export type AgentAction = Prisma.AgentActionModel
+/**
+ * Model AgentRun
+ * 
+ */
+export type AgentRun = Prisma.AgentRunModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model AICredential
+ * 
+ */
+export type AICredential = Prisma.AICredentialModel
+/**
+ * Model ChatSession
+ * 
+ */
+export type ChatSession = Prisma.ChatSessionModel
+/**
+ * Model ChatMessage
+ * 
+ */
+export type ChatMessage = Prisma.ChatMessageModel
+/**
+ * Model PendingCredential
+ * 
+ */
+export type PendingCredential = Prisma.PendingCredentialModel
+/**
+ * Model SkillGoal
+ * 
+ */
+export type SkillGoal = Prisma.SkillGoalModel
+/**
+ * Model SkillChallenge
+ * 
+ */
+export type SkillChallenge = Prisma.SkillChallengeModel

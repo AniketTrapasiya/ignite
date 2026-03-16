@@ -77,10 +77,13 @@ interface ConnectedIntegration {
 interface AvailableModel {
   id: string;
   name: string;
-  provider: "google" | "anthropic";
+  provider: "google" | "anthropic" | "openai" | "groq";
+  description?: string;
   available: boolean;
+  cap?: string[];
 }
 
+type OutputType = "text" | "image" | "audio";
 type Phase = 0 | 1 | 2 | 3 | 4; // 0=idle 1=fueled 2=priming 3=running 4=done
 
 // ── Phase Tracker ──────────────────────────────────────────────────────────
@@ -185,12 +188,14 @@ export default function EnginePage() {
   const [chunks, setChunks] = useState<string[]>([]);
   const [isDone, setIsDone] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
+  const [toolEvents, setToolEvents] = useState<{ type: "call" | "result"; name: string; payload: unknown; id: number }[]>([]);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [savedToMemory, setSavedToMemory] = useState(false);
   const [gaugePower, setGaugePower] = useState(0);
   const [gaugeTemp, setGaugeTemp] = useState(0);
   const [gaugeLoad, setGaugeLoad] = useState(0);
   const [stepsPopupOpen, setStepsPopupOpen] = useState(false);
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
 
   // Inline panels data
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -200,13 +205,35 @@ export default function EnginePage() {
   const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
   const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
 
+  // Multi-modal state
+  const [outputType, setOutputType] = useState<OutputType>("text");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaContext, setMediaContext] = useState<string>("");
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
+  const [ttsVoice, setTtsVoice] = useState("alloy");
+  const [imageSize, setImageSize] = useState("1024x1024");
+  const [publishPlatforms, setPublishPlatforms] = useState<string[]>([]);
+
   const abortRef = useRef<AbortController | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
 
   // Load model preference from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("autoflow-model");
     if (saved) setSelectedModel(saved);
+  }, []);
+
+  // Close model dropdown on outside click
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setModelDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
   }, []);
 
   // Load data
@@ -231,9 +258,15 @@ export default function EnginePage() {
       .then((d) => {
         const models: AvailableModel[] = d.models || [];
         setAvailableModels(models);
-        // If currently selected model is not available, select first available
-        const currentAvailable = models.find((m) => m.id === selectedModel && m.available);
-        if (!currentAvailable) {
+        // Read localStorage directly to avoid stale closure over selectedModel state
+        const savedId = localStorage.getItem("autoflow-model");
+        const resolvedId = savedId || "gemini-2.0-flash";
+        const currentAvailable = models.find((m) => m.id === resolvedId && m.available);
+        if (currentAvailable) {
+          // Ensure React state matches localStorage
+          setSelectedModel(resolvedId);
+        } else {
+          // Saved model no longer in list — pick first available
           const firstAvailable = models.find((m) => m.available);
           if (firstAvailable) {
             setSelectedModel(firstAvailable.id);
@@ -289,17 +322,80 @@ export default function EnginePage() {
     setRunError(null);
     setSavedToMemory(false);
     setStepsPopupOpen(false);
+    setGeneratedImage(null);
+    setGeneratedAudio(null);
     setEngineState("thinking");
 
     const abort = new AbortController();
     abortRef.current = abort;
 
+    // ── Image generation ──────────────────────────────────────────────────
+    if (outputType === "image") {
+      try {
+        setEngineState("running");
+        const res = await fetch("/api/engine/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: abort.signal,
+          body: JSON.stringify({
+            type: "image",
+            prompt: prompt.trim(),
+            model: selectedModel.startsWith("dall-e") ? selectedModel : "dall-e-3",
+            size: imageSize,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Image generation failed");
+        setGeneratedImage(data.b64 ?? null);
+        setEngineState("success");
+        setIsDone(true);
+        setTimeout(() => setEngineState("idle"), 4000);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setRunError(err instanceof Error ? err.message : "Unknown error");
+        setEngineState("error");
+        setIsDone(true);
+      }
+      return;
+    }
+
+    // ── Audio generation (TTS) ────────────────────────────────────────────
+    if (outputType === "audio") {
+      try {
+        setEngineState("running");
+        const res = await fetch("/api/engine/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: abort.signal,
+          body: JSON.stringify({
+            type: "audio",
+            text: prompt.trim(),
+            model: selectedModel.startsWith("tts-") ? selectedModel : "tts-1",
+            voice: ttsVoice,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Audio generation failed");
+        setGeneratedAudio(data.audioBase64 ?? null);
+        setEngineState("success");
+        setIsDone(true);
+        setTimeout(() => setEngineState("idle"), 4000);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setRunError(err instanceof Error ? err.message : "Unknown error");
+        setEngineState("error");
+        setIsDone(true);
+      }
+      return;
+    }
+
+    // ── Text generation (SSE stream) ──────────────────────────────────────
     try {
       const res = await fetch("/api/engine/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: abort.signal,
-        body: JSON.stringify({ prompt, memoryIds: loadedMemoryIds, mods: activeMods, model: selectedModel }),
+        body: JSON.stringify({ prompt, memoryIds: loadedMemoryIds, mods: activeMods, model: selectedModel, mediaContext: mediaContext || undefined }),
       });
 
       if (!res.ok) {
@@ -358,6 +454,12 @@ export default function EnginePage() {
             if (data.text) {
               setChunks((p) => [...p, data.text]);
             }
+            if (data.toolCall) {
+              setToolEvents((p) => [...p, { type: "call", name: data.toolCall.name, payload: data.toolCall.args, id: Date.now() }]);
+            }
+            if (data.toolResult) {
+              setToolEvents((p) => [...p, { type: "result", name: data.toolResult.name, payload: data.toolResult.result, id: Date.now() + 1 }]);
+            }
             if (data.done) {
               setEngineState("success");
               setIsDone(true);
@@ -384,6 +486,8 @@ export default function EnginePage() {
       try {
         const data = JSON.parse(line.slice(6).trim());
         if (data.text) setChunks((p) => [...p, data.text]);
+        if (data.toolCall) setToolEvents((p) => [...p, { type: "call", name: data.toolCall.name, payload: data.toolCall.args, id: Date.now() }]);
+        if (data.toolResult) setToolEvents((p) => [...p, { type: "result", name: data.toolResult.name, payload: data.toolResult.result, id: Date.now() + 1 }]);
         if (data.done) {
           setEngineState("success");
           setIsDone(true);
@@ -409,6 +513,16 @@ export default function EnginePage() {
     setPrompt("");
     setSavedToMemory(false);
     setStepsPopupOpen(false);
+    setGeneratedImage(null);
+    setGeneratedAudio(null);
+    setMediaFile(null);
+    setMediaContext("");
+    setToolEvents([]);
+  }
+
+  function handleMediaFile(file: File) {
+    setMediaFile(file);
+    setMediaContext(`[Attached file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB, type: ${file.type})]`);
   }
 
   const isRunning = engineState === "running" || engineState === "thinking";
@@ -468,10 +582,40 @@ export default function EnginePage() {
       </div>
 
       {/* ── 3-Panel Cockpit ── */}
-      <div className="flex-1 grid grid-cols-[380px_1fr_380px] gap-4 p-4 overflow-hidden">
+      <div className="flex-1 grid grid-cols-[480px_1fr_480px] gap-4 p-4 overflow-hidden">
 
         {/* ════ LEFT COLUMN ════ */}
         <div className="flex flex-col gap-4 overflow-hidden">
+
+          {/* OUTPUT TYPE SELECTOR */}
+          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/8">
+            {([
+              { t: "text" as OutputType, label: "Text", icon: "⌨️", desc: "LLM reasoning" },
+              { t: "image" as OutputType, label: "Image", icon: "🎨", desc: "AI generation" },
+              { t: "audio" as OutputType, label: "Audio", icon: "🎵", desc: "Text-to-speech" },
+            ] as { t: OutputType; label: string; icon: string; desc: string }[]).map((opt) => (
+              <button
+                key={opt.t}
+                onClick={() => !isRunning && setOutputType(opt.t)}
+                disabled={isRunning}
+                className="flex-1 flex flex-col items-center gap-0.5 py-2 px-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
+                style={outputType === opt.t ? {
+                  background: "rgba(168,85,247,0.15)",
+                  borderColor: "rgba(168,85,247,0.5)",
+                  color: "#c084fc",
+                  boxShadow: "0 0 12px rgba(168,85,247,0.15)",
+                  border: "1px solid rgba(168,85,247,0.4)",
+                } : {
+                  border: "1px solid transparent",
+                  color: "rgba(255,255,255,0.3)",
+                }}
+              >
+                <span className="text-base">{opt.icon}</span>
+                <span>{opt.label}</span>
+                <span className="text-[9px] text-white/25">{opt.desc}</span>
+              </button>
+            ))}
+          </div>
 
           {/* FUEL INPUT */}
           <div
@@ -487,7 +631,9 @@ export default function EnginePage() {
           >
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
-              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">Fuel Input</span>
+              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">
+                {outputType === "text" ? "Fuel Input" : outputType === "image" ? "Image Prompt" : "TTS Input"}
+              </span>
               <span className="ml-auto text-xs text-white/20">{prompt.length > 0 ? `${prompt.length} chars` : "⌘+Enter to run"}</span>
             </div>
 
@@ -495,20 +641,129 @@ export default function EnginePage() {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ignite(); }}
-              placeholder={"Describe what you want the engine to do...\n\nExample: Find trending AI videos on YouTube and write a 60-second script."}
+              placeholder={
+                outputType === "image"
+                  ? "Describe the image to generate...\n\nExample: A futuristic city at night with neon lights reflecting on wet streets, cinematic, 8K"
+                  : outputType === "audio"
+                    ? "Enter the text to convert to speech...\n\nExample: Welcome to AutoFlow. Your AI automation engine is ready."
+                    : "Describe what you want the engine to do...\n\nExample: Find trending AI videos on YouTube and write a 60-second script."
+              }
               rows={6}
               disabled={isRunning}
               className="w-full bg-transparent text-white placeholder-white/15 text-sm leading-relaxed resize-none focus:outline-none disabled:opacity-40"
             />
 
+            {/* Audio options */}
+            {outputType === "audio" && (
+              <div className="flex items-center gap-3 pt-1 border-t border-white/5">
+                <span className="text-xs text-white/30">Voice:</span>
+                <div className="flex gap-1.5 flex-wrap">
+                  {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setTtsVoice(v)}
+                      className="px-2 py-1 rounded-lg text-[10px] border transition-all"
+                      style={ttsVoice === v ? {
+                        background: "rgba(168,85,247,0.15)",
+                        borderColor: "rgba(168,85,247,0.5)",
+                        color: "#c084fc",
+                      } : {
+                        background: "transparent",
+                        borderColor: "rgba(255,255,255,0.1)",
+                        color: "rgba(255,255,255,0.3)",
+                      }}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Image size options */}
+            {outputType === "image" && (
+              <div className="flex items-center gap-3 pt-1 border-t border-white/5">
+                <span className="text-xs text-white/30">Size:</span>
+                <div className="flex gap-1.5">
+                  {[["1024x1024", "Square"], ["1792x1024", "Wide"], ["1024x1792", "Portrait"]].map(([size, label]) => (
+                    <button
+                      key={size}
+                      onClick={() => setImageSize(size)}
+                      className="px-2 py-1 rounded-lg text-[10px] border transition-all"
+                      style={imageSize === size ? {
+                        background: "rgba(168,85,247,0.15)",
+                        borderColor: "rgba(168,85,247,0.5)",
+                        color: "#c084fc",
+                      } : {
+                        background: "transparent",
+                        borderColor: "rgba(255,255,255,0.1)",
+                        color: "rgba(255,255,255,0.3)",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Media upload (text mode) */}
+            {outputType === "text" && (
+              <div
+                className="rounded-xl border border-dashed border-white/10 p-3 flex items-center gap-3 cursor-pointer hover:border-white/20 transition-all"
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleMediaFile(file);
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => document.getElementById("media-upload")?.click()}
+              >
+                <input
+                  id="media-upload"
+                  type="file"
+                  accept="video/*,audio/*,image/*"
+                  className="hidden"
+                  onChange={(e) => { if (e.target.files?.[0]) handleMediaFile(e.target.files[0]); }}
+                />
+                {mediaFile ? (
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-base">{mediaFile.type.startsWith("video") ? "🎬" : mediaFile.type.startsWith("audio") ? "🎵" : "🖼️"}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-white/60 truncate">{mediaFile.name}</p>
+                      <p className="text-[10px] text-white/25">{(mediaFile.size / 1024 / 1024).toFixed(2)}MB — as context</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMediaFile(null); setMediaContext(""); }}
+                      className="text-white/30 hover:text-white/60 text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/8 flex items-center justify-center text-sm flex-shrink-0">
+                      📎
+                    </div>
+                    <div>
+                      <p className="text-xs text-white/30">Attach media as context</p>
+                      <p className="text-[10px] text-white/15">Video, audio, or image • drag & drop or click</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {/* Quick start chips */}
-            {!isRunning && !isDone && prompt.length === 0 && (
+            {!isRunning && !isDone && prompt.length === 0 && outputType === "text" && (
               <div className="flex flex-wrap gap-1.5 pt-1 border-t border-white/5">
                 {[
                   { l: "YouTube script", p: "Find 3 trending YouTube topics about AI this week and write a 60-second script." },
                   { l: "Cold email", p: "Write a compelling cold email for a SaaS product with subject line and CTA." },
                   { l: "Market research", p: "Research top 5 competitors in the AI automation space and summarize differentiators." },
                   { l: "Social post", p: "Create 3 LinkedIn posts about AI automation for small businesses under 200 words each." },
+                  { l: "YouTube upload", p: "I have a video about AI automation for small businesses. Generate an optimized YouTube title, description (with timestamps), tags (30), and thumbnail concept." },
+                  { l: "LinkedIn post", p: "Create a professional LinkedIn post about launching an AI product, with hook, story, CTA, and 5 relevant hashtags." },
                 ].map((s) => (
                   <button
                     key={s.l}
@@ -642,7 +897,7 @@ export default function EnginePage() {
 
           {/* ── Power gauge + status bars ── */}
           <div
-            className="w-full max-w-[260px] rounded-2xl border p-4 space-y-3"
+            className="w-full max-w-[300px] rounded-2xl border p-4 space-y-3"
             style={{
               background: "linear-gradient(145deg, #0d0b1e 0%, #080614 100%)",
               borderColor: "rgba(120,50,255,0.2)",
@@ -673,61 +928,182 @@ export default function EnginePage() {
           </div>
 
           {/* ── Model selector ── */}
-          <div className="w-full max-w-[260px]">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl border"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(120,50,255,0.25)" }}>
-              <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(168,85,247,0.2)" }}>
-                <svg className="w-2.5 h-2.5" fill="none" stroke="#a855f7" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21a48.309 48.309 0 01-8.135-.687c-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                </svg>
-              </div>
-              <select
-                value={selectedModel}
-                onChange={(e) => {
-                  setSelectedModel(e.target.value);
-                  localStorage.setItem("autoflow-model", e.target.value);
+          <div className="w-full max-w-[300px] relative" ref={modelDropdownRef}>
+            <button
+              onClick={() => !isRunning && setModelDropdownOpen((v) => !v)}
+              disabled={isRunning}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all disabled:opacity-40"
+              style={{
+                background: modelDropdownOpen ? "rgba(168,85,247,0.08)" : "rgba(255,255,255,0.03)",
+                borderColor: modelDropdownOpen ? "rgba(168,85,247,0.55)" : "rgba(120,50,255,0.25)",
+                boxShadow: modelDropdownOpen ? "0 0 16px rgba(168,85,247,0.15)" : "none",
+              }}
+            >
+              <div
+                className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                style={{
+                  background: availableModels.find((m) => m.id === selectedModel)?.provider === "anthropic"
+                    ? "rgba(212,167,106,0.2)" : "rgba(99,179,237,0.2)",
+                  color: availableModels.find((m) => m.id === selectedModel)?.provider === "anthropic"
+                    ? "#d4a76a" : "#63b3ed",
                 }}
-                disabled={isRunning}
-                className="flex-1 bg-transparent text-xs font-mono focus:outline-none disabled:opacity-50"
-                style={{ color: "#a855f7" }}
               >
-                {availableModels.length > 0 ? (
-                  <>
-                    {/* Google/Gemini Models */}
-                    {availableModels.filter((m) => m.provider === "google").length > 0 && (
-                      <optgroup label="── Gemini (Google)">
-                        {availableModels
-                          .filter((m) => m.provider === "google")
-                          .map((m) => (
-                            <option key={m.id} value={m.id} disabled={!m.available}>
-                              {m.id}{!m.available ? " (no key)" : ""}
-                            </option>
-                          ))}
-                      </optgroup>
-                    )}
-                    {/* Anthropic/Claude Models */}
-                    {availableModels.filter((m) => m.provider === "anthropic").length > 0 && (
-                      <optgroup label="── Claude (Anthropic)">
-                        {availableModels
-                          .filter((m) => m.provider === "anthropic")
-                          .map((m) => (
-                            <option key={m.id} value={m.id} disabled={!m.available}>
-                              {m.id}{!m.available ? " (no key)" : ""}
-                            </option>
-                          ))}
-                      </optgroup>
-                    )}
-                  </>
-                ) : (
-                  <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                )}
-              </select>
-            </div>
+                {availableModels.find((m) => m.id === selectedModel)?.provider === "anthropic" ? "A" : "G"}
+              </div>
+              <span className="flex-1 text-xs font-medium text-left truncate" style={{ color: "#a855f7" }}>
+                {availableModels.find((m) => m.id === selectedModel)?.name ?? selectedModel}
+              </span>
+              <svg
+                className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${modelDropdownOpen ? "rotate-180" : ""}`}
+                fill="none" stroke="#a855f7" strokeWidth={2.5} viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown panel */}
+            {modelDropdownOpen && (
+              <div
+                className="absolute top-full mt-1.5 left-0 right-0 z-50 rounded-xl border overflow-hidden"
+                style={{
+                  background: "linear-gradient(145deg, #0f0d24, #0b0918)",
+                  borderColor: "rgba(168,85,247,0.3)",
+                  boxShadow: "0 0 40px rgba(168,85,247,0.12), 0 20px 40px rgba(0,0,0,0.7)",
+                }}
+              >
+                <div className="max-h-60 overflow-y-auto scrollbar-hide">
+                  {/* Gemini group */}
+                  {availableModels.filter((m) => m.provider === "google").length > 0 && (
+                    <>
+                      <div className="px-3 py-1.5 border-b border-white/[0.06] sticky top-0" style={{ background: "#0f0d24" }}>
+                        <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Gemini · Google</span>
+                      </div>
+                      {availableModels.filter((m) => m.provider === "google").map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => { if (m.available) { setSelectedModel(m.id); localStorage.setItem("autoflow-model", m.id); setModelDropdownOpen(false); } }}
+                          disabled={!m.available}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
+                          style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
+                        >
+                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(99,179,237,0.15)", color: "#63b3ed" }}>G</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
+                          </div>
+                          {selectedModel === m.id && (
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                  {/* Claude group */}
+                  {availableModels.filter((m) => m.provider === "anthropic").length > 0 && (
+                    <>
+                      <div className="px-3 py-1.5 border-b border-white/[0.06] border-t border-t-white/[0.04] sticky top-0" style={{ background: "#0f0d24" }}>
+                        <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Claude · Anthropic</span>
+                      </div>
+                      {availableModels.filter((m) => m.provider === "anthropic").map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => { if (m.available) { setSelectedModel(m.id); localStorage.setItem("autoflow-model", m.id); setModelDropdownOpen(false); } }}
+                          disabled={!m.available}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
+                          style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
+                        >
+                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(212,167,106,0.15)", color: "#d4a76a" }}>A</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
+                          </div>
+                          {!m.available && <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/5 text-white/25 flex-shrink-0">no key</span>}
+                          {selectedModel === m.id && m.available && (
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                  {/* OpenAI group */}
+                  {availableModels.filter((m) => m.provider === "openai").length > 0 && (
+                    <>
+                      <div className="px-3 py-1.5 border-b border-white/[0.06] border-t border-t-white/[0.04] sticky top-0" style={{ background: "#0f0d24" }}>
+                        <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">GPT · OpenAI</span>
+                      </div>
+                      {availableModels.filter((m) => m.provider === "openai").map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            if (m.available) {
+                              setSelectedModel(m.id);
+                              localStorage.setItem("autoflow-model", m.id);
+                              setModelDropdownOpen(false);
+                              // Auto-switch output type if model only supports image/audio
+                              if (m.cap?.includes("image") && !m.cap?.includes("text")) setOutputType("image");
+                              if (m.cap?.includes("audio") && !m.cap?.includes("text")) setOutputType("audio");
+                            }
+                          }}
+                          disabled={!m.available}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
+                          style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
+                        >
+                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(16,163,127,0.15)", color: "#10a37f" }}>O</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
+                            <div className="flex gap-0.5 mt-0.5">
+                              {m.cap?.map((c) => <span key={c} className="text-[8px] px-1 rounded bg-white/[0.04] text-white/25">{c}</span>)}
+                            </div>
+                          </div>
+                          {selectedModel === m.id && m.available && (
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                  {/* Groq group */}
+                  {availableModels.filter((m) => m.provider === "groq").length > 0 && (
+                    <>
+                      <div className="px-3 py-1.5 border-b border-white/[0.06] border-t border-t-white/[0.04] sticky top-0" style={{ background: "#0f0d24" }}>
+                        <span className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Llama · Groq</span>
+                      </div>
+                      {availableModels.filter((m) => m.provider === "groq").map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => { if (m.available) { setSelectedModel(m.id); localStorage.setItem("autoflow-model", m.id); setModelDropdownOpen(false); } }}
+                          disabled={!m.available}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors disabled:opacity-30 hover:bg-purple-500/8"
+                          style={{ background: selectedModel === m.id ? "rgba(168,85,247,0.12)" : undefined }}
+                        >
+                          <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center text-[8px] font-bold" style={{ background: "rgba(245,80,54,0.15)", color: "#f55036" }}>⚡</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate" style={{ color: selectedModel === m.id ? "#a855f7" : "rgba(255,255,255,0.75)" }}>{m.name}</p>
+                          </div>
+                          {selectedModel === m.id && m.available && (
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                  {availableModels.length === 0 && (
+                    <div className="px-3 py-4 text-xs text-white/30 text-center">Loading models…
+                      <div className="mt-1"><a href="/dashboard/settings/ai-keys" className="text-purple-400 hover:underline text-[10px]">Add API keys →</a></div>
+                    </div>
+                  )}
+                </div>
+                {/* Add keys shortcut */}
+                <div className="p-2 border-t border-white/[0.06]">
+                  <a href="/dashboard/settings/ai-keys" className="flex items-center justify-center gap-1 text-[10px] text-white/25 hover:text-white/50 transition-colors py-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    Add AI provider keys
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Ignite / Stop button ── */}
-          <div className="w-full max-w-[260px] space-y-2.5">
+          <div className="w-full max-w-[300px] space-y-2.5">
             <AnimatePresence mode="wait">
               {isRunning ? (
                 <motion.button
@@ -1003,37 +1379,63 @@ export default function EnginePage() {
                   <span className="text-white/30 text-xs">Priming engine…</span>
                 </div>
               ) : (
-                outputLines.map((line, i) => (
-                  <div key={i} className="leading-relaxed flex gap-2">
-                    {line.type === "step" && (
-                      <>
-                        <span className="font-bold flex-shrink-0" style={{ color: "#f97316" }}>
-                          STEP {line.stepNum}:
-                        </span>
-                        <span className="text-white/70">{line.content}</span>
-                      </>
-                    )}
-                    {line.type === "result" && (
-                      <>
-                        <span className="font-bold flex-shrink-0" style={{ color: "#22c55e" }}>
-                          RESULT:
-                        </span>
-                        <span className="text-emerald-100/80">{line.content}</span>
-                      </>
-                    )}
-                    {line.type === "error" && (
-                      <>
-                        <span className="font-bold flex-shrink-0" style={{ color: "#ef4444" }}>
-                          ERROR:
-                        </span>
-                        <span className="text-red-300/80">{line.content}</span>
-                      </>
-                    )}
-                    {line.type === "text" && (
-                      <span className="text-white/50">{line.content}</span>
-                    )}
-                  </div>
-                ))
+                <>
+                  {/* Tool call / result cards */}
+                  {toolEvents.map((ev) => (
+                    <div
+                      key={ev.id}
+                      className={`mb-2 rounded-xl border text-xs overflow-hidden ${ev.type === "call"
+                          ? "border-blue-500/30 bg-blue-500/5"
+                          : "border-green-500/30 bg-green-500/5"
+                        }`}
+                    >
+                      <div className={`flex items-center gap-2 px-3 py-1.5 border-b ${ev.type === "call" ? "border-blue-500/20 text-blue-400" : "border-green-500/20 text-green-400"}`}>
+                        <span>{ev.type === "call" ? "🔧" : "✅"}</span>
+                        <span className="font-mono font-medium">{ev.name}</span>
+                        <span className="ml-auto text-[10px] opacity-60">{ev.type === "call" ? "calling…" : "done"}</span>
+                      </div>
+                      <details className="cursor-pointer">
+                        <summary className="px-3 py-1 text-[10px] text-white/30 select-none">
+                          {ev.type === "call" ? "View args" : "View result"}
+                        </summary>
+                        <pre className="px-3 pb-2 text-[10px] text-white/50 whitespace-pre-wrap break-all overflow-auto max-h-48">
+                          {JSON.stringify(ev.payload, null, 2)}
+                        </pre>
+                      </details>
+                    </div>
+                  ))}
+                  {outputLines.map((line, i) => (
+                    <div key={i} className="leading-relaxed flex gap-2">
+                      {line.type === "step" && (
+                        <>
+                          <span className="font-bold flex-shrink-0" style={{ color: "#f97316" }}>
+                            STEP {line.stepNum}:
+                          </span>
+                          <span className="text-white/70">{line.content}</span>
+                        </>
+                      )}
+                      {line.type === "result" && (
+                        <>
+                          <span className="font-bold flex-shrink-0" style={{ color: "#22c55e" }}>
+                            RESULT:
+                          </span>
+                          <span className="text-emerald-100/80">{line.content}</span>
+                        </>
+                      )}
+                      {line.type === "error" && (
+                        <>
+                          <span className="font-bold flex-shrink-0" style={{ color: "#ef4444" }}>
+                            ERROR:
+                          </span>
+                          <span className="text-red-300/80">{line.content}</span>
+                        </>
+                      )}
+                      {line.type === "text" && (
+                        <span className="text-white/50">{line.content}</span>
+                      )}
+                    </div>
+                  ))}
+                </>
               )}
               {runError && (
                 <div className="flex items-start gap-2 mt-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
@@ -1137,11 +1539,58 @@ export default function EnginePage() {
               </div>
             )}
           </div>
+
+          {/* PUBLISH TARGETS */}
+          <div
+            className="rounded-2xl border flex-shrink-0"
+            style={{ background: "linear-gradient(145deg, #0f0d1e 0%, #0b0918 100%)", borderColor: "rgba(99,102,241,0.25)" }}
+          >
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
+              <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">🚀 Publish</span>
+              <span className="ml-auto text-[10px] text-white/25">{publishPlatforms.length} selected</span>
+            </div>
+            <div className="p-3 grid grid-cols-2 gap-1.5">
+              {[
+                { id: "youtube", label: "YouTube", emoji: "📺", color: "#FF0000", desc: "Upload video / metadata" },
+                { id: "linkedin", label: "LinkedIn", emoji: "💼", color: "#0A66C2", desc: "Post text + image" },
+                { id: "telegram", label: "Telegram", emoji: "✈️", color: "#2CA5E0", desc: "Send result" },
+                { id: "whatsapp", label: "WhatsApp", emoji: "💬", color: "#25D366", desc: "Send audio/text" },
+                { id: "twitter", label: "Twitter/X", emoji: "🐦", color: "#1DA1F2", desc: "Post thread" },
+                { id: "instagram", label: "Instagram", emoji: "📸", color: "#E1306C", desc: "Post image" },
+              ].map((p) => {
+                const isActive = publishPlatforms.includes(p.id);
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setPublishPlatforms((arr) => isActive ? arr.filter((x) => x !== p.id) : [...arr, p.id])}
+                    className="flex items-center gap-2 p-2 rounded-xl border text-left transition-all"
+                    style={{
+                      background: isActive ? `${p.color}12` : "rgba(255,255,255,0.02)",
+                      borderColor: isActive ? `${p.color}50` : "rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <span className="text-sm">{p.emoji}</span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold" style={{ color: isActive ? p.color : "rgba(255,255,255,0.45)" }}>{p.label}</p>
+                      <p className="text-[8px] text-white/20 truncate">{p.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {publishPlatforms.length > 0 && (
+              <div className="px-3 pb-3">
+                <p className="text-[9px] text-white/20 text-center">
+                  Selected platforms will auto-receive result via connected integrations
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ════ FULL-WIDTH RESULT PANEL ════ */}
-      {(isRunning || isDone || chunks.length > 0) && (
+      {(isRunning || isDone || chunks.length > 0 || generatedImage || generatedAudio) && (
         <div className="mx-4 mb-4 rounded-2xl border overflow-hidden transition-all duration-500"
           style={{
             background: "#09091a",
@@ -1285,6 +1734,68 @@ export default function EnginePage() {
 
             {/* RIGHT: Main output */}
             <div className="flex-1 p-5 overflow-y-auto max-h-[500px] scrollbar-hide space-y-4">
+
+              {/* ─── IMAGE RESULT ─── */}
+              {generatedImage && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-purple-400" />
+                    <span className="text-xs font-semibold text-purple-400 uppercase tracking-widest">Generated Image</span>
+                    <button
+                      onClick={() => {
+                        const a = document.createElement("a");
+                        a.href = `data:image/png;base64,${generatedImage}`;
+                        a.download = `autoflow-${Date.now()}.png`;
+                        a.click();
+                      }}
+                      className="ml-auto text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
+                    >
+                      ↓ Download
+                    </button>
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`data:image/png;base64,${generatedImage}`}
+                    alt="Generated by AutoFlow"
+                    className="w-full max-w-lg rounded-xl border border-white/10"
+                    style={{ boxShadow: "0 0 40px rgba(168,85,247,0.15)" }}
+                  />
+                </div>
+              )}
+
+              {/* ─── AUDIO RESULT ─── */}
+              {generatedAudio && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-cyan-400" />
+                    <span className="text-xs font-semibold text-cyan-400 uppercase tracking-widest">Generated Audio</span>
+                    <button
+                      onClick={() => {
+                        const a = document.createElement("a");
+                        a.href = `data:audio/mpeg;base64,${generatedAudio}`;
+                        a.download = `autoflow-tts-${Date.now()}.mp3`;
+                        a.click();
+                      }}
+                      className="ml-auto text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
+                    >
+                      ↓ Download MP3
+                    </button>
+                  </div>
+                  <div
+                    className="rounded-xl border border-white/10 p-4"
+                    style={{ background: "rgba(34,211,238,0.04)" }}
+                  >
+                    <audio
+                      controls
+                      src={`data:audio/mpeg;base64,${generatedAudio}`}
+                      className="w-full"
+                      style={{ filter: "invert(1) hue-rotate(180deg)" }}
+                    />
+                    <p className="text-xs text-white/30 mt-2 italic">&quot;{prompt.slice(0, 120)}{prompt.length > 120 ? "…" : ""}&quot;</p>
+                  </div>
+                </div>
+              )}
+
               {/* Streaming raw text (non-step, non-result lines) */}
               {outputLines.filter((l) => l.type === "text").length > 0 && (
                 <div className="font-mono text-sm text-white/40 space-y-1 leading-relaxed">

@@ -35,7 +35,7 @@ export function DashboardShell({ userName, userEmail, children }: DashboardShell
 
       {/* Main content */}
       <div className="lg:pl-64 min-h-screen">
-        <Header userName={userName} onMenuToggle={() => setSidebarOpen(true)} />
+        <Header userName={userName} userEmail={userEmail} onMenuToggle={() => setSidebarOpen(true)} />
         <main className="min-h-screen">{children}</main>
       </div>
     </div>

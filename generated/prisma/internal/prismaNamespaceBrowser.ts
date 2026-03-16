@@ -55,9 +55,20 @@ export const ModelName = {
   Otp: 'Otp',
   PasswordReset: 'PasswordReset',
   Workflow: 'Workflow',
+  WorkflowExecution: 'WorkflowExecution',
   EngineMemory: 'EngineMemory',
   Integration: 'Integration',
-  EngineRun: 'EngineRun'
+  EngineRun: 'EngineRun',
+  Agent: 'Agent',
+  AgentAction: 'AgentAction',
+  AgentRun: 'AgentRun',
+  Notification: 'Notification',
+  AICredential: 'AICredential',
+  ChatSession: 'ChatSession',
+  ChatMessage: 'ChatMessage',
+  PendingCredential: 'PendingCredential',
+  SkillGoal: 'SkillGoal',
+  SkillChallenge: 'SkillChallenge'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -119,6 +130,11 @@ export const WorkflowScalarFieldEnum = {
   name: 'name',
   description: 'description',
   steps: 'steps',
+  nodes: 'nodes',
+  edges: 'edges',
+  triggerType: 'triggerType',
+  triggerConfig: 'triggerConfig',
+  webhookId: 'webhookId',
   userId: 'userId',
   status: 'status',
   createdAt: 'createdAt',
@@ -126,6 +142,22 @@ export const WorkflowScalarFieldEnum = {
 } as const
 
 export type WorkflowScalarFieldEnum = (typeof WorkflowScalarFieldEnum)[keyof typeof WorkflowScalarFieldEnum]
+
+
+export const WorkflowExecutionScalarFieldEnum = {
+  id: 'id',
+  workflowId: 'workflowId',
+  userId: 'userId',
+  status: 'status',
+  stepLogs: 'stepLogs',
+  trigger: 'trigger',
+  output: 'output',
+  error: 'error',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt'
+} as const
+
+export type WorkflowExecutionScalarFieldEnum = (typeof WorkflowExecutionScalarFieldEnum)[keyof typeof WorkflowExecutionScalarFieldEnum]
 
 
 export const EngineMemoryScalarFieldEnum = {
@@ -164,6 +196,10 @@ export const EngineRunScalarFieldEnum = {
   memories: 'memories',
   mods: 'mods',
   output: 'output',
+  outputType: 'outputType',
+  mediaInput: 'mediaInput',
+  outputUrl: 'outputUrl',
+  publishLog: 'publishLog',
   status: 'status',
   steps: 'steps',
   createdAt: 'createdAt',
@@ -171,6 +207,161 @@ export const EngineRunScalarFieldEnum = {
 } as const
 
 export type EngineRunScalarFieldEnum = (typeof EngineRunScalarFieldEnum)[keyof typeof EngineRunScalarFieldEnum]
+
+
+export const AgentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  status: 'status',
+  triggerType: 'triggerType',
+  triggerConfig: 'triggerConfig',
+  promptTemplate: 'promptTemplate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentScalarFieldEnum = (typeof AgentScalarFieldEnum)[keyof typeof AgentScalarFieldEnum]
+
+
+export const AgentActionScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  order: 'order',
+  type: 'type',
+  config: 'config'
+} as const
+
+export type AgentActionScalarFieldEnum = (typeof AgentActionScalarFieldEnum)[keyof typeof AgentActionScalarFieldEnum]
+
+
+export const AgentRunScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  userId: 'userId',
+  triggerData: 'triggerData',
+  output: 'output',
+  actionsLog: 'actionsLog',
+  status: 'status',
+  error: 'error',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt'
+} as const
+
+export type AgentRunScalarFieldEnum = (typeof AgentRunScalarFieldEnum)[keyof typeof AgentRunScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  read: 'read',
+  link: 'link',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const AICredentialScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  label: 'label',
+  apiKey: 'apiKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AICredentialScalarFieldEnum = (typeof AICredentialScalarFieldEnum)[keyof typeof AICredentialScalarFieldEnum]
+
+
+export const ChatSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  channel: 'channel',
+  channelId: 'channelId',
+  model: 'model',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatSessionScalarFieldEnum = (typeof ChatSessionScalarFieldEnum)[keyof typeof ChatSessionScalarFieldEnum]
+
+
+export const ChatMessageScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  role: 'role',
+  content: 'content',
+  artifacts: 'artifacts',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
+
+
+export const PendingCredentialScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  messageId: 'messageId',
+  toolName: 'toolName',
+  schema: 'schema',
+  resolved: 'resolved',
+  values: 'values',
+  createdAt: 'createdAt'
+} as const
+
+export type PendingCredentialScalarFieldEnum = (typeof PendingCredentialScalarFieldEnum)[keyof typeof PendingCredentialScalarFieldEnum]
+
+
+export const SkillGoalScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  description: 'description',
+  level: 'level',
+  curriculum: 'curriculum',
+  streakDays: 'streakDays',
+  longestStreak: 'longestStreak',
+  totalXp: 'totalXp',
+  totalDays: 'totalDays',
+  currentDay: 'currentDay',
+  lastActiveAt: 'lastActiveAt',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SkillGoalScalarFieldEnum = (typeof SkillGoalScalarFieldEnum)[keyof typeof SkillGoalScalarFieldEnum]
+
+
+export const SkillChallengeScalarFieldEnum = {
+  id: 'id',
+  goalId: 'goalId',
+  userId: 'userId',
+  day: 'day',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  difficulty: 'difficulty',
+  hints: 'hints',
+  status: 'status',
+  submission: 'submission',
+  feedback: 'feedback',
+  score: 'score',
+  xpEarned: 'xpEarned',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt'
+} as const
+
+export type SkillChallengeScalarFieldEnum = (typeof SkillChallengeScalarFieldEnum)[keyof typeof SkillChallengeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -186,6 +377,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {

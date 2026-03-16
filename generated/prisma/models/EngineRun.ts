@@ -29,6 +29,9 @@ export type EngineRunMinAggregateOutputType = {
   userId: string | null
   prompt: string | null
   output: string | null
+  outputType: string | null
+  mediaInput: string | null
+  outputUrl: string | null
   status: $Enums.EngineRunStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -39,6 +42,9 @@ export type EngineRunMaxAggregateOutputType = {
   userId: string | null
   prompt: string | null
   output: string | null
+  outputType: string | null
+  mediaInput: string | null
+  outputUrl: string | null
   status: $Enums.EngineRunStatus | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -51,6 +57,10 @@ export type EngineRunCountAggregateOutputType = {
   memories: number
   mods: number
   output: number
+  outputType: number
+  mediaInput: number
+  outputUrl: number
+  publishLog: number
   status: number
   steps: number
   createdAt: number
@@ -64,6 +74,9 @@ export type EngineRunMinAggregateInputType = {
   userId?: true
   prompt?: true
   output?: true
+  outputType?: true
+  mediaInput?: true
+  outputUrl?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -74,6 +87,9 @@ export type EngineRunMaxAggregateInputType = {
   userId?: true
   prompt?: true
   output?: true
+  outputType?: true
+  mediaInput?: true
+  outputUrl?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -86,6 +102,10 @@ export type EngineRunCountAggregateInputType = {
   memories?: true
   mods?: true
   output?: true
+  outputType?: true
+  mediaInput?: true
+  outputUrl?: true
+  publishLog?: true
   status?: true
   steps?: true
   createdAt?: true
@@ -172,6 +192,10 @@ export type EngineRunGroupByOutputType = {
   memories: string[]
   mods: string[]
   output: string | null
+  outputType: string
+  mediaInput: string | null
+  outputUrl: string | null
+  publishLog: runtime.JsonValue
   status: $Enums.EngineRunStatus
   steps: runtime.JsonValue
   createdAt: Date
@@ -206,6 +230,10 @@ export type EngineRunWhereInput = {
   memories?: Prisma.StringNullableListFilter<"EngineRun">
   mods?: Prisma.StringNullableListFilter<"EngineRun">
   output?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  outputType?: Prisma.StringFilter<"EngineRun"> | string
+  mediaInput?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  outputUrl?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  publishLog?: Prisma.JsonFilter<"EngineRun">
   status?: Prisma.EnumEngineRunStatusFilter<"EngineRun"> | $Enums.EngineRunStatus
   steps?: Prisma.JsonFilter<"EngineRun">
   createdAt?: Prisma.DateTimeFilter<"EngineRun"> | Date | string
@@ -220,6 +248,10 @@ export type EngineRunOrderByWithRelationInput = {
   memories?: Prisma.SortOrder
   mods?: Prisma.SortOrder
   output?: Prisma.SortOrderInput | Prisma.SortOrder
+  outputType?: Prisma.SortOrder
+  mediaInput?: Prisma.SortOrderInput | Prisma.SortOrder
+  outputUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  publishLog?: Prisma.SortOrder
   status?: Prisma.SortOrder
   steps?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -237,6 +269,10 @@ export type EngineRunWhereUniqueInput = Prisma.AtLeast<{
   memories?: Prisma.StringNullableListFilter<"EngineRun">
   mods?: Prisma.StringNullableListFilter<"EngineRun">
   output?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  outputType?: Prisma.StringFilter<"EngineRun"> | string
+  mediaInput?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  outputUrl?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  publishLog?: Prisma.JsonFilter<"EngineRun">
   status?: Prisma.EnumEngineRunStatusFilter<"EngineRun"> | $Enums.EngineRunStatus
   steps?: Prisma.JsonFilter<"EngineRun">
   createdAt?: Prisma.DateTimeFilter<"EngineRun"> | Date | string
@@ -251,6 +287,10 @@ export type EngineRunOrderByWithAggregationInput = {
   memories?: Prisma.SortOrder
   mods?: Prisma.SortOrder
   output?: Prisma.SortOrderInput | Prisma.SortOrder
+  outputType?: Prisma.SortOrder
+  mediaInput?: Prisma.SortOrderInput | Prisma.SortOrder
+  outputUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  publishLog?: Prisma.SortOrder
   status?: Prisma.SortOrder
   steps?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -270,6 +310,10 @@ export type EngineRunScalarWhereWithAggregatesInput = {
   memories?: Prisma.StringNullableListFilter<"EngineRun">
   mods?: Prisma.StringNullableListFilter<"EngineRun">
   output?: Prisma.StringNullableWithAggregatesFilter<"EngineRun"> | string | null
+  outputType?: Prisma.StringWithAggregatesFilter<"EngineRun"> | string
+  mediaInput?: Prisma.StringNullableWithAggregatesFilter<"EngineRun"> | string | null
+  outputUrl?: Prisma.StringNullableWithAggregatesFilter<"EngineRun"> | string | null
+  publishLog?: Prisma.JsonWithAggregatesFilter<"EngineRun">
   status?: Prisma.EnumEngineRunStatusWithAggregatesFilter<"EngineRun"> | $Enums.EngineRunStatus
   steps?: Prisma.JsonWithAggregatesFilter<"EngineRun">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"EngineRun"> | Date | string
@@ -282,6 +326,10 @@ export type EngineRunCreateInput = {
   memories?: Prisma.EngineRunCreatememoriesInput | string[]
   mods?: Prisma.EngineRunCreatemodsInput | string[]
   output?: string | null
+  outputType?: string
+  mediaInput?: string | null
+  outputUrl?: string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -296,6 +344,10 @@ export type EngineRunUncheckedCreateInput = {
   memories?: Prisma.EngineRunCreatememoriesInput | string[]
   mods?: Prisma.EngineRunCreatemodsInput | string[]
   output?: string | null
+  outputType?: string
+  mediaInput?: string | null
+  outputUrl?: string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -308,6 +360,10 @@ export type EngineRunUpdateInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -322,6 +378,10 @@ export type EngineRunUncheckedUpdateInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -335,6 +395,10 @@ export type EngineRunCreateManyInput = {
   memories?: Prisma.EngineRunCreatememoriesInput | string[]
   mods?: Prisma.EngineRunCreatemodsInput | string[]
   output?: string | null
+  outputType?: string
+  mediaInput?: string | null
+  outputUrl?: string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -347,6 +411,10 @@ export type EngineRunUpdateManyMutationInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -360,6 +428,10 @@ export type EngineRunUncheckedUpdateManyInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -383,6 +455,10 @@ export type EngineRunCountOrderByAggregateInput = {
   memories?: Prisma.SortOrder
   mods?: Prisma.SortOrder
   output?: Prisma.SortOrder
+  outputType?: Prisma.SortOrder
+  mediaInput?: Prisma.SortOrder
+  outputUrl?: Prisma.SortOrder
+  publishLog?: Prisma.SortOrder
   status?: Prisma.SortOrder
   steps?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -394,6 +470,9 @@ export type EngineRunMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   prompt?: Prisma.SortOrder
   output?: Prisma.SortOrder
+  outputType?: Prisma.SortOrder
+  mediaInput?: Prisma.SortOrder
+  outputUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -404,6 +483,9 @@ export type EngineRunMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   prompt?: Prisma.SortOrder
   output?: Prisma.SortOrder
+  outputType?: Prisma.SortOrder
+  mediaInput?: Prisma.SortOrder
+  outputUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -479,6 +561,10 @@ export type EngineRunCreateWithoutUserInput = {
   memories?: Prisma.EngineRunCreatememoriesInput | string[]
   mods?: Prisma.EngineRunCreatemodsInput | string[]
   output?: string | null
+  outputType?: string
+  mediaInput?: string | null
+  outputUrl?: string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -491,6 +577,10 @@ export type EngineRunUncheckedCreateWithoutUserInput = {
   memories?: Prisma.EngineRunCreatememoriesInput | string[]
   mods?: Prisma.EngineRunCreatemodsInput | string[]
   output?: string | null
+  outputType?: string
+  mediaInput?: string | null
+  outputUrl?: string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -533,6 +623,10 @@ export type EngineRunScalarWhereInput = {
   memories?: Prisma.StringNullableListFilter<"EngineRun">
   mods?: Prisma.StringNullableListFilter<"EngineRun">
   output?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  outputType?: Prisma.StringFilter<"EngineRun"> | string
+  mediaInput?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  outputUrl?: Prisma.StringNullableFilter<"EngineRun"> | string | null
+  publishLog?: Prisma.JsonFilter<"EngineRun">
   status?: Prisma.EnumEngineRunStatusFilter<"EngineRun"> | $Enums.EngineRunStatus
   steps?: Prisma.JsonFilter<"EngineRun">
   createdAt?: Prisma.DateTimeFilter<"EngineRun"> | Date | string
@@ -545,6 +639,10 @@ export type EngineRunCreateManyUserInput = {
   memories?: Prisma.EngineRunCreatememoriesInput | string[]
   mods?: Prisma.EngineRunCreatemodsInput | string[]
   output?: string | null
+  outputType?: string
+  mediaInput?: string | null
+  outputUrl?: string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -557,6 +655,10 @@ export type EngineRunUpdateWithoutUserInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -569,6 +671,10 @@ export type EngineRunUncheckedUpdateWithoutUserInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -581,6 +687,10 @@ export type EngineRunUncheckedUpdateManyWithoutUserInput = {
   memories?: Prisma.EngineRunUpdatememoriesInput | string[]
   mods?: Prisma.EngineRunUpdatemodsInput | string[]
   output?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputType?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaInput?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outputUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishLog?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEngineRunStatusFieldUpdateOperationsInput | $Enums.EngineRunStatus
   steps?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -596,6 +706,10 @@ export type EngineRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   memories?: boolean
   mods?: boolean
   output?: boolean
+  outputType?: boolean
+  mediaInput?: boolean
+  outputUrl?: boolean
+  publishLog?: boolean
   status?: boolean
   steps?: boolean
   createdAt?: boolean
@@ -610,6 +724,10 @@ export type EngineRunSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   memories?: boolean
   mods?: boolean
   output?: boolean
+  outputType?: boolean
+  mediaInput?: boolean
+  outputUrl?: boolean
+  publishLog?: boolean
   status?: boolean
   steps?: boolean
   createdAt?: boolean
@@ -624,6 +742,10 @@ export type EngineRunSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   memories?: boolean
   mods?: boolean
   output?: boolean
+  outputType?: boolean
+  mediaInput?: boolean
+  outputUrl?: boolean
+  publishLog?: boolean
   status?: boolean
   steps?: boolean
   createdAt?: boolean
@@ -638,13 +760,17 @@ export type EngineRunSelectScalar = {
   memories?: boolean
   mods?: boolean
   output?: boolean
+  outputType?: boolean
+  mediaInput?: boolean
+  outputUrl?: boolean
+  publishLog?: boolean
   status?: boolean
   steps?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EngineRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "prompt" | "memories" | "mods" | "output" | "status" | "steps" | "createdAt" | "updatedAt", ExtArgs["result"]["engineRun"]>
+export type EngineRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "prompt" | "memories" | "mods" | "output" | "outputType" | "mediaInput" | "outputUrl" | "publishLog" | "status" | "steps" | "createdAt" | "updatedAt", ExtArgs["result"]["engineRun"]>
 export type EngineRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -667,6 +793,10 @@ export type $EngineRunPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     memories: string[]
     mods: string[]
     output: string | null
+    outputType: string
+    mediaInput: string | null
+    outputUrl: string | null
+    publishLog: runtime.JsonValue
     status: $Enums.EngineRunStatus
     steps: runtime.JsonValue
     createdAt: Date
@@ -1101,6 +1231,10 @@ export interface EngineRunFieldRefs {
   readonly memories: Prisma.FieldRef<"EngineRun", 'String[]'>
   readonly mods: Prisma.FieldRef<"EngineRun", 'String[]'>
   readonly output: Prisma.FieldRef<"EngineRun", 'String'>
+  readonly outputType: Prisma.FieldRef<"EngineRun", 'String'>
+  readonly mediaInput: Prisma.FieldRef<"EngineRun", 'String'>
+  readonly outputUrl: Prisma.FieldRef<"EngineRun", 'String'>
+  readonly publishLog: Prisma.FieldRef<"EngineRun", 'Json'>
   readonly status: Prisma.FieldRef<"EngineRun", 'EngineRunStatus'>
   readonly steps: Prisma.FieldRef<"EngineRun", 'Json'>
   readonly createdAt: Prisma.FieldRef<"EngineRun", 'DateTime'>
