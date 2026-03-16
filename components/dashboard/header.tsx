@@ -41,7 +41,7 @@ export function Header({ userName, userEmail, onMenuToggle }: HeaderProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <span className="font-bold text-white text-sm">AutoFlow <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">AI</span></span>
+              <span className="font-bold text-white text-sm">Ignite <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">AI</span></span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -63,7 +63,7 @@ export function Header({ userName, userEmail, onMenuToggle }: HeaderProps) {
         {/* Left: breadcrumb placeholder — pages can use <title> */}
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-white/25 font-medium">AutoFlow AI</span>
+          <span className="text-xs text-white/40 font-medium">Ignite AI</span>
         </div>
 
         {/* Right: actions */}

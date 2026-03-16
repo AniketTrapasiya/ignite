@@ -143,7 +143,7 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
             </svg>
           </div>
           <div>
-            <span className="font-extrabold text-white text-sm tracking-tight">AutoFlow</span>
+            <span className="font-extrabold text-white text-sm tracking-tight">Ignite</span>
             <span
               className="font-extrabold text-sm"
               style={{ background: "linear-gradient(90deg, #a855f7, #e91e8c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
@@ -157,9 +157,12 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {navItems.map((item) => {
+          // For AI Keys, use exact match to avoid conflicting with Settings
           const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            item.href === "/dashboard/settings/ai-keys"
+              ? pathname === item.href
+              : pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
           if (item.highlight) {
             return (
@@ -200,7 +203,7 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
                     border: "1px solid rgba(168,85,247,0.2)",
                     color: "#e2e8f0",
                   }
-                  : { color: "rgba(255,255,255,0.38)" }
+                  : { color: "rgba(255,255,255,0.60)" }
               }
             >
               {item.icon}
@@ -229,13 +232,13 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
           href="/dashboard/settings"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200"
           style={
-            pathname.startsWith("/dashboard/settings")
+            pathname === "/dashboard/settings"
               ? {
                 background: "rgba(168,85,247,0.12)",
                 border: "1px solid rgba(168,85,247,0.2)",
                 color: "#e2e8f0",
               }
-              : { color: "rgba(255,255,255,0.38)" }
+              : { color: "rgba(255,255,255,0.60)" }
           }
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">

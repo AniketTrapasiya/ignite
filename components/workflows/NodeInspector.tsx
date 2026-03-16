@@ -110,9 +110,9 @@ export function NodeInspector({ node, onChange, onCommit, onDelete }: Props) {
   );
 
   const typeLabel: Record<NodeType, string> = {
-    trigger: "âš¡ Trigger", llm: "ðŸ¤– LLM / AI", http: "ðŸŒ HTTP Request",
-    condition: "ðŸ”€ Condition", action: "âš™ï¸ Action", delay: "â± Delay",
-    transform: "âš—ï¸ Transform", output: "ðŸ“¤ Output",
+    trigger: "⚡ Trigger", llm: "🤖 LLM / AI", http: "ðŸŒ HTTP Request",
+    condition: "🔀 Condition", action: "âš™ï¸ Action", delay: "⏱ Delay",
+    transform: "âš—ï¸ Transform", output: "📤 Output",
   };
 
   const renderFields = () => {

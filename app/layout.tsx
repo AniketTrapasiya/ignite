@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "AutoFlow AI",
-    template: "%s | AutoFlow AI",
+    default: "Ignite AI",
+    template: "%s | Ignite AI",
   },
   icons: {
     icon: "/favicon.png",
   },
-  description: "AI-powered workflow automation platform",
+  description: "Agentic AI automation platform",
 };
 
 export default function RootLayout({

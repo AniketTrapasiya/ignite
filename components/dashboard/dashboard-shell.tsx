@@ -14,7 +14,7 @@ export function DashboardShell({ userName, userEmail, children }: DashboardShell
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#07070f]">
+    <div className="h-screen overflow-hidden bg-[#07070f]">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -34,9 +34,9 @@ export function DashboardShell({ userName, userEmail, children }: DashboardShell
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64 min-h-screen">
+      <div className="lg:pl-64 h-full flex flex-col">
         <Header userName={userName} userEmail={userEmail} onMenuToggle={() => setSidebarOpen(true)} />
-        <main className="min-h-screen">{children}</main>
+        <main className="flex-1 overflow-auto min-h-0">{children}</main>
       </div>
     </div>
   );

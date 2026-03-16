@@ -710,7 +710,9 @@ export default function WorkshopPage() {
   // Render
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-full bg-[#0a0a0f] overflow-hidden">
+    <div className="flex h-full bg-[#0a0a0f] overflow-hidden"
+      style={{ height: '100%' }}
+    >
       {/* ── Sessions Sidebar ───────────────────────────────────────────────── */}
       <AnimatePresence initial={false}>
         {sidebarOpen && (
@@ -755,7 +757,7 @@ export default function WorkshopPage() {
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
               {sessions.length === 0 && (
                 <div className="text-xs text-white/25 text-center mt-8 px-4">
-                  No sessions yet. Click "+ New Chat" to start.
+                  No sessions yet. Click &amp; + New Chat &amp; to start.
                 </div>
               )}
               {sessions.map((s) => (

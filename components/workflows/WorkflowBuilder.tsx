@@ -1,4 +1,4 @@
-/**
+﻿/**
  * components/workflows/WorkflowBuilder.tsx
  * Visual node-based workflow editor powered by @xyflow/react.
  * Features: drag-and-drop, keyboard shortcuts, auto-layout, run log panel,
@@ -451,14 +451,14 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             disabled={running}
             className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white/90 text-xs font-medium transition-colors"
           >
-            {running ? "â³ Running…" : "▶ Run"}
+            {running ? "Running…" : "▶ Run"}
           </button>
 
           <div className="w-px h-4 bg-white/10 mx-1" />
 
           {/* Undo/Redo */}
-          <button onClick={undo} title="Undo (⌘Z)" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">↩</button>
-          <button onClick={redo} title="Redo (⌘Y)" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">↪</button>
+          <button onClick={undo} title="Undo" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">↩</button>
+          <button onClick={redo} title="Redo" className="px-2 py-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 text-xs transition-colors">↪</button>
 
           {/* Auto-layout */}
           <button
@@ -562,209 +562,217 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                 className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white/50 transition-colors disabled:opacity-40"
               >
                 {loadingLogs ? "Loading…" : "↺ Refresh"}
-              </button>
-            </div>
+              </button >
+            </div >
 
-            {executions.length === 0 && !loadingLogs && (
-              <div className="text-center py-16 text-white/25 text-sm">
-                <p className="text-3xl mb-3">📋</p>
-                <p>No executions yet. Press <strong>▶ Run</strong> to start.</p>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              {executions.map((exec) => (
-                <div key={exec.id} className="rounded-2xl border border-white/[0.07] bg-white/2 overflow-hidden">
-                  {/* Exec header */}
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
-                    <span className={`font-semibold text-xs ${statusColor(exec.status)}`}>
-                      {exec.status === "COMPLETED" ? "✓" : exec.status === "FAILED" ? "✗" : exec.status === "RUNNING" ? "⏳" : "○"} {exec.status}
-                    </span>
-                    <span className="text-xs text-white/25 font-mono">{exec.id.slice(0, 8)}</span>
-                    <span className="text-xs text-white/20 ml-auto">
-                      {new Date(exec.createdAt).toLocaleString()}
-                    </span>
-                    {exec.completedAt && (
-                      <span className="text-xs text-white/20">
-                        {Math.round((new Date(exec.completedAt).getTime() - new Date(exec.createdAt).getTime()) / 1000)}s
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Step logs */}
-                  {exec.stepLogs && exec.stepLogs.length > 0 && (
-                    <div className="divide-y divide-white/[0.04]">
-                      {exec.stepLogs.map((step, i) => (
-                        <div key={i} className="px-4 py-2.5 flex items-start gap-3">
-                          <span className={`text-xs mt-0.5 shrink-0 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : step.status === "running" ? "text-blue-400" : "text-neutral-500"}`}>
-                            {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : step.status === "running" ? "⏳" : "○"}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-white/50">{step.nodeId}</span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 capitalize">{step.nodeType}</span>
-                            </div>
-                            {step.error && <div className="text-xs text-red-400 mt-1 font-mono truncate">{step.error}</div>}
-                            {step.output != null && (
-                              <div className="text-[10px] text-white/30 mt-1 font-mono truncate">
-                                → {typeof step.output === "string" ? step.output.slice(0, 120) : JSON.stringify(step.output).slice(0, 120)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {exec.error && (
-                    <div className="px-4 py-2 text-xs text-red-400 font-mono bg-red-500/5">{exec.error}</div>
-                  )}
+            {
+              executions.length === 0 && !loadingLogs && (
+                <div className="text-center py-16 text-white/25 text-sm">
+                  <p className="text-3xl mb-3">📋</p>
+                  <p>No executions yet. Press <strong>▶ Run</strong> to start.</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+              )
+            }
 
-      {/* ── Inspector ────────────────────────────────────────────────────────── */}
-      <aside className="w-68 shrink-0 bg-[#0c0c14] border-l border-white/[0.07] overflow-y-auto" style={{ width: 272 }}>
-        {selectedNode ? (
-          <NodeInspector node={selectedNode} onChange={handleNodeDataChange} onCommit={handleNodeDataCommit} onDelete={deleteNode} />
-        ) : activeTab === "logs" && executions.length > 0 ? (
-          <div className="p-4 space-y-4">
-            <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">Latest Run</p>
-            {(() => {
-              const latest = executions[0];
-              return (
-                <div className="space-y-3">
-                  {/* Status */}
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/6 bg-white/2">
-                    <span className={`text-sm ${latest.status === "COMPLETED" ? "text-green-400" : latest.status === "FAILED" ? "text-red-400" : latest.status === "RUNNING" ? "text-blue-400" : "text-neutral-400"}`}>
-                      {latest.status === "COMPLETED" ? "✓" : latest.status === "FAILED" ? "✗" : latest.status === "RUNNING" ? "⏳" : "○"}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-bold ${latest.status === "COMPLETED" ? "text-green-400" : latest.status === "FAILED" ? "text-red-400" : latest.status === "RUNNING" ? "text-blue-400" : "text-neutral-400"}`}>{latest.status}</p>
-                      <p className="text-[10px] text-white/25 font-mono">{latest.id.slice(0, 8)}</p>
-                    </div>
-                    {latest.completedAt && (
-                      <span className="text-[10px] text-white/30 shrink-0">
-                        {Math.round((new Date(latest.completedAt).getTime() - new Date(latest.createdAt).getTime()) / 1000)}s
+            < div className="space-y-3" >
+              {
+                executions.map((exec) => (
+                  <div key={exec.id} className="rounded-2xl border border-white/[0.07] bg-white/2 overflow-hidden">
+                    {/* Exec header */}
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
+                      <span className={`font-semibold text-xs ${statusColor(exec.status)}`}>
+                        {exec.status === "COMPLETED" ? "✓" : exec.status === "FAILED" ? "✗" : exec.status === "RUNNING" ? "⏳" : "○"} {exec.status}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Final output */}
-                  {latest.output != null && (
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Output</p>
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-                        <pre className="text-[11px] text-emerald-300/80 font-mono whitespace-pre-wrap break-all leading-relaxed max-h-48 overflow-y-auto">
-                          {typeof latest.output === "string" ? latest.output : JSON.stringify(latest.output, null, 2)}
-                        </pre>
-                      </div>
+                      <span className="text-xs text-white/25 font-mono">{exec.id.slice(0, 8)}</span>
+                      <span className="text-xs text-white/20 ml-auto">
+                        {new Date(exec.createdAt).toLocaleString()}
+                      </span>
+                      {exec.completedAt && (
+                        <span className="text-xs text-white/20">
+                          {Math.round((new Date(exec.completedAt).getTime() - new Date(exec.createdAt).getTime()) / 1000)}s
+                        </span>
+                      )}
                     </div>
-                  )}
 
-                  {/* Error */}
-                  {latest.error && (
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Error</p>
-                      <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
-                        <p className="text-[11px] text-red-300/80 font-mono break-all">{latest.error}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step summary */}
-                  {latest.stepLogs && latest.stepLogs.length > 0 && (
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Steps ({latest.stepLogs.length})</p>
-                      <div className="space-y-1">
-                        {latest.stepLogs.map((step, i) => (
-                          <div key={i} className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-white/2 border border-white/4">
-                            <span className={`text-xs shrink-0 mt-0.5 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : "text-blue-400"}`}>
-                              {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : "⏳"}
+                    {/* Step logs */}
+                    {exec.stepLogs && exec.stepLogs.length > 0 && (
+                      <div className="divide-y divide-white/[0.04]">
+                        {exec.stepLogs.map((step, i) => (
+                          <div key={i} className="px-4 py-2.5 flex items-start gap-3">
+                            <span className={`text-xs mt-0.5 shrink-0 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : step.status === "running" ? "text-blue-400" : "text-neutral-500"}`}>
+                              {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : step.status === "running" ? "⏳" : "○"}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-mono text-white/40 truncate">{step.nodeId}</span>
-                                <span className="text-[9px] px-1 rounded bg-white/5 text-white/25 capitalize shrink-0">{step.nodeType}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono text-white/50">{step.nodeId}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 capitalize">{step.nodeType}</span>
                               </div>
+                              {step.error && <div className="text-xs text-red-400 mt-1 font-mono truncate">{step.error}</div>}
                               {step.output != null && (
-                                <p className="text-[10px] text-white/30 font-mono truncate mt-0.5">
-                                  → {typeof step.output === "string" ? step.output.slice(0, 80) : JSON.stringify(step.output).slice(0, 80)}
-                                </p>
+                                <div className="text-[10px] text-white/30 mt-1 font-mono truncate">
+                                  → {typeof step.output === "string" ? step.output.slice(0, 120) : JSON.stringify(step.output).slice(0, 120)}
+                                </div>
                               )}
-                              {step.error && <p className="text-[10px] text-red-400/80 font-mono truncate mt-0.5">{step.error}</p>}
                             </div>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <p className="text-[9px] text-white/20 text-center">
-                    {new Date(latest.createdAt).toLocaleString()}
-                  </p>
-                </div>
-              );
-            })()}
-          </div>
-        ) : activeTab === "logs" && running ? (
-          <div className="p-5 flex flex-col items-center gap-3 pt-12">
-            <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-              ))}
+                    {exec.error && (
+                      <div className="px-4 py-2 text-xs text-red-400 font-mono bg-red-500/5">{exec.error}</div>
+                    )}
+                  </div>
+                ))
+              }
+            </div >
+          </div >
+        )
+        }
+      </div >
+
+      {/* ── Inspector ────────────────────────────────────────────────────────── */}
+      < aside className="w-68 shrink-0 bg-[#0c0c14] border-l border-white/[0.07] overflow-y-auto" style={{ width: 272 }}>
+        {
+          selectedNode ? (
+            <NodeInspector node={selectedNode} onChange={handleNodeDataChange} onCommit={handleNodeDataCommit} onDelete={deleteNode} />
+          ) : activeTab === "logs" && executions.length > 0 ? (
+            <div className="p-4 space-y-4">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">Latest Run</p>
+              {(() => {
+                const latest = executions[0];
+                return (
+                  <div className="space-y-3">
+                    {/* Status */}
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/6 bg-white/2">
+                      <span className={`text-sm ${latest.status === "COMPLETED" ? "text-green-400" : latest.status === "FAILED" ? "text-red-400" : latest.status === "RUNNING" ? "text-blue-400" : "text-neutral-400"}`}>
+                        {latest.status === "COMPLETED" ? "✓" : latest.status === "FAILED" ? "✗" : latest.status === "RUNNING" ? "⏳" : "○"}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold ${latest.status === "COMPLETED" ? "text-green-400" : latest.status === "FAILED" ? "text-red-400" : latest.status === "RUNNING" ? "text-blue-400" : "text-neutral-400"}`}>{latest.status}</p>
+                        <p className="text-[10px] text-white/25 font-mono">{latest.id.slice(0, 8)}</p>
+                      </div>
+                      {latest.completedAt && (
+                        <span className="text-[10px] text-white/30 shrink-0">
+                          {Math.round((new Date(latest.completedAt).getTime() - new Date(latest.createdAt).getTime()) / 1000)}s
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Final output */}
+                    {latest.output != null && (
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Output</p>
+                        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                          <pre className="text-[11px] text-emerald-300/80 font-mono whitespace-pre-wrap break-all leading-relaxed max-h-48 overflow-y-auto">
+                            {typeof latest.output === "string" ? latest.output : JSON.stringify(latest.output, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Error */}
+                    {latest.error && (
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Error</p>
+                        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
+                          <p className="text-[11px] text-red-300/80 font-mono break-all">{latest.error}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Step summary */}
+                    {latest.stepLogs && latest.stepLogs.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Steps ({latest.stepLogs.length})</p>
+                        <div className="space-y-1">
+                          {latest.stepLogs.map((step, i) => (
+                            <div key={i} className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-white/2 border border-white/4">
+                              <span className={`text-xs shrink-0 mt-0.5 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : "text-blue-400"}`}>
+                                {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : "⏳"}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] font-mono text-white/40 truncate">{step.nodeId}</span>
+                                  <span className="text-[9px] px-1 rounded bg-white/5 text-white/25 capitalize shrink-0">{step.nodeType}</span>
+                                </div>
+                                {step.output != null && (
+                                  <p className="text-[10px] text-white/30 font-mono truncate mt-0.5">
+                                    → {typeof step.output === "string" ? step.output.slice(0, 80) : JSON.stringify(step.output).slice(0, 80)}
+                                  </p>
+                                )}
+                                {step.error && <p className="text-[10px] text-red-400/80 font-mono truncate mt-0.5">{step.error}</p>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-[9px] text-white/20 text-center">
+                      {new Date(latest.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
-            <p className="text-xs text-white/30 text-center">Executing workflow…</p>
-            {runStatus && <p className="text-xs text-blue-400/70 text-center font-mono">{runStatus.msg}</p>}
-          </div>
-        ) : (
-          <div className="p-5 space-y-4">
-            <p className="text-xs font-semibold text-white/40">Inspector</p>
-            <p className="text-xs text-white/25 leading-relaxed">Click any node to configure it here.</p>
-            <div className="border-t border-white/6 pt-4 space-y-2">
-              <p className="text-[10px] text-white/20 font-semibold uppercase tracking-widest">Quick tip</p>
-              <p className="text-xs text-white/20 leading-relaxed">
-                Connect nodes by dragging from the dot at the bottom of one node to the top of another.
-                Right-click a node for more options.
-              </p>
+          ) : activeTab === "logs" && running ? (
+            <div className="p-5 flex flex-col items-center gap-3 pt-12">
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </div>
+              <p className="text-xs text-white/30 text-center">Executing workflow…</p>
+              {runStatus && <p className="text-xs text-blue-400/70 text-center font-mono">{runStatus.msg}</p>}
             </div>
-          </div>
-        )}
-      </aside>
+          ) : (
+            <div className="p-5 space-y-4">
+              <p className="text-xs font-semibold text-white/40">Inspector</p>
+              <p className="text-xs text-white/25 leading-relaxed">Click any node to configure it here.</p>
+              <div className="border-t border-white/6 pt-4 space-y-2">
+                <p className="text-[10px] text-white/20 font-semibold uppercase tracking-widest">Quick tip</p>
+                <p className="text-xs text-white/20 leading-relaxed">
+                  Connect nodes by dragging from the dot at the bottom of one node to the top of another.
+                  Right-click a node for more options.
+                </p>
+              </div>
+            </div>
+          )}
+      </aside >
 
       {/* ── Context menu ─────────────────────────────────────────────────────── */}
-      {ctxMenu && (
-        <div
-          className="fixed z-50 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[160px]"
-          style={{ left: ctxMenu.x, top: ctxMenu.y }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {[
-            { label: "✎ Configure", action: () => { setSelectedNodeId(ctxMenu.nodeId); setCtxMenu(null); } },
-            { label: "⧉ Duplicate (⌘D)", action: () => duplicateNode(ctxMenu.nodeId) },
-            { label: "⊡ Copy ID", action: () => { navigator.clipboard.writeText(ctxMenu.nodeId); setCtxMenu(null); } },
-            null, // divider
-            { label: "🗑 Delete", action: () => deleteNode(ctxMenu.nodeId), danger: true },
-          ].map((item, i) =>
-            !item ? (
-              <div key={i} className="my-1 h-px bg-white/10" />
-            ) : (
-              <button
-                key={i}
-                onClick={item.action}
-                className={`w-full text-left px-4 py-2 text-xs transition-colors ${item.danger ? "text-red-400 hover:bg-red-500/10" : "text-white/70 hover:bg-white/5"
-                  }`}
-              >
-                {item.label}
-              </button>
-            )
-          )}
-        </div>
-      )}
-    </div>
+      {
+        ctxMenu && (
+          <div
+            className="fixed z-50 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[160px]"
+            style={{ left: ctxMenu.x, top: ctxMenu.y }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {[
+              { label: "✎ Configure", action: () => { setSelectedNodeId(ctxMenu.nodeId); setCtxMenu(null); } },
+              { label: "⧉ Duplicate (⌘D)", action: () => duplicateNode(ctxMenu.nodeId) },
+              { label: "⊡ Copy ID", action: () => { navigator.clipboard.writeText(ctxMenu.nodeId); setCtxMenu(null); } },
+              null, // divider
+              { label: "🗑 Delete", action: () => deleteNode(ctxMenu.nodeId), danger: true },
+            ].map((item, i) =>
+              !item ? (
+                <div key={i} className="my-1 h-px bg-white/10" />
+              ) : (
+                <button
+                  key={i}
+                  onClick={item.action}
+                  className={`w-full text-left px-4 py-2 text-xs transition-colors ${item.danger ? "text-red-400 hover:bg-red-500/10" : "text-white/70 hover:bg-white/5"
+                    }`}
+                >
+                  {item.label}
+                </button>
+              )
+            )}
+          </div>
+        )
+      }
+    </div >
   );
 }
 

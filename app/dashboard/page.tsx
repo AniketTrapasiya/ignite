@@ -52,7 +52,7 @@ export default async function DashboardPage() {
       {/* Welcome */}
       <div className="pt-2">
         <h2 className="text-2xl font-bold text-white">
-          Hey, {firstName} ðŸ‘‹
+          Hey, {firstName} 👋
         </h2>
         <p className="text-white/40 text-sm mt-1">
           Your AI automation platform is ready.
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
               <h3 className="text-xl font-bold text-white mb-1">Ignite Engine</h3>
               <p className="text-white/60 text-xs">One-shot AI tasks</p>
             </div>
-            <div className="text-4xl group-hover:scale-110 transition-transform duration-300">âš¡</div>
+            <div className="text-4xl group-hover:scale-110 transition-transform duration-300">⚡</div>
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-all duration-300" />
           </div>
         </Link>
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
                 </p>
               )}
             </div>
-            <div className="text-4xl group-hover:scale-110 transition-transform duration-300 relative z-10">ðŸ¤–</div>
+            <div className="text-4xl group-hover:scale-110 transition-transform duration-300 relative z-10">🤖</div>
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/3 transition-all duration-300 rounded-2xl" />
           </div>
         </Link>
@@ -130,11 +130,11 @@ export default async function DashboardPage() {
               <p className="text-white/50 text-xs">AI-coached daily practice</p>
               {totalXp > 0 && (
                 <p className="text-amber-400 text-xs mt-1 font-medium">
-                  âœ¦ {totalXp.toLocaleString()} XP earned
+                  ✦ {totalXp.toLocaleString()} XP earned
                 </p>
               )}
             </div>
-            <div className="text-4xl group-hover:scale-110 transition-transform duration-300 relative z-10">ðŸŽ“</div>
+            <div className="text-4xl group-hover:scale-110 transition-transform duration-300 relative z-10">🎓</div>
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/3 transition-all duration-300 rounded-2xl" />
           </div>
         </Link>
@@ -143,10 +143,10 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Engine Runs", value: runCount, icon: "âš¡", color: "#6366f1", href: "/dashboard/engine" },
-          { label: "AI Agents", value: agentCount, icon: "ðŸ¤–", color: "#a855f7", href: "/dashboard/agents" },
-          { label: "Memories", value: memoryCount, icon: "ðŸ§ ", color: "#ec4899", href: "/dashboard/engine" },
-          { label: "Integrations", value: integrationCount, icon: "ðŸ”Œ", color: "#f97316", href: "/dashboard/integrations" },
+          { label: "Engine Runs", value: runCount, icon: "⚡", color: "#6366f1", href: "/dashboard/engine" },
+          { label: "AI Agents", value: agentCount, icon: "🤖", color: "#a855f7", href: "/dashboard/agents" },
+          { label: "Memories", value: memoryCount, icon: "🧠", color: "#ec4899", href: "/dashboard/engine" },
+          { label: "Integrations", value: integrationCount, icon: "🔌", color: "#f97316", href: "/dashboard/integrations" },
         ].map((stat) => (
           <Link
             key={stat.label}
@@ -169,9 +169,9 @@ export default async function DashboardPage() {
             </h3>
             <div className="flex items-center gap-4">
               {topStreak > 0 && (
-                <span className="text-xs text-orange-400 font-semibold">ðŸ”¥ {topStreak}d streak</span>
+                <span className="text-xs text-orange-400 font-semibold">🔥 {topStreak}d streak</span>
               )}
-              <span className="text-xs text-amber-400 font-semibold">âœ¦ {totalXp.toLocaleString()} XP</span>
+              <span className="text-xs text-amber-400 font-semibold">✦ {totalXp.toLocaleString()} XP</span>
               <Link href="/dashboard/skills" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
                 View all
               </Link>
@@ -201,7 +201,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex justify-between text-xs text-white/30">
                     <span>Day {g.currentDay}/{g.totalDays}</span>
-                    <span className="text-amber-500">âœ¦ {g.totalXp} XP</span>
+                    <span className="text-amber-500">✦ {g.totalXp} XP</span>
                   </div>
                 </Link>
               );
@@ -217,7 +217,7 @@ export default async function DashboardPage() {
           className="flex items-center gap-4 p-4 rounded-2xl border border-purple-500/20 bg-purple-500/3 hover:bg-purple-500/7 hover:border-purple-500/30 transition-all group"
         >
           <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-            ðŸ¤–
+            🤖
           </div>
           <div>
             <p className="font-medium text-white text-sm">Create an Agent</p>
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
           className="flex items-center gap-4 p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/3 hover:bg-emerald-500/7 hover:border-emerald-500/30 transition-all group"
         >
           <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-            ðŸŽ“
+            🎓
           </div>
           <div>
             <p className="font-medium text-white text-sm">Start a Skill Journey</p>
@@ -244,7 +244,7 @@ export default async function DashboardPage() {
           className="flex items-center gap-4 p-4 rounded-2xl border border-white/8 bg-white/2 hover:bg-white/5 hover:border-white/15 transition-all group"
         >
           <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-            ðŸ”Œ
+            🔌
           </div>
           <div>
             <p className="font-medium text-white text-sm">Connect Integrations</p>
@@ -259,7 +259,7 @@ export default async function DashboardPage() {
           className="flex items-center gap-4 p-4 rounded-2xl border border-white/8 bg-white/2 hover:bg-white/5 hover:border-white/15 transition-all group"
         >
           <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-            ðŸ”„
+            🔄
           </div>
           <div>
             <p className="font-medium text-white text-sm">Saved Workflows</p>
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
       {/* Empty state for new users */}
       {runCount === 0 && skillGoals.length === 0 && (
         <div className="text-center py-12 rounded-2xl border border-dashed border-white/8">
-          <p className="text-4xl mb-3">ðŸš€</p>
+          <p className="text-4xl mb-3">🚀</p>
           <p className="text-white/50 text-sm font-medium">Nothing here yet</p>
           <p className="text-white/25 text-xs mt-1">Fire up the engine or start a skill journey to get going</p>
           <div className="flex items-center justify-center gap-3 mt-4">
