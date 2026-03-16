@@ -16,20 +16,21 @@ import "@xyflow/react/dist/style.css";
 import { nodeTypes } from "./nodes";
 import { NodeInspector } from "./NodeInspector";
 import { WorkflowNode, NodeType } from "@/lib/workflow-executor";
+import { Zap, Bot, Globe, GitBranch, Cog, Clock, Shuffle, Send } from "lucide-react";
 
 // ── Palette definitions ───────────────────────────────────────────────────────
 const PALETTE_NODES: {
-  type: NodeType; label: string; icon: string; colorKey: string;
+  type: NodeType; label: string; icon: typeof Zap; colorKey: string;
   defaultData: Record<string, unknown>; description: string;
 }[] = [
-    { type: "trigger", label: "Trigger", icon: "⚡", colorKey: "yellow", defaultData: { triggerType: "manual" }, description: "Start of workflow" },
-    { type: "llm", label: "AI / LLM", icon: "🤖", colorKey: "blue", defaultData: { model: "gemini-2.5-flash", prompt: "" }, description: "Generate text with AI" },
-    { type: "http", label: "HTTP", icon: "ðŸŒ", colorKey: "green", defaultData: { method: "GET", url: "" }, description: "Call any REST API" },
-    { type: "condition", label: "Condition", icon: "🔀", colorKey: "purple", defaultData: { left: "", operator: "==", right: "" }, description: "Branch on true / false" },
-    { type: "action", label: "Action", icon: "⚙ï¸", colorKey: "orange", defaultData: { actionType: "log", message: "" }, description: "Email, Slack, Telegram…" },
-    { type: "delay", label: "Delay", icon: "â±", colorKey: "neutral", defaultData: { delayMs: 5000 }, description: "Wait before next step" },
-    { type: "transform", label: "Transform", icon: "⚗ï¸", colorKey: "cyan", defaultData: { expression: "input" }, description: "Reshape / map data" },
-    { type: "output", label: "Output", icon: "📤", colorKey: "pink", defaultData: { format: "json" }, description: "Final result / response" },
+    { type: "trigger", label: "Trigger", icon: Zap, colorKey: "yellow", defaultData: { triggerType: "manual" }, description: "Start of workflow" },
+    { type: "llm", label: "AI / LLM", icon: Bot, colorKey: "blue", defaultData: { model: "gemini-2.5-flash", prompt: "" }, description: "Generate text with AI" },
+    { type: "http", label: "HTTP", icon: Globe, colorKey: "green", defaultData: { method: "GET", url: "" }, description: "Call any REST API" },
+    { type: "condition", label: "Condition", icon: GitBranch, colorKey: "purple", defaultData: { left: "", operator: "==", right: "" }, description: "Branch on true / false" },
+    { type: "action", label: "Action", icon: Cog, colorKey: "orange", defaultData: { actionType: "log", message: "" }, description: "Email, Slack, Telegram…" },
+    { type: "delay", label: "Delay", icon: Clock, colorKey: "neutral", defaultData: { delayMs: 5000 }, description: "Wait before next step" },
+    { type: "transform", label: "Transform", icon: Shuffle, colorKey: "cyan", defaultData: { expression: "input" }, description: "Reshape / map data" },
+    { type: "output", label: "Output", icon: Send, colorKey: "pink", defaultData: { format: "json" }, description: "Final result / response" },
   ];
 
 const PALETTE_COLORS: Record<string, string> = {
@@ -394,7 +395,7 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                   e.dataTransfer.effectAllowed = "move";
                 }}
               >
-                <span className="text-sm mt-0.5">{p.icon}</span>
+                <p.icon className="w-4 h-4 mt-0.5 shrink-0" />
                 <div>
                   <div className="text-xs font-semibold text-white/80 leading-none">{p.label}</div>
                   <div className="text-[10px] text-white/30 leading-relaxed mt-0.5">{p.description}</div>
