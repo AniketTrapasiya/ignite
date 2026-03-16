@@ -138,7 +138,7 @@ export async function runEngine(
             const result = await sendTelegramMessage(
               creds.apiKey,
               creds.chatId,
-              `🤖 <b>AutoFlow Result</b>\n\n${message}`
+              `🤖 AutoFlow Result\n\n${message}`
             );
             if (!result.ok) console.error("[Telegram] Failed:", result.description);
           } else {

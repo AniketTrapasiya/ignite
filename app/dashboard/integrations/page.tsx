@@ -187,6 +187,8 @@ export default function IntegrationsPage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [modalService, setModalService] = useState<(typeof INTEGRATIONS)[number] | null>(null);
+  const [testing, setTesting] = useState<string | null>(null);
+  const [testResults, setTestResults] = useState<Record<string, { ok: boolean; message: string }>>({});
 
   useEffect(() => { loadIntegrations(); }, []);
 
@@ -203,6 +205,23 @@ export default function IntegrationsPage() {
   async function disconnect(service: string) {
     await fetch(`/api/integrations/${service}`, { method: "DELETE" });
     setConnected((prev) => prev.filter((i) => i.service !== service));
+    setTestResults((prev) => { const n = { ...prev }; delete n[service]; return n; });
+  }
+
+  async function testIntegration(service: string) {
+    setTesting(service);
+    setTestResults((prev) => ({ ...prev, [service]: { ok: false, message: "Testing…" } }));
+    try {
+      const res = await fetch(`/api/integrations/${service}/test`, { method: "POST" });
+      const data = await res.json();
+      setTestResults((prev) => ({
+        ...prev,
+        [service]: { ok: !!data.ok, message: data.message ?? data.error ?? "Unknown result" },
+      }));
+    } catch {
+      setTestResults((prev) => ({ ...prev, [service]: { ok: false, message: "Request failed" } }));
+    }
+    setTesting(null);
   }
 
   const connectedServices = connected.map((c) => c.service);
@@ -328,6 +347,16 @@ export default function IntegrationsPage() {
                   </p>
                 )}
 
+                {/* Test result */}
+                {isConnected && testResults[integration.service] && (
+                  <p className={`text-[10px] px-2 py-1 rounded-lg ${testResults[integration.service].ok
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                    }`}>
+                    {testResults[integration.service].ok ? "✓ " : "✗ "}{testResults[integration.service].message}
+                  </p>
+                )}
+
                 {/* Actions */}
                 <div className="flex gap-2 mt-auto">
                   {integration.docsUrl && (
@@ -342,12 +371,21 @@ export default function IntegrationsPage() {
                     </a>
                   )}
                   {isConnected ? (
-                    <button
-                      onClick={() => disconnect(integration.service)}
-                      className="flex-1 py-2 rounded-xl text-xs font-medium border border-red-500/20 text-red-400/70 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 transition-colors"
-                    >
-                      Disconnect
-                    </button>
+                    <>
+                      <button
+                        onClick={() => testIntegration(integration.service)}
+                        disabled={testing === integration.service}
+                        className="flex-1 py-2 rounded-xl text-xs font-medium border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70 disabled:opacity-40 transition-colors"
+                      >
+                        {testing === integration.service ? "Testing…" : "Test"}
+                      </button>
+                      <button
+                        onClick={() => disconnect(integration.service)}
+                        className="flex-1 py-2 rounded-xl text-xs font-medium border border-red-500/20 text-red-400/70 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 transition-colors"
+                      >
+                        Disconnect
+                      </button>
+                    </>
                   ) : (
                     <button
                       onClick={() => setModalService(integration)}

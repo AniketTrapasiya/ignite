@@ -23,7 +23,8 @@ export async function sendTelegramMessage(
       body: JSON.stringify({
         chat_id: chatId,
         text: safeText,
-        parse_mode: "HTML",
+        // No parse_mode — plain text is safest since AI output may contain
+        // unescaped < > & that would cause HTML mode to reject the message.
       }),
     });
 
