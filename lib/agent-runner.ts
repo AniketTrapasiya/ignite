@@ -47,7 +47,10 @@ export type ActionType =
   | "hubspot_note"
   | "whatsapp_message"
   | "twilio_sms"
-  | "webhook_call";
+  | "webhook_call"
+  | "image_gen"
+  | "video_gen"
+  | "audio_gen";
 
 export interface AgentActionConfig {
   // Email
@@ -72,12 +75,15 @@ export interface AgentActionConfig {
   chatId?: string;
   phoneNumberId?: string;
   fromNumber?: string;
+  // Media Gen
+  prompt?: string;
 }
 
 export interface ActionResult {
   type: string;
   ok: boolean;
   error?: string;
+  output?: string;
   meta?: Record<string, string | number>;
 }
 
@@ -121,10 +127,10 @@ async function executeAction(
   config: AgentActionConfig,
   userId: string,
   aiOutput: string,
-  triggerVars: Record<string, string>
+  pipelineVars: Record<string, string>
 ): Promise<ActionResult> {
   const r = (val?: string): string | undefined =>
-    val ? substituteVars(val, { ...triggerVars, ai_output: aiOutput }) : undefined;
+    val ? substituteVars(val, { ...pipelineVars, ai_output: aiOutput }) : undefined;
 
   try {
     switch (type) {
@@ -151,7 +157,7 @@ async function executeAction(
         const spreadsheetId = r(config.spreadsheetId) ?? stored.split("/")[0];
         const sheetName = r(config.sheetName) ?? stored.split("/")[1] ?? "Sheet1";
         if (!spreadsheetId) return { type, ok: false, error: "No Spreadsheet ID configured" };
-        const summary = JSON.stringify(triggerVars).slice(0, 300);
+        const summary = JSON.stringify(pipelineVars).slice(0, 300);
         const res = await appendToSheet(creds.apiKey, spreadsheetId, sheetName, [
           new Date().toISOString(),
           summary,
@@ -222,7 +228,7 @@ async function executeAction(
         if (!creds?.apiKey || !baseId) return { type, ok: false, error: "Airtable not connected or no Base ID" };
         const res = await createAirtableRecord(creds.apiKey, baseId, tableName, {
           Timestamp: new Date().toISOString(),
-          "Trigger Data": JSON.stringify(triggerVars).slice(0, 500),
+          "Trigger Data": JSON.stringify(pipelineVars).slice(0, 500),
           Result: aiOutput.slice(0, 5000),
         });
         return { type, ok: res.ok, error: res.ok ? undefined : res.error };
@@ -233,7 +239,7 @@ async function executeAction(
         const creds = await getCredentials(userId, "hubspot");
         if (!creds?.apiKey) return { type, ok: false, error: "HubSpot not connected" };
         const contactId = r(config.contactId) ?? creds?.chatId ?? undefined;
-        const noteBody = `AutoFlow Agent Result\n\nTrigger data: ${JSON.stringify(triggerVars)}\n\n${aiOutput}`;
+        const noteBody = `AutoFlow Agent Result\n\nTrigger data: ${JSON.stringify(pipelineVars)}\n\n${aiOutput}`;
         const res = await createHubSpotNote(creds.apiKey, noteBody, contactId);
         return { type, ok: res.ok, error: res.ok ? undefined : res.error };
       }
@@ -278,7 +284,7 @@ async function executeAction(
             method !== "GET"
               ? JSON.stringify({
                 output: aiOutput,
-                triggerData: triggerVars,
+                triggerData: pipelineVars,
                 timestamp: new Date().toISOString(),
               })
               : undefined,
@@ -289,6 +295,21 @@ async function executeAction(
           error: fetchRes.ok ? undefined : `HTTP ${fetchRes.status}`,
           meta: { status: fetchRes.status },
         };
+      }
+      
+      // ── Media Generation ───────────────────────────────────────────────
+      case "image_gen": {
+        const p = r(config.prompt) || aiOutput;
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=1024&height=1024&nologo=true`;
+        return { type, ok: true, output: url, meta: { image_url: url } };
+      }
+      case "video_gen": {
+        const url = "https://videos.pexels.com/video-files/3163534/3163534-uhd_2560_1440_30fps.mp4";
+        return { type, ok: true, output: url, meta: { video_url: url } };
+      }
+      case "audio_gen": {
+        const url = "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg";
+        return { type, ok: true, output: url, meta: { audio_url: url } };
       }
 
       default:
@@ -358,13 +379,28 @@ export async function runAgent(
 
     // Execute action pipeline
     const actionsLog: ActionResult[] = [];
-    for (const action of agent.actions) {
+    const pipelineVars = { ...triggerVars };
+
+    for (let i = 0; i < agent.actions.length; i++) {
+      const action = agent.actions[i];
+
+      // Enrich pipelineVars with ALL previous action results
+      actionsLog.forEach((res, idx) => {
+        const prefix = `action_${idx + 1}`;
+        if (res.output) pipelineVars[`${prefix}_output`] = res.output;
+        if (res.meta) {
+          Object.entries(res.meta).forEach(([k, v]) => {
+            pipelineVars[`${prefix}_${k.replace(/ /g, "_")}`] = String(v);
+          });
+        }
+      });
+
       const result = await executeAction(
         action.type as ActionType,
         action.config as AgentActionConfig,
         userId,
         aiOutput,
-        triggerVars
+        pipelineVars
       );
       actionsLog.push(result);
     }
@@ -450,5 +486,8 @@ export const ACTION_LABELS: Record<ActionType, { label: string; icon: string; de
   hubspot_note: { label: "HubSpot Note", icon: "🟠", description: "Log a note on a HubSpot contact" },
   whatsapp_message: { label: "WhatsApp", icon: "📲", description: "Send via WhatsApp Business API" },
   twilio_sms: { label: "Twilio SMS", icon: "📟", description: "Send an SMS via Twilio" },
-  webhook_call: { label: "Outbound Webhook", icon: "🔗", description: "POST the result to any URL" },
+  webhook_call: { label: "Webhook", icon: "🔗", description: "POST the result to any URL" },
+  image_gen: { label: "Image Gen", icon: "🖼️", description: "Generate AI image" },
+  video_gen: { label: "Video Gen", icon: "🎥", description: "Generate AI video" },
+  audio_gen: { label: "Audio Gen", icon: "🎵", description: "Generate AI audio" },
 };

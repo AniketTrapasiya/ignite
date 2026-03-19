@@ -66,7 +66,7 @@ export default function BuilderPage() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-neutral-950">
+    <div className="flex flex-col h-full bg-[#080810]">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-800 shrink-0">
         <button

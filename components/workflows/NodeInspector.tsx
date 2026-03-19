@@ -1,4 +1,4 @@
-﻿/**
+/**
  * components/workflows/NodeInspector.tsx
  * Right-panel configuration form for the selected node.
  * Includes: per-field validation, copy reference helper, node notes.
@@ -109,10 +109,18 @@ export function NodeInspector({ node, onChange, onCommit, onDelete }: Props) {
     </div>
   );
 
-  const typeLabel: Record<NodeType, string> = {
-    trigger: "⚡ Trigger", llm: "🤖 LLM / AI", http: "ðŸŒ HTTP Request",
-    condition: "🔀 Condition", action: "âš™ï¸ Action", delay: "⏱ Delay",
-    transform: "âš—ï¸ Transform", output: "📤 Output",
+  const typeLabel: Record<string, string> = {
+    trigger: "⚡ Trigger",
+    llm: "🤖 AI Agent",
+    http: "🌐 HTTP Request",
+    condition: "🔀 Condition",
+    action: "⚙️ Action",
+    delay: "⏱ Delay",
+    transform: "🛠️ Transform",
+    output: "📤 Output",
+    image_gen: "🖼️ Image Gen",
+    video_gen: "🎥 Video Gen",
+    audio_gen: "🎵 Audio Gen",
   };
 
   const renderFields = () => {
@@ -200,6 +208,25 @@ export function NodeInspector({ node, onChange, onCommit, onDelete }: Props) {
             {select("Format", "format", ["json", "text", "markdown", "html"])}
             {field("Source node ID", "inputNodeId", { placeholder: "llm1 (optional - defaults to last node)" })}
             {field("Label", "label", { placeholder: "Final result" })}
+          </>
+        );
+      case "image_gen":
+        return (
+          <>
+            {field("Prompt", "prompt", { rows: 4, placeholder: "A futuristic city at sunset...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
+            {select("Aspect Ratio", "aspectRatio", ["1:1", "16:9", "9:16"])}
+          </>
+        );
+      case "video_gen":
+        return (
+          <>
+            {field("Prompt", "prompt", { rows: 4, placeholder: "A drone flying over mountains...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
+          </>
+        );
+      case "audio_gen":
+        return (
+          <>
+            {field("Prompt", "prompt", { rows: 4, placeholder: "A calm ambient music track...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
           </>
         );
       default:

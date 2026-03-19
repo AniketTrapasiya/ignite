@@ -30,6 +30,7 @@ interface BaseNodeProps {
   hasFalse?: boolean;
   selected?: boolean;
   invalid?: boolean;    // red dot if required fields missing
+  status?: "pending" | "running" | "completed" | "failed";
 }
 
 export function BaseNode({
@@ -43,14 +44,19 @@ export function BaseNode({
   hasFalse = false,
   selected = false,
   invalid = false,
+  status = "pending",
 }: BaseNodeProps) {
   const palette = NODE_PALETTE[color] ?? NODE_PALETTE["border-neutral-500"];
+  const isRunning = status === "running";
 
   return (
     <div
       className={`relative rounded-2xl shadow-xl border min-w-[190px] max-w-[250px] text-sm
         ${palette.border}
         ${selected ? `ring-2 ring-white/30 shadow-2xl ${palette.glow}` : "shadow-black/40"}
+        ${isRunning ? "ring-2 ring-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-pulse" : ""}
+        ${status === "completed" ? "border-green-500/60 ring-1 ring-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.3)]" : ""}
+        ${status === "failed" ? "border-red-500/60 ring-1 ring-red-500/20" : ""}
         bg-neutral-900/95 backdrop-blur
         transition-all duration-150`}
     >
@@ -60,11 +66,16 @@ export function BaseNode({
       )}
 
       {/* Header */}
-      <div className={`flex items-center gap-2 px-3 py-2.5 rounded-t-2xl bg-gradient-to-r ${palette.header} border-b border-white/5`}>
+      <div className={`flex items-center gap-2 px-3 py-2.5 rounded-t-2xl bg-linear-to-r ${palette.header} border-b border-white/5`}>
         <span className="text-base leading-none">{icon}</span>
         <span className="text-white/90 text-xs font-semibold tracking-wide truncate flex-1">{label}</span>
-        {/* Accent dot */}
-        <span className="w-1.5 h-1.5 rounded-full shrink-0 opacity-80" style={{ background: palette.dot }} />
+        {/* Status indicator */}
+        <div className="flex items-center gap-1.5">
+          {status === "completed" && <span className="text-green-400 text-[10px]">✓</span>}
+          {status === "failed" && <span className="text-red-400 text-[10px]">✗</span>}
+          {isRunning && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />}
+          <span className="w-1.5 h-1.5 rounded-full shrink-0 opacity-80" style={{ background: palette.dot }} />
+        </div>
       </div>
 
       {/* Content */}
@@ -77,7 +88,7 @@ export function BaseNode({
         <Handle
           type="target"
           position={Position.Top}
-          className="!w-3 !h-3 !border-2 !border-neutral-700"
+          className="w-3! h-3! border-2! border-neutral-700!"
           style={{ background: palette.dot, top: -6 }}
         />
       )}
@@ -85,7 +96,7 @@ export function BaseNode({
         <Handle
           type="source"
           position={Position.Bottom}
-          className="!w-3 !h-3 !border-2 !border-neutral-700"
+          className="w-3! h-3! border-2! border-neutral-700!"
           style={{ background: palette.dot, bottom: -6 }}
         />
       )}
@@ -95,7 +106,7 @@ export function BaseNode({
           position={Position.Bottom}
           id="true"
           style={{ left: "28%", background: "#22c55e", bottom: -6 }}
-          className="!w-3 !h-3 !border-2 !border-neutral-700"
+          className="w-3! h-3! border-2! border-neutral-700!"
         />
       )}
       {hasFalse && (
@@ -104,7 +115,7 @@ export function BaseNode({
           position={Position.Bottom}
           id="false"
           style={{ left: "72%", background: "#ef4444", bottom: -6 }}
-          className="!w-3 !h-3 !border-2 !border-neutral-700"
+          className="w-3! h-3! border-2! border-neutral-700!"
         />
       )}
 

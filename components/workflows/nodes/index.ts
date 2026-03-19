@@ -10,6 +10,7 @@ export { ActionNode } from "./ActionNode";
 export { DelayNode } from "./DelayNode";
 export { TransformNode } from "./TransformNode";
 export { OutputNode } from "./OutputNode";
+export { ImageGenNode, VideoGenNode, AudioGenNode } from "./MediaNodes";
 
 import { TriggerNode } from "./TriggerNode";
 import { LLMNode } from "./LLMNode";
@@ -19,6 +20,7 @@ import { ActionNode } from "./ActionNode";
 import { DelayNode } from "./DelayNode";
 import { TransformNode } from "./TransformNode";
 import { OutputNode } from "./OutputNode";
+import { ImageGenNode, VideoGenNode, AudioGenNode } from "./MediaNodes";
 
 export const nodeTypes = {
   trigger: TriggerNode,
@@ -29,4 +31,7 @@ export const nodeTypes = {
   delay: DelayNode,
   transform: TransformNode,
   output: OutputNode,
+  image_gen: ImageGenNode,
+  video_gen: VideoGenNode,
+  audio_gen: AudioGenNode,
 };

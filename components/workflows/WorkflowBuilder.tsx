@@ -1,4 +1,4 @@
-﻿/**
+/**
  * components/workflows/WorkflowBuilder.tsx
  * Visual node-based workflow editor powered by @xyflow/react.
  * Features: drag-and-drop, keyboard shortcuts, auto-layout, run log panel,
@@ -16,7 +16,8 @@ import "@xyflow/react/dist/style.css";
 import { nodeTypes } from "./nodes";
 import { NodeInspector } from "./NodeInspector";
 import { WorkflowNode, NodeType } from "@/lib/workflow-executor";
-import { Zap, Bot, Globe, GitBranch, Cog, Clock, Shuffle, Send } from "lucide-react";
+import { Zap, Bot, Globe, GitBranch, Cog, Clock, Shuffle, Send, Image as ImageIcon, Video as VideoIcon, Music as MusicIcon } from "lucide-react";
+import { MediaPreview, extractMediaUrls } from "./MediaPreview";
 
 // ── Palette definitions ───────────────────────────────────────────────────────
 const PALETTE_NODES: {
@@ -28,6 +29,9 @@ const PALETTE_NODES: {
     { type: "http", label: "HTTP", icon: Globe, colorKey: "green", defaultData: { method: "GET", url: "" }, description: "Call any REST API" },
     { type: "condition", label: "Condition", icon: GitBranch, colorKey: "purple", defaultData: { left: "", operator: "==", right: "" }, description: "Branch on true / false" },
     { type: "action", label: "Action", icon: Cog, colorKey: "orange", defaultData: { actionType: "log", message: "" }, description: "Email, Slack, Telegram…" },
+    { type: "image_gen", label: "Image Gen", icon: ImageIcon, colorKey: "pink", defaultData: { prompt: "", aspectRatio: "1:1" }, description: "Generate AI images" },
+    { type: "video_gen", label: "Video Gen", icon: VideoIcon, colorKey: "purple", defaultData: { prompt: "" }, description: "Generate AI video" },
+    { type: "audio_gen", label: "Audio Gen", icon: MusicIcon, colorKey: "blue", defaultData: { prompt: "" }, description: "Generate AI audio" },
     { type: "delay", label: "Delay", icon: Clock, colorKey: "neutral", defaultData: { delayMs: 5000 }, description: "Wait before next step" },
     { type: "transform", label: "Transform", icon: Shuffle, colorKey: "cyan", defaultData: { expression: "input" }, description: "Reshape / map data" },
     { type: "output", label: "Output", icon: Send, colorKey: "pink", defaultData: { format: "json" }, description: "Final result / response" },
@@ -306,6 +310,15 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
             const execs = d2.workflow?.executions ?? [];
             setExecutions(execs);
             const latest = execs.find((e) => e.id === data.executionId);
+            
+            // Highlight active nodes on canvas
+            if (latest?.stepLogs) {
+              setNodes((nds) => nds.map((n) => {
+                const step = latest.stepLogs.find((s) => s.nodeId === n.id);
+                return { ...n, data: { ...n.data, status: step?.status || "pending" } };
+              }));
+            }
+
             if (latest && ["COMPLETED", "FAILED", "CANCELLED"].includes(latest.status)) {
               clearInterval(poll);
               setRunning(false);
@@ -313,6 +326,10 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                 type: latest.status === "COMPLETED" ? "success" : "error",
                 msg: latest.status === "COMPLETED" ? "Completed ✓" : `Failed: ${latest.error ?? "unknown"}`,
               });
+              // Clear status highlights after 5 seconds
+              setTimeout(() => {
+                setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, status: undefined } })));
+              }, 5000);
             }
           } catch { clearInterval(poll); setRunning(false); }
         }, 2000);
@@ -525,7 +542,16 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
           >
             <Background color="rgba(255,255,255,0.04)" gap={24} size={1} />
             <Controls
-              style={{ background: "#111118", border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{
+                background: "#111118",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "8px",
+                padding: "4px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)",
+              }}
               showInteractive={false}
             />
             <MiniMap
@@ -598,25 +624,34 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                     {/* Step logs */}
                     {exec.stepLogs && exec.stepLogs.length > 0 && (
                       <div className="divide-y divide-white/[0.04]">
-                        {exec.stepLogs.map((step, i) => (
+                        {exec.stepLogs.map((step, i) => {
+                          const medias = extractMediaUrls(step.output);
+                          return (
                           <div key={i} className="px-4 py-2.5 flex items-start gap-3">
-                            <span className={`text-xs mt-0.5 shrink-0 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : step.status === "running" ? "text-blue-400" : "text-neutral-500"}`}>
+                            <span className={`text-xs mt-0.5 shrink-0 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : step.status === "running" ? "text-blue-400 animate-pulse" : "text-neutral-500"}`}>
                               {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : step.status === "running" ? "⏳" : "○"}
                             </span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-mono text-white/50">{step.nodeId}</span>
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 capitalize">{step.nodeType}</span>
+                                <span className={`text-xs font-mono transition-colors ${step.status === "running" ? "text-blue-300 font-bold" : "text-white/50"}`}>{step.nodeId}</span>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded transition-colors capitalize ${step.status === "running" ? "bg-blue-500/20 text-blue-300" : "bg-white/5 text-white/30"}`}>{step.nodeType}</span>
                               </div>
                               {step.error && <div className="text-xs text-red-400 mt-1 font-mono truncate">{step.error}</div>}
                               {step.output != null && (
-                                <div className="text-[10px] text-white/30 mt-1 font-mono truncate">
-                                  → {typeof step.output === "string" ? step.output.slice(0, 120) : JSON.stringify(step.output).slice(0, 120)}
+                                <div className="mt-2 space-y-2">
+                                  <div className="text-[10px] text-white/50 bg-black/30 p-2 rounded max-h-32 overflow-y-auto font-mono whitespace-pre-wrap leading-relaxed border border-white/5">
+                                    {typeof step.output === "string" ? step.output : JSON.stringify(step.output, null, 2)}
+                                  </div>
+                                  {medias.length > 0 && (
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                      {medias.map((m, idx) => <MediaPreview key={idx} url={m.url} type={m.type} />)}
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
                           </div>
-                        ))}
+                        )})}
                       </div>
                     )}
 
@@ -686,26 +721,40 @@ function Builder({ workflowId, initialNodes = [], initialEdges = [], onSave }: P
                     {latest.stepLogs && latest.stepLogs.length > 0 && (
                       <div className="space-y-1.5">
                         <p className="text-[10px] text-white/25 font-semibold uppercase tracking-widest">Steps ({latest.stepLogs.length})</p>
-                        <div className="space-y-1">
-                          {latest.stepLogs.map((step, i) => (
-                            <div key={i} className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-white/2 border border-white/4">
-                              <span className={`text-xs shrink-0 mt-0.5 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : "text-blue-400"}`}>
-                                {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : "⏳"}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-[10px] font-mono text-white/40 truncate">{step.nodeId}</span>
-                                  <span className="text-[9px] px-1 rounded bg-white/5 text-white/25 capitalize shrink-0">{step.nodeType}</span>
+                        <div className="space-y-1.5">
+                          {latest.stepLogs.map((step, i) => {
+                            const stepMedias = extractMediaUrls(step.output);
+                            return (
+                            <div key={i} className={`flex flex-col gap-1.5 px-3 py-2.5 rounded-lg border transition-colors ${step.status === "running" ? "bg-blue-500/5 border-blue-500/20" : "bg-white/2 border-white/4"}`}>
+                              <div className="flex items-start gap-2">
+                                <span className={`text-xs shrink-0 mt-0.5 ${step.status === "completed" ? "text-green-400" : step.status === "failed" ? "text-red-400" : "text-blue-400 animate-pulse"}`}>
+                                  {step.status === "completed" ? "✓" : step.status === "failed" ? "✗" : "⏳"}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`text-[10px] font-mono truncate ${step.status === "running" ? "text-blue-300 font-bold" : "text-white/40"}`}>{step.nodeId}</span>
+                                    <span className={`text-[9px] px-1 rounded capitalize shrink-0 ${step.status === "running" ? "bg-blue-500/20 text-blue-300" : "bg-white/5 text-white/25"}`}>{step.nodeType}</span>
+                                  </div>
+                                  
+                                  {step.output != null && (
+                                    <div className="mt-1.5">
+                                      <div className="text-[10px] text-white/40 font-mono bg-black/20 p-1.5 rounded truncate">
+                                        {typeof step.output === "string" ? step.output : JSON.stringify(step.output)}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {step.error && <p className="text-[10px] text-red-400/80 font-mono truncate mt-0.5">{step.error}</p>}
                                 </div>
-                                {step.output != null && (
-                                  <p className="text-[10px] text-white/30 font-mono truncate mt-0.5">
-                                    → {typeof step.output === "string" ? step.output.slice(0, 80) : JSON.stringify(step.output).slice(0, 80)}
-                                  </p>
-                                )}
-                                {step.error && <p className="text-[10px] text-red-400/80 font-mono truncate mt-0.5">{step.error}</p>}
                               </div>
+                              {stepMedias.length > 0 && (
+                                <div className="mt-1 flex flex-col gap-2">
+                                  {stepMedias.map((m, idx) => (
+                                    <MediaPreview key={idx} url={m.url} type={m.type} />
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          ))}
+                          )})}
                         </div>
                       </div>
                     )}

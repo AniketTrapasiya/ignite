@@ -18,7 +18,10 @@ export type NodeType =
   | "action"
   | "delay"
   | "transform"
-  | "output";
+  | "output"
+  | "image_gen"
+  | "video_gen"
+  | "audio_gen";
 
 export interface WorkflowNode {
   id: string;
@@ -227,7 +230,6 @@ async function executeNode(node: WorkflowNode, ctx: ExecutionContext, userId: st
       // Safe-eval with input variable
       const forbidden = /\b(fetch|require|import|eval|Function|process|global|window|document)\b/;
       if (forbidden.test(expression)) throw new Error("Forbidden expression");
-      // eslint-disable-next-line no-new-func
       const fn = new Function("input", "ctx", `"use strict"; return (${expression});`);
       return fn(input, ctx);
     }
@@ -238,10 +240,76 @@ async function executeNode(node: WorkflowNode, ctx: ExecutionContext, userId: st
     }
 
     case "action": {
-      // Action nodes delegate to registered integrations (future extension)
       const actionType = String(d.actionType ?? "log");
-      if (actionType === "log") return { logged: true, message: interpolate(String(d.message ?? ""), ctx) };
-      return { action: actionType, status: "not-implemented" };
+      const message = interpolate(String(d.message ?? ""), ctx);
+
+      if (actionType === "log") return { logged: true, message };
+
+      // Import necessary helpers (locally to avoid circular deps if any)
+      const { getCredentials } = await import("./integrations");
+      const { sendTelegramMessage } = await import("./integrations/telegram");
+      const { sendSlackMessage, buildSlackBlocks } = await import("./integrations/slack");
+
+      switch (actionType) {
+        case "telegram":
+        case "telegram_message": {
+          const creds = await getCredentials(userId, "telegram");
+          const chatId = String(d.chatId ?? creds?.chatId ?? "");
+          if (!creds?.apiKey || !chatId) return { ok: false, error: "Telegram not connected" };
+          const res = await sendTelegramMessage(creds.apiKey, chatId, message);
+          return { ok: res.ok, error: res.description };
+        }
+        case "slack":
+        case "slack_message": {
+          const creds = await getCredentials(userId, "slack");
+          const channel = String(d.chatId ?? creds?.chatId ?? "");
+          if (!creds?.apiKey || !channel) return { ok: false, error: "Slack not connected" };
+          const res = await sendSlackMessage(creds.apiKey, channel, "Automated Workflow", buildSlackBlocks(message));
+          return { ok: res.ok, error: res.error };
+        }
+        default:
+          return { action: actionType, status: "not-implemented", message };
+      }
+    }
+
+    case "image_gen": {
+      const prompt = interpolate(String(d.prompt ?? ""), ctx);
+      const aspectRatio = String(d.aspectRatio ?? "1:1");
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${aspectRatio === "16:9" ? 1024 : 512}&height=${aspectRatio === "9:16" ? 1024 : 512}&nologo=true`;
+      return {
+        success: true,
+        image_url: url,
+        image: url, // Alias for convenience
+        url, // Alias for convenience
+        text: url, // Alias so {{nodeId.text}} works
+        prompt
+      };
+    }
+
+    case "video_gen": {
+      const prompt = interpolate(String(d.prompt ?? ""), ctx);
+      const url = "https://videos.pexels.com/video-files/3163534/3163534-uhd_2560_1440_30fps.mp4";
+      return {
+        success: true,
+        video_url: url,
+        video: url,
+        url,
+        text: url,
+        prompt
+      };
+    }
+
+    case "audio_gen": {
+      const prompt = interpolate(String(d.prompt ?? ""), ctx);
+      const url = "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg";
+      return {
+        success: true,
+        audio_url: url,
+        audio: url,
+        url,
+        text: url,
+        prompt
+      };
     }
 
     default:

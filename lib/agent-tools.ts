@@ -1,10 +1,11 @@
-﻿/**
+/**
  * lib/agent-tools.ts
  * Real tool definitions for the agentic engine (AI SDK v6).
  * In AI SDK v6, tools use `inputSchema` (not `parameters`).
  */
 import { tool } from "ai";
 import { z } from "zod";
+import { tavily } from "@tavily/core";
 
 // Helper to get an AbortSignal with a timeout
 function timeoutSignal(ms: number): AbortSignal | undefined {
@@ -205,15 +206,94 @@ export const summarizeTextTool = tool({
   },
 });
 
+// ── Tavily Search ────────────────────────────────────────────────────────────
+export const tavilySearchTool = tool({
+  description: "Search the web using Tavily. High quality answers for complex research queries.",
+  inputSchema: z.object({
+    query: z.string().describe("The search query"),
+  }),
+  execute: async ({ query }: { query: string }) => {
+    const apiKey = process.env.TAVILY_API_KEY;
+    if (!apiKey) {
+      return { error: "TAVILY_API_KEY is not configured", fallback_to_webSearchTool: true };
+    }
+    try {
+      const tvly = tavily({ apiKey });
+      const response = await tvly.search(query, {
+        searchDepth: "advanced",
+        includeAnswer: true,
+      });
+      return { query, answer: response.answer, results: response.results };
+    } catch (err) {
+      return { error: String(err), fallback_to_webSearchTool: true };
+    }
+  },
+});
+
+// ── Media Generation Tools ────────────────────────────────────────────────────
+export const generateImageTool = tool({
+  description: "Generate an image using a text prompt. Returns a URL of the generated image.",
+  inputSchema: z.object({
+    prompt: z.string().describe("Detailed description of the image to generate"),
+    aspectRatio: z.enum(["1:1", "16:9", "9:16"]).default("1:1"),
+  }),
+  execute: async ({ prompt, aspectRatio }: { prompt: string; aspectRatio: string }) => {
+    return {
+      success: true,
+      prompt,
+      // For the hackathon/demo, return a placeholder image from Unsplash that matches the prompt
+      image_url: `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${aspectRatio === "16:9" ? 1024 : 512}&height=${aspectRatio === "9:16" ? 1024 : 512}&nologo=true`,
+      aspectRatio
+    };
+  },
+});
+
+export const generateVideoTool = tool({
+  description: "Generate a short video using a text prompt. Returns a video URL.",
+  inputSchema: z.object({
+    prompt: z.string().describe("Detailed description of the video to generate"),
+  }),
+  execute: async ({ prompt }: { prompt: string }) => {
+    // Return a sample generated video for the hackathon/demo
+    return {
+      success: true,
+      prompt,
+      video_url: "https://videos.pexels.com/video-files/3163534/3163534-uhd_2560_1440_30fps.mp4",
+      note: "Using sample video for demonstration purposes."
+    };
+  },
+});
+
+export const generateAudioTool = tool({
+  description: "Generate audio (Speech, TTS, or SFX) from text.",
+  inputSchema: z.object({
+    text: z.string().describe("Text to convert to speech"),
+    voice: z.string().optional(),
+  }),
+  execute: async ({ text, voice }: { text: string; voice?: string }) => {
+    // Return a sample generated audio for the hackathon/demo
+    return {
+      success: true,
+      text,
+      audio_url: "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg",
+      note: "Using sample audio for demonstration purposes."
+    };
+  },
+});
+
 // ── Aggregate tools export ────────────────────────────────────────────────────
 export const agentTools = {
   webSearch: webSearchTool,
+  tavilySearch: tavilySearchTool,
   httpRequest: httpRequestTool,
   extractPage: extractPageTool,
   getCurrentTime: getCurrentTimeTool,
   parseJson: parseJsonTool,
   evaluateExpression: evaluateExpressionTool,
   summarizeText: summarizeTextTool,
+  generateImage: generateImageTool,
+  generateVideo: generateVideoTool,
+  generateAudio: generateAudioTool,
 };
 
 // ── Credential Request Tool (Human-in-the-Loop) ───────────────────────────────

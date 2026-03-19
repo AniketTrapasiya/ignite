@@ -200,6 +200,27 @@ const ACTIONS: {
         { key: "method", label: "Method", placeholder: "POST" },
       ],
     },
+    {
+      type: "image_gen",
+      label: "Generate Image",
+      icon: "🖼️",
+      desc: "Create an AI image based on the result",
+      fields: [
+        { key: "prompt", label: "Custom Prompt (Optional)", placeholder: "Uses AI result if empty", hint: "Prefix or override the AI output" },
+      ],
+    },
+    {
+      type: "video_gen",
+      label: "Generate Video",
+      icon: "🎥",
+      desc: "Create an AI video from the result",
+    },
+    {
+      type: "audio_gen",
+      label: "Generate Audio",
+      icon: "🎵",
+      desc: "Convert result to AI speech/audio",
+    },
   ];
 
 const ICONS = ["🤖", "⚡", "🚀", "🧠", "🔥", "📊", "🎯", "💼", "🌟", "⚙️", "🔮", "💡"];
