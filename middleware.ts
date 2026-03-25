@@ -11,6 +11,8 @@ const publicPaths = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/auth/verify-otp",
+  "/api/webhooks/telegram",
+  "/api/cron/telegram-news",
 ];
 
 const authOnlyPaths = [

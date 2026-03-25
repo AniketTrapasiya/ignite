@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { fetchDailyNews } from '@/lib/agent/tools/newsFetcher';
 import { sendTelegramMessage } from '@/lib/integrations/telegram';
+import { prisma } from '@/lib/prisma';
+import { decrypt } from '@/lib/encryption';
 
 export async function GET(request: Request) {
   // Prevent unauthorized access if deployed to Vercel production
@@ -25,22 +27,35 @@ export async function GET(request: Request) {
       message += `${idx + 1}. <a href="${n.url}">${n.title}</a>\n`;
     });
 
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    // Multi-Tenant Upgrade: Broadcast to all connected Telegram users
+    const integrations = await prisma.integration.findMany({
+      where: { service: 'telegram', status: 'connected' }
+    });
 
-    if (!botToken || !chatId) {
-      console.warn("⚠️ Missing Telegram credentials. News fetched but not sent.");
-      return NextResponse.json({ message: "News fetched, but missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID." }, { status: 200 });
+    if (integrations.length === 0) {
+      console.warn("⚠️ No connected Telegram users found in the database.");
+      return NextResponse.json({ message: "No users to send news to." }, { status: 200 });
     }
 
-    const { ok, description } = await sendTelegramMessage(botToken, chatId, message);
+    let sentCount = 0;
+    for (const integration of integrations) {
+      try {
+        const decryptedCreds = decrypt(integration.credentials);
+        const creds = JSON.parse(decryptedCreds);
+        const botToken = creds.botToken || process.env.TELEGRAM_BOT_TOKEN;
+        const chatId = creds.chatId || creds.chat_id;
 
-    if (!ok) {
-      throw new Error(`Telegram API Error: ${description}`);
+        if (botToken && chatId) {
+          const { ok } = await sendTelegramMessage(botToken, chatId, message);
+          if (ok) sentCount++;
+        }
+      } catch (e) {
+        console.error(`Failed to dispatch news to user ${integration.userId}`, e);
+      }
     }
 
-    console.log("✅ News successfully dispatched to Telegram.");
-    return NextResponse.json({ message: "News successfully sent to Telegram!" }, { status: 200 });
+    console.log(`✅ News successfully dispatched to ${sentCount} Telegram users.`);
+    return NextResponse.json({ message: `Broadcasted to ${sentCount} users.` }, { status: 200 });
   } catch (error) {
     console.error("❌ Cron Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -3,6 +3,7 @@ import { BaseMessage } from "@langchain/core/messages";
 
 // Define the state for the 24/7 Life-Agent loop
 export interface AgentState {
+  userId: string;
   messages: BaseMessage[];
   currentCycle: "waking" | "working" | "socializing" | "gaming" | "sleeping";
   age: number;
@@ -15,6 +16,7 @@ import { fetchDailyNews } from './tools/newsFetcher.js';
 export const createAgentGraph = () => {
   const workflow = new StateGraph<AgentState>({
     channels: {
+      userId: null as any,
       messages: { value: (x, y) => x.concat(y), default: () => [] },
       currentCycle: null,
       age: null,

@@ -77,7 +77,94 @@ export default function AgentDashboard() {
 
           </div>
         </div>
+
+        {/* Pending Approvals HITL UI */}
+        <PendingApprovals />
+
       </div>
+    </div>
+  );
+}
+
+function PendingApprovals() {
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loadingObj, setLoadingObj] = useState<Record<string, boolean>>({});
+
+  const fetchPending = async () => {
+    try {
+      const res = await fetch('/api/agent/pending?userId=123');
+      const data = await res.json();
+      if (data.posts) setPosts(data.posts);
+    } catch(e) {}
+  };
+
+  useEffect(() => {
+    fetchPending();
+    const inv = setInterval(fetchPending, 5000);
+    return () => clearInterval(inv);
+  }, []);
+
+  const handleAction = async (id: string, action: string, newContent?: string) => {
+    setLoadingObj({ ...loadingObj, [id]: true });
+    try {
+      const res = await fetch('/api/agent/pending', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id, action, newContent, userId: '123' })
+      });
+      await res.json();
+      await fetchPending();
+    } catch(e) {}
+    setLoadingObj({ ...loadingObj, [id]: false });
+  };
+
+  return (
+    <div className="mt-10 border-t border-cyan-500/20 pt-8">
+      <h2 className="text-2xl font-bold flex items-center gap-3 text-cyan-300 mb-6 uppercase tracking-widest">
+        <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+        HITL Pending Approvals
+      </h2>
+      
+      {posts.length === 0 ? (
+        <div className="text-gray-500 font-sans italic text-sm">No agent drafts waiting for your review. (Queue is clean)</div>
+      ) : (
+        <div className="grid gap-6">
+          {posts.map(p => (
+            <div key={p.id} className="bg-[#0B0F19] border border-cyan-500/30 rounded-xl p-5 shadow-lg relative overflow-hidden">
+               <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                 <span className="text-amber-400 font-bold uppercase text-xs tracking-wider">Draft: {p.platform}</span>
+                 <a href={p.targetUrl} target="_blank" rel="noreferrer" className="text-cyan-400 text-xs hover:underline truncate max-w-sm">{p.targetUrl}</a>
+               </div>
+               
+               <textarea 
+                  className="w-full bg-black/50 text-white border border-white/10 rounded-lg p-3 min-h-[100px] font-sans text-sm focus:border-cyan-500 outline-none transition-colors"
+                  defaultValue={p.content}
+                  id={`draft-${p.id}`}
+               />
+
+               <div className="flex items-center gap-3 mt-4 justify-end">
+                 <button onClick={() => handleAction(p.id, 'reject')} disabled={loadingObj[p.id]} className="px-4 py-2 rounded-lg text-xs font-bold border border-red-500/50 text-red-400 hover:bg-red-500/10 transition">Discard ❌</button>
+                 <button 
+                    onClick={() => {
+                        const val = (document.getElementById(`draft-${p.id}`) as HTMLTextAreaElement).value;
+                        handleAction(p.id, 'update', val);
+                    }} 
+                    disabled={loadingObj[p.id]} 
+                    className="px-4 py-2 rounded-lg text-xs font-bold border border-amber-500/50 text-amber-400 hover:bg-amber-500/10 transition"
+                 >Save Edit 📝</button>
+                 <button 
+                    onClick={() => {
+                        const val = (document.getElementById(`draft-${p.id}`) as HTMLTextAreaElement).value;
+                        handleAction(p.id, 'approve', val);
+                    }} 
+                    disabled={loadingObj[p.id]} 
+                    className="px-6 py-2 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition shadow-[0_0_15px_rgba(8,145,178,0.5)]"
+                 >Approve & Publish 🚀</button>
+               </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

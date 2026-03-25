@@ -1,0 +1,33 @@
+[
+  {
+    "platform": "linkedin",
+    "targetUrl": "https://example.com/user/post123",
+    "content": "Keep pushing forward! I believe in you. 🚀",
+    "id": "post_1774446185050_548",
+    "timestamp": 1774446185050
+  },
+  {
+    "userId": "22b723b7-281e-48d2-a0a0-dfd709381bc8",
+    "platform": "twitter",
+    "targetUrl": "https://t.me/ignite_os_test",
+    "content": "This is a LIVE Human-in-the-Loop test for your Ignite platform. If you see this in Telegram, the integration is working perfectly! 🤖✅",
+    "id": "post_1774450281065_786",
+    "timestamp": 1774450281065
+  },
+  {
+    "userId": "22b723b7-281e-48d2-a0a0-dfd709381bc8",
+    "platform": "twitter",
+    "targetUrl": "https://t.me/ignite_os_test",
+    "content": "This is a LIVE Human-in-the-Loop test for your Ignite platform. If you see this in Telegram, the integration is working perfectly! 🤖✅",
+    "id": "post_1774450431221_783",
+    "timestamp": 1774450431221
+  },
+  {
+    "userId": "22b723b7-281e-48d2-a0a0-dfd709381bc8",
+    "platform": "twitter",
+    "targetUrl": "https://t.me/ignite_os_test",
+    "content": "This is a LIVE Human-in-the-Loop test for your Ignite platform. If you see this in Telegram, the integration is working perfectly! 🤖✅",
+    "id": "post_1774450461874_170",
+    "timestamp": 1774450461874
+  }
+]
