@@ -9,13 +9,13 @@ import { cookies } from 'next/headers';
  */
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth-token')?.value;
+  const token = cookieStore.get('autoflow-token')?.value;
   let userId = "guest";
 
   if (token) {
     try {
-      const decoded = await verifyToken(token);
-      if (decoded && typeof decoded !== 'string') userId = (decoded as any).userId;
+      const decoded = verifyToken(token);
+      if (decoded && decoded.userId) userId = decoded.userId;
     } catch(e) {}
   }
 
