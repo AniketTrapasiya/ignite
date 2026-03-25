@@ -3,11 +3,13 @@ import { getAllPendingPosts, updatePendingPost, clearPendingPost, getLatestPendi
 import { executePlaywrightPublish } from '@/lib/agent/tools/socialWriter';
 import { sendTelegramMessage } from '@/lib/integrations/telegram';
 import { prisma } from '@/lib/prisma';
+import { decrypt } from '@/lib/encryption';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId') || '123'; // Using 123 as the dev fallback
+    const userId = searchParams.get('userId'); 
+    if (!userId) return NextResponse.json({ posts: [] });
     const posts = await getAllPendingPosts(userId);
     return NextResponse.json({ posts });
   } catch (err) {
@@ -55,12 +57,18 @@ export async function PUT(req: Request) {
              where: { userId_service: { userId, service: 'telegram' } }
           });
           if (integration) {
-            const creds = JSON.parse(integration.credentials);
-            if ((creds.botToken || process.env.TELEGRAM_BOT_TOKEN) && creds.chatId) {
-               await sendTelegramMessage(creds.botToken || process.env.TELEGRAM_BOT_TOKEN, creds.chatId, `✅ Notice: Draft for ${post.platform} was approved manually via the Web Dashboard and successfully published!`);
+            const decryptedCreds = decrypt(integration.credentials);
+            const creds = JSON.parse(decryptedCreds);
+            const botToken = creds.botToken || process.env.TELEGRAM_BOT_TOKEN;
+            const chatId = creds.chatId || creds.chat_id;
+            
+            if (botToken && chatId) {
+               await sendTelegramMessage(botToken, chatId, `✅ Notice: Draft for ${post.platform} was approved manually via the Web Dashboard and successfully published!`);
             }
           }
-        } catch(e) {}
+        } catch(e) {
+          console.error("Dashboard notification failed:", e);
+        }
 
         return NextResponse.json({ success: true, message: 'Published successfully!' });
       } else {

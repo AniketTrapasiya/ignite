@@ -79,20 +79,21 @@ export default function AgentDashboard() {
         </div>
 
         {/* Pending Approvals HITL UI */}
-        <PendingApprovals />
+        <PendingApprovals userId={vitals.userId} />
 
       </div>
     </div>
   );
 }
 
-function PendingApprovals() {
+function PendingApprovals({ userId }: { userId: string }) {
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingObj, setLoadingObj] = useState<Record<string, boolean>>({});
 
   const fetchPending = async () => {
+    if (!userId) return;
     try {
-      const res = await fetch('/api/agent/pending?userId=123');
+      const res = await fetch(`/api/agent/pending?userId=${userId}`);
       const data = await res.json();
       if (data.posts) setPosts(data.posts);
     } catch(e) {}
@@ -110,7 +111,7 @@ function PendingApprovals() {
       const res = await fetch('/api/agent/pending', {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ id, action, newContent, userId: '123' })
+        body: JSON.stringify({ id, action, newContent, userId })
       });
       await res.json();
       await fetchPending();

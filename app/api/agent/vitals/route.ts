@@ -1,14 +1,26 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { basePersona } from '@/lib/agent/persona';
+import { verifyToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 /**
  * Month 6 - Week 21: Backend "Agent Vitals" Endpoints
  * Exposes the Digital Twin's internal status to the React Dashboard.
  */
-export async function GET() {
-  // In production, this would query Neo4j and Pinecone to calculate dynamic stats
-  // For the initial launch, we read from the core memory and synthesize the vitals
+export async function GET(req: NextRequest) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth-token')?.value;
+  let userId = "guest";
+
+  if (token) {
+    try {
+      const decoded = await verifyToken(token);
+      if (typeof decoded !== 'string') userId = decoded.userId;
+    } catch(e) {}
+  }
+
   const vitals = {
+    userId,
     name: basePersona.name,
     currentAge: basePersona.currentAge.toFixed(1), // e.g. "18.2"
     energyLevel: basePersona.energyLevel,
