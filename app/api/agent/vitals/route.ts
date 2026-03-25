@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   if (token) {
     try {
       const decoded = await verifyToken(token);
-      if (typeof decoded !== 'string') userId = decoded.userId;
+      if (decoded && typeof decoded !== 'string') userId = (decoded as any).userId;
     } catch(e) {}
   }
 
