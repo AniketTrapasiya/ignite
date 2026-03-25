@@ -49,6 +49,16 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: "Life-Twin",
+    href: "/agent-dashboard",
+    badge: "LIVE",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.375a1.125 1.125 0 011.125-1.125h14.25a1.125 1.125 0 011.125 1.125v13.5a1.125 1.125 0 01-1.125 1.125H5.432c-.445 0-.872.2-.162.529l-2.484 1.15A.75.75 0 012.25 17.85V3.375z" />
+      </svg>
+    ),
+  },
+  {
     label: "Templates",
     href: "/dashboard/agents/templates",
     icon: (
