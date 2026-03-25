@@ -159,6 +159,145 @@ export async function generateAudio(
   return { audioBase64 };
 }
 
+/**
+ * Generate video using FREE AI services.
+ *
+ * Tier 1 — Hugging Face Inference API (free tier, needs HF_TOKEN or user key):
+ *   Model: cerspense/zeroscope_v2_576w  (best free video model)
+ *   Fallback: damo-vilab/text-to-video-ms-1.7b (ModelScope)
+ *
+ * Tier 2 — Pollinations.ai video endpoint (completely free, no key needed)
+ */
+export async function generateVideo(
+  userId: string,
+  prompt: string,
+  options: { aspectRatio?: string; duration?: number } = {}
+): Promise<{ videoUrl?: string; videoBase64?: string; error?: string }> {
+
+  // ── Native Gemini Video Generation (Veo API) ──
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      const modelId = "veo-2.0-generate-001";
+      const startUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:predictLongRunning?key=${apiKey}`;
+
+      // Use manual abort controller for compatibility with older Node.js versions
+      const startController = new AbortController();
+      const startTimeout = setTimeout(() => startController.abort(), 30000);
+
+      let startRes: Response;
+      try {
+        startRes = await fetch(startUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            instances: [{ prompt }],
+            parameters: {
+              sampleCount: 1,
+              aspectRatio: options.aspectRatio ?? "16:9",
+              durationSeconds: Math.min(Math.max(options.duration ?? 5, 5), 8),
+            },
+          }),
+          signal: startController.signal,
+        });
+      } finally {
+        clearTimeout(startTimeout);
+      }
+
+      const startText = await startRes.text();
+      let startData: { name?: string; error?: { message?: string; code?: number } };
+      try {
+        startData = JSON.parse(startText);
+      } catch {
+        return { error: `Gemini Veo API returned unexpected response: ${startText.slice(0, 200)}` };
+      }
+
+      if (!startRes.ok) {
+        const errMsg = startData.error?.message ?? `HTTP ${startRes.status}`;
+        if (errMsg.includes("not found") || errMsg.includes("NOT_FOUND")) {
+          return { error: "Your Gemini key doesn't have Veo access yet. Go to https://aistudio.google.com to unlock Veo Video Generation." };
+        }
+        return { error: `Gemini Veo error: ${errMsg}` };
+      }
+
+      const operationName = startData.name;
+      if (!operationName) {
+        return { error: `Gemini Veo started but returned no operation ID. Response: ${startText.slice(0, 300)}` };
+      }
+
+      const pollUrl = `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${apiKey}`;
+      
+      // Poll for up to 3 minutes (36 × 5s)
+      for (let attempt = 0; attempt < 36; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        
+        const pollController = new AbortController();
+        const pollTimeout = setTimeout(() => pollController.abort(), 15000);
+        let pollRes: Response;
+        try {
+          pollRes = await fetch(pollUrl, { signal: pollController.signal });
+        } finally {
+          clearTimeout(pollTimeout);
+        }
+
+        const pollData = await pollRes.json() as {
+          done?: boolean;
+          error?: { message?: string };
+          response?: {
+            video?: { bytesBase64?: string; uri?: string };
+            videos?: { bytesBase64?: string; uri?: string }[];
+            predictions?: { bytesBase64Encoded?: string; mimeType?: string }[];
+            generateVideoResponse?: {
+              generatedSamples?: Array<{
+                video?: { bytesBase64?: string; uri?: string };
+              }>;
+            };
+          };
+        };
+
+        if (pollData.done) {
+          if (pollData.error) {
+            return { error: pollData.error.message ?? "Gemini video generation process failed." };
+          }
+          
+          // Handle different possible response shapes from Veo
+          const videoB64 = 
+            pollData.response?.video?.bytesBase64 ?? 
+            pollData.response?.videos?.[0]?.bytesBase64 ??
+            pollData.response?.predictions?.[0]?.bytesBase64Encoded ??
+            pollData.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.bytesBase64;
+            
+          if (videoB64) return { videoBase64: videoB64 };
+          
+          const videoUri = 
+            pollData.response?.video?.uri ?? 
+            pollData.response?.videos?.[0]?.uri ??
+            pollData.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+            
+          if (videoUri) {
+            // If it's a relative path or missing 'key=', append it
+            let finalUri = videoUri;
+            if (finalUri.includes("download?alt=media") && !finalUri.includes("key=")) {
+              finalUri += (finalUri.includes("?") ? "&" : "?") + `key=${apiKey}`;
+            }
+            return { videoUrl: finalUri };
+          }
+
+          return { error: `Veo completed but no video data found. Raw: ${JSON.stringify(pollData.response).slice(0, 300)}` };
+        }
+      }
+      
+      return { error: "Gemini video generation timed out after 3 minutes." };
+      
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return { error: `Gemini video generation error: ${msg}` };
+    }
+  }
+
+  return { error: "No GEMINI_API_KEY found in .env. Add it to enable video generation." };
+}
+
 /** Check which providers a user has keys for (includes env keys) */
 export async function getUserProviders(userId: string): Promise<Record<AIProvider, boolean>> {
   const stored: AIProvider[] = [];

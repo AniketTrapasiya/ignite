@@ -111,3 +111,56 @@ export function extractResultForTelegram(engineOutput: string): string {
   const match = engineOutput.match(/RESULT:\s*([\s\S]+)$/);
   return match ? match[1].trim() : engineOutput.trim();
 }
+
+/**
+ * Send raw media (buffer or base64) to Telegram using multipart/form-data.
+ */
+export async function sendTelegramMediaBuffer(
+  botToken: string,
+  chatId: string,
+  mediaData: Buffer | string, // Buffer or base64 string
+  type: "photo" | "video" | "audio",
+  filename: string,
+  caption?: string
+): Promise<{ ok: boolean; description?: string }> {
+  try {
+    const formData = new FormData();
+    formData.append("chat_id", chatId);
+    if (caption) formData.append("caption", caption);
+    formData.append("parse_mode", "HTML");
+
+    // Convert to Blob/File for FormData
+    let blob: Blob;
+    if (Buffer.isBuffer(mediaData)) {
+      blob = new Blob([new Uint8Array(mediaData)]);
+    } else if (typeof mediaData === "string" && mediaData.startsWith("data:")) {
+      // Data URL (base64)
+      const base64Data = mediaData.split(",")[1];
+      const binaryData = Buffer.from(base64Data, "base64");
+      blob = new Blob([new Uint8Array(binaryData)]);
+    } else if (typeof mediaData === "string") {
+      // Just base64
+      const binaryData = Buffer.from(mediaData, "base64");
+      blob = new Blob([new Uint8Array(binaryData)]);
+    } else {
+      throw new Error("Invalid media data format");
+    }
+
+    formData.append(type, blob, filename);
+
+    const method = type === "photo" ? "sendPhoto" : type === "video" ? "sendVideo" : "sendAudio";
+    const res = await fetch(`${TELEGRAM_API}/bot${botToken}/${method}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const json = (await res.json()) as { ok: boolean; description?: string };
+    return json;
+  } catch (err) {
+    return {
+      ok: false,
+      description: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+

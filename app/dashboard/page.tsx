@@ -1,4 +1,4 @@
-﻿import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -48,14 +48,14 @@ export default async function DashboardPage() {
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
+    <div className="p-6 max-w-5xl mx-auto space-y-8 cyber-grid">
       {/* Welcome */}
-      <div className="pt-2">
-        <h2 className="text-2xl font-bold text-white">
+      <div className="pt-2 relative z-10">
+        <h2 className="text-2xl font-bold text-white glitch-text" data-text={`Hey, ${firstName} 👋`}>
           Hey, {firstName} 👋
         </h2>
         <p className="text-white/40 text-sm mt-1">
-          Your AI automation platform is ready.
+          Your AI automation platform is ready. <span className="text-purple-400/60 text-xs">// Era 2626</span>
         </p>
       </div>
 
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="rounded-2xl border border-white/8 bg-white/3 p-5 hover:bg-white/5 transition-colors"
+            className="rounded-2xl border border-white/8 bg-white/3 p-5 hover:bg-white/5 transition-all holo-border group"
           >
             <p className="text-2xl mb-2">{stat.icon}</p>
             <p className="text-3xl font-bold text-white">{stat.value}</p>

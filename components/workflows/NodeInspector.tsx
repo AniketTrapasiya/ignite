@@ -214,19 +214,24 @@ export function NodeInspector({ node, onChange, onCommit, onDelete }: Props) {
         return (
           <>
             {field("Prompt", "prompt", { rows: 4, placeholder: "A futuristic city at sunset...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
-            {select("Aspect Ratio", "aspectRatio", ["1:1", "16:9", "9:16"])}
+            {select("Model", "model", ["dall-e-3", "dall-e-2", "imagen-3.0-generate-002"])}
+            {select("Size", "size", ["1024x1024", "1792x1024", "1024x1792"])}
+            {select("Quality", "quality", ["standard", "hd"])}
           </>
         );
       case "video_gen":
         return (
           <>
-            {field("Prompt", "prompt", { rows: 4, placeholder: "A drone flying over mountains...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
+            {field("Prompt", "prompt", { rows: 4, placeholder: "A drone flying over mountains at golden hour...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
+            {select("Aspect Ratio", "aspectRatio", ["16:9", "9:16", "1:1"])}
           </>
         );
       case "audio_gen":
         return (
           <>
-            {field("Prompt", "prompt", { rows: 4, placeholder: "A calm ambient music track...", required: true, hint: "Use {{nodeId.field}} for dynamic prompts" })}
+            {field("Text to speak", "prompt", { rows: 4, placeholder: "Hello, welcome to AutoFlow...", required: true, hint: "Use {{nodeId.field}} for dynamic text" })}
+            {select("Voice", "voice", ["alloy", "echo", "fable", "onyx", "nova", "shimmer"])}
+            {select("Model", "model", ["tts-1", "tts-1-hd"])}
           </>
         );
       default:

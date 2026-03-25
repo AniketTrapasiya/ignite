@@ -83,7 +83,7 @@ interface AvailableModel {
   cap?: string[];
 }
 
-type OutputType = "text" | "image" | "audio";
+type OutputType = "text" | "image" | "audio" | "video";
 type Phase = 0 | 1 | 2 | 3 | 4; // 0=idle 1=fueled 2=priming 3=running 4=done
 
 // ── Phase Tracker ──────────────────────────────────────────────────────────
@@ -211,8 +211,10 @@ export default function EnginePage() {
   const [mediaContext, setMediaContext] = useState<string>("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
+  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
   const [ttsVoice, setTtsVoice] = useState("alloy");
   const [imageSize, setImageSize] = useState("1024x1024");
+  const [videoAspectRatio, setVideoAspectRatio] = useState("16:9");
   const [publishPlatforms, setPublishPlatforms] = useState<string[]>([]);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -324,6 +326,7 @@ export default function EnginePage() {
     setStepsPopupOpen(false);
     setGeneratedImage(null);
     setGeneratedAudio(null);
+    setGeneratedVideo(null);
     setEngineState("thinking");
 
     const abort = new AbortController();
@@ -342,6 +345,7 @@ export default function EnginePage() {
             prompt: prompt.trim(),
             model: selectedModel.startsWith("dall-e") || selectedModel.startsWith("imagen") ? selectedModel : "dall-e-3",
             size: imageSize,
+            publishTo: publishPlatforms,
           }),
         });
         const data = await res.json();
@@ -372,11 +376,47 @@ export default function EnginePage() {
             text: prompt.trim(),
             model: selectedModel.startsWith("tts-") ? selectedModel : "tts-1",
             voice: ttsVoice,
+            publishTo: publishPlatforms,
           }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Audio generation failed");
         setGeneratedAudio(data.audioBase64 ?? null);
+        setEngineState("success");
+        setIsDone(true);
+        setTimeout(() => setEngineState("idle"), 4000);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setRunError(err instanceof Error ? err.message : "Unknown error");
+        setEngineState("error");
+        setIsDone(true);
+      }
+      return;
+    }
+
+    // ── Video generation ──────────────────────────────────────────────────
+    if (outputType === "video") {
+      try {
+        setEngineState("running");
+        const res = await fetch("/api/engine/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: abort.signal,
+          body: JSON.stringify({
+            type: "video",
+            prompt: prompt.trim(),
+            aspectRatio: videoAspectRatio,
+            publishTo: publishPlatforms,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Video generation failed");
+        
+        const videoSrc = data.videoBase64
+          ? `data:video/mp4;base64,${data.videoBase64}`
+          : data.videoUrl ?? null;
+        
+        setGeneratedVideo(videoSrc);
         setEngineState("success");
         setIsDone(true);
         setTimeout(() => setEngineState("idle"), 4000);
@@ -515,6 +555,7 @@ export default function EnginePage() {
     setStepsPopupOpen(false);
     setGeneratedImage(null);
     setGeneratedAudio(null);
+    setGeneratedVideo(null);
     setMediaFile(null);
     setMediaContext("");
     setToolEvents([]);
@@ -531,7 +572,7 @@ export default function EnginePage() {
   const stepsDone = outputLines.filter((l) => l.type === "step").length;
 
   return (
-    <div className="min-h-screen bg-[#07070f] text-white flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-[#07070f] text-white flex flex-col overflow-hidden cyber-grid">
       {/* Save Memory Modal */}
       <SaveMemoryModal
         isOpen={saveModalOpen}
@@ -547,10 +588,10 @@ export default function EnginePage() {
       {/* ── Top Header ── */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/6">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#e91e8c", textShadow: "0 0 30px rgba(233,30,140,0.45)" }}>
+          <h1 className="text-2xl font-extrabold tracking-tight neon-text-pink" style={{ color: "#e91e8c" }}>
             ENGINE ROOM
           </h1>
-          <p className="text-white/30 text-xs mt-0.5 tracking-widest uppercase">Fuel it. Prime it. Ignite.</p>
+          <p className="text-white/30 text-xs mt-0.5 tracking-widest uppercase">Fuel it. Prime it. Ignite. — Era 2626</p>
         </div>
 
         <PhaseTracker phase={phase} />
@@ -582,7 +623,12 @@ export default function EnginePage() {
       </div>
 
       {/* ── 3-Panel Cockpit ── */}
-      <div className="flex-1 grid grid-cols-[480px_1fr_480px] gap-4 p-4 overflow-hidden">
+      <div className="flex-1 grid grid-cols-[480px_1fr_480px] gap-4 p-4 overflow-hidden relative z-10">
+
+        {/* Ambient floating orbs */}
+        <div className="ambient-orb" style={{ width: 200, height: 200, background: "rgba(124,58,237,0.08)", top: "10%", left: "5%" }} />
+        <div className="ambient-orb" style={{ width: 150, height: 150, background: "rgba(233,30,140,0.06)", top: "60%", right: "8%", animationDelay: "4s" }} />
+        <div className="ambient-orb" style={{ width: 180, height: 180, background: "rgba(34,211,238,0.05)", bottom: "15%", left: "40%", animationDelay: "8s" }} />
 
         {/* ════ LEFT COLUMN ════ */}
         <div className="flex flex-col gap-4 overflow-hidden">
@@ -592,6 +638,7 @@ export default function EnginePage() {
             {([
               { t: "text" as OutputType, label: "Text", icon: "⌨️", desc: "LLM reasoning" },
               { t: "image" as OutputType, label: "Image", icon: "🎨", desc: "AI generation" },
+              { t: "video" as OutputType, label: "Video", icon: "🎬", desc: "AI video gen" },
               { t: "audio" as OutputType, label: "Audio", icon: "🎵", desc: "Text-to-speech" },
             ] as { t: OutputType; label: string; icon: string; desc: string }[]).map((opt) => (
               <button
@@ -632,7 +679,7 @@ export default function EnginePage() {
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ background: "#a855f7", boxShadow: "0 0 6px #a855f7" }} />
               <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">
-                {outputType === "text" ? "Fuel Input" : outputType === "image" ? "Image Prompt" : "TTS Input"}
+                {outputType === "text" ? "Fuel Input" : outputType === "image" ? "Image Prompt" : outputType === "video" ? "Video Prompt" : "TTS Input"}
               </span>
               <span className="ml-auto text-xs text-white/20">{prompt.length > 0 ? `${prompt.length} chars` : "⌘+Enter to run"}</span>
             </div>
@@ -644,9 +691,11 @@ export default function EnginePage() {
               placeholder={
                 outputType === "image"
                   ? "Describe the image to generate...\n\nExample: A futuristic city at night with neon lights reflecting on wet streets, cinematic, 8K"
-                  : outputType === "audio"
-                    ? "Enter the text to convert to speech...\n\nExample: Welcome to AutoFlow. Your AI automation engine is ready."
-                    : "Describe what you want the engine to do...\n\nExample: Find trending AI videos on YouTube and write a 60-second script."
+                  : outputType === "video"
+                    ? "Describe the video to generate...\n\nExample: Aerial drone shot flying over a futuristic cityscape at golden hour, cinematic motion"
+                    : outputType === "audio"
+                      ? "Enter the text to convert to speech...\n\nExample: Welcome to AutoFlow. Your AI automation engine is ready."
+                      : "Describe what you want the engine to do...\n\nExample: Find trending AI videos on YouTube and write a 60-second script."
               }
               rows={6}
               disabled={isRunning}
@@ -691,6 +740,33 @@ export default function EnginePage() {
                       onClick={() => setImageSize(size)}
                       className="px-2 py-1 rounded-lg text-[10px] border transition-all"
                       style={imageSize === size ? {
+                        background: "rgba(168,85,247,0.15)",
+                        borderColor: "rgba(168,85,247,0.5)",
+                        color: "#c084fc",
+                      } : {
+                        background: "transparent",
+                        borderColor: "rgba(255,255,255,0.1)",
+                        color: "rgba(255,255,255,0.3)",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Video options */}
+            {outputType === "video" && (
+              <div className="flex items-center gap-3 pt-1 border-t border-white/5">
+                <span className="text-xs text-white/30">Ratio:</span>
+                <div className="flex gap-1.5">
+                  {[["16:9", "Wide"], ["9:16", "Portrait"], ["1:1", "Square"]].map(([ratio, label]) => (
+                    <button
+                      key={ratio}
+                      onClick={() => setVideoAspectRatio(ratio)}
+                      className="px-2 py-1 rounded-lg text-[10px] border transition-all"
+                      style={videoAspectRatio === ratio ? {
                         background: "rgba(168,85,247,0.15)",
                         borderColor: "rgba(168,85,247,0.5)",
                         color: "#c084fc",
@@ -886,8 +962,8 @@ export default function EnginePage() {
         {/* ════ CENTER COLUMN ════ */}
         <div className="flex flex-col items-center gap-4 py-4">
           <p
-            className="text-xs font-extrabold uppercase tracking-[0.3em]"
-            style={{ color: "#22d3ee", textShadow: "0 0 20px rgba(34,211,238,0.5)" }}
+            className="text-xs font-extrabold uppercase tracking-[0.3em] neon-text-cyan"
+            style={{ color: "#22d3ee" }}
           >
             Engine Chamber
           </p>
@@ -897,7 +973,7 @@ export default function EnginePage() {
 
           {/* ── Power gauge + status bars ── */}
           <div
-            className="w-full max-w-75 rounded-2xl border p-4 space-y-3"
+            className="w-full max-w-75 rounded-2xl border p-4 space-y-3 holo-border"
             style={{
               background: "linear-gradient(145deg, #0d0b1e 0%, #080614 100%)",
               borderColor: "rgba(120,50,255,0.2)",
@@ -1136,7 +1212,7 @@ export default function EnginePage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   whileHover={prompt.trim() ? { scale: 1.03 } : {}}
                   whileTap={prompt.trim() ? { scale: 0.97 } : {}}
-                  className="relative w-full py-4 rounded-2xl text-base font-extrabold text-white disabled:opacity-25 disabled:cursor-not-allowed overflow-hidden"
+                  className="relative w-full py-4 rounded-2xl text-base font-extrabold text-white disabled:opacity-25 disabled:cursor-not-allowed overflow-hidden plasma-pulse"
                   style={{
                     background: prompt.trim()
                       ? "linear-gradient(135deg, #ea580c 0%, #f97316 60%, #fb923c 100%)"
@@ -1227,7 +1303,7 @@ export default function EnginePage() {
 
           {/* LIVE OUTPUT */}
           <div
-            className="rounded-2xl border flex flex-col overflow-hidden"
+            className="rounded-2xl border flex flex-col overflow-hidden scanline-overlay"
             style={{
               background: "linear-gradient(145deg, #07060f 0%, #0b0918 100%)",
               borderColor: "rgba(120,50,255,0.25)",
@@ -1610,7 +1686,7 @@ export default function EnginePage() {
       </div>
 
       {/* ════ FULL-WIDTH RESULT PANEL ════ */}
-      {(isRunning || isDone || chunks.length > 0 || generatedImage || generatedAudio) && (
+      {(isRunning || isDone || chunks.length > 0 || generatedImage || generatedAudio || generatedVideo) && (
         <div className="mx-4 mb-4 rounded-2xl border overflow-hidden transition-all duration-500"
           style={{
             background: "#09091a",
@@ -1780,6 +1856,37 @@ export default function EnginePage() {
                     className="w-full max-w-lg rounded-xl border border-white/10"
                     style={{ boxShadow: "0 0 40px rgba(168,85,247,0.15)" }}
                   />
+                </div>
+              )}
+
+              {/* ─── VIDEO RESULT ─── */}
+              {generatedVideo && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-pink-400" />
+                    <span className="text-xs font-semibold text-pink-400 uppercase tracking-widest">Generated Video</span>
+                    <a
+                      href={generatedVideo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      className="ml-auto text-xs px-2.5 py-1 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
+                    >
+                      ↓ Download
+                    </a>
+                  </div>
+                  <div
+                    className="rounded-xl border border-white/10 overflow-hidden"
+                    style={{ background: "rgba(236,72,153,0.04)" }}
+                  >
+                    <video
+                      controls
+                      src={generatedVideo}
+                      className="w-full max-w-lg rounded-xl"
+                      style={{ boxShadow: "0 0 40px rgba(236,72,153,0.15)" }}
+                    />
+                    <p className="text-xs text-white/30 p-3 italic">&quot;{prompt.slice(0, 120)}{prompt.length > 120 ? "…" : ""}&quot;</p>
+                  </div>
                 </div>
               )}
 

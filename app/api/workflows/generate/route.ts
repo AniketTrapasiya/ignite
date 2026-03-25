@@ -24,6 +24,9 @@ Node types:
   delay    — Wait for a duration. data must include: { label, duration: 60, unit: "seconds"|"minutes"|"hours" }
   transform — Data manipulation/formatting. data must include: { label, expression: "<jq or template>" }
   output   — Final output/response. data must include: { label, format: "text"|"json"|"email" }
+  image_gen — AI image generation. data must include: { label, prompt: "<template>", model: "dall-e-3"|"imagen-3.0-generate-002", size: "1024x1024"|"1792x1024"|"1024x1792", quality: "standard"|"hd" }
+  video_gen — AI video generation. data must include: { label, prompt: "<template>", aspectRatio: "16:9"|"9:16"|"1:1" }
+  audio_gen — Text-to-speech. data must include: { label, prompt: "<text to speak>", voice: "alloy"|"echo"|"fable"|"onyx"|"nova"|"shimmer", model: "tts-1"|"tts-1-hd" }
 
 Layout: Position nodes top-to-bottom. trigger starts at x:300, y:50. Each subsequent node adds y:120.
 Branch nodes: true path x:150, false path x:450, then converge back at x:300.

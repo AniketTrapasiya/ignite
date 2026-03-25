@@ -274,41 +274,73 @@ async function executeNode(node: WorkflowNode, ctx: ExecutionContext, userId: st
 
     case "image_gen": {
       const prompt = interpolate(String(d.prompt ?? ""), ctx);
-      const aspectRatio = String(d.aspectRatio ?? "1:1");
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${aspectRatio === "16:9" ? 1024 : 512}&height=${aspectRatio === "9:16" ? 1024 : 512}&nologo=true`;
+      const model = String(d.model ?? "dall-e-3");
+      const size = String(d.size ?? "1024x1024");
+      const quality = String(d.quality ?? "standard");
+
+      const { generateImage } = await import("./providers");
+      const result = await generateImage(userId, prompt, { model, size, quality });
+
+      if (result.error) throw new Error(`Image generation failed: ${result.error}`);
+
+      const imageData = result.b64
+        ? `data:image/png;base64,${result.b64}`
+        : result.url ?? "";
+
       return {
         success: true,
-        image_url: url,
-        image: url, // Alias for convenience
-        url, // Alias for convenience
-        text: url, // Alias so {{nodeId.text}} works
-        prompt
+        image_url: imageData,
+        image: imageData,
+        url: imageData,
+        text: imageData,
+        b64: result.b64,
+        prompt,
       };
     }
 
     case "video_gen": {
       const prompt = interpolate(String(d.prompt ?? ""), ctx);
-      const url = "https://videos.pexels.com/video-files/3163534/3163534-uhd_2560_1440_30fps.mp4";
+      const aspectRatio = String(d.aspectRatio ?? "16:9");
+
+      const { generateVideo } = await import("./providers");
+      const result = await generateVideo(userId, prompt, { aspectRatio });
+
+      if (result.error) throw new Error(`Video generation failed: ${result.error}`);
+
+      const videoUrl = result.videoUrl ?? "";
+
       return {
         success: true,
-        video_url: url,
-        video: url,
-        url,
-        text: url,
-        prompt
+        video_url: videoUrl,
+        video: videoUrl,
+        url: videoUrl,
+        text: videoUrl,
+        prompt,
       };
     }
 
     case "audio_gen": {
-      const prompt = interpolate(String(d.prompt ?? ""), ctx);
-      const url = "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg";
+      const text = interpolate(String(d.prompt ?? d.text ?? ""), ctx);
+      const voice = String(d.voice ?? "alloy");
+      const model = String(d.model ?? "tts-1");
+
+      const { generateAudio } = await import("./providers");
+      const result = await generateAudio(userId, text, { model, voice });
+
+      if (result.error) throw new Error(`Audio generation failed: ${result.error}`);
+
+      const audioData = result.audioBase64
+        ? `data:audio/mpeg;base64,${result.audioBase64}`
+        : "";
+
       return {
         success: true,
-        audio_url: url,
-        audio: url,
-        url,
-        text: url,
-        prompt
+        audio_url: audioData,
+        audio: audioData,
+        url: audioData,
+        text: audioData,
+        audioBase64: result.audioBase64,
+        prompt: text,
       };
     }
 
