@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  AgentDraft: 'AgentDraft',
   Otp: 'Otp',
   PasswordReset: 'PasswordReset',
   Workflow: 'Workflow',
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "otp" | "passwordReset" | "workflow" | "workflowExecution" | "engineMemory" | "integration" | "engineRun" | "agent" | "agentAction" | "agentRun" | "notification" | "aICredential" | "chatSession" | "chatMessage" | "pendingCredential" | "skillGoal" | "skillChallenge"
+    modelProps: "user" | "agentDraft" | "otp" | "passwordReset" | "workflow" | "workflowExecution" | "engineMemory" | "integration" | "engineRun" | "agent" | "agentAction" | "agentRun" | "notification" | "aICredential" | "chatSession" | "chatMessage" | "pendingCredential" | "skillGoal" | "skillChallenge"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -492,6 +493,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentDraft: {
+      payload: Prisma.$AgentDraftPayload<ExtArgs>
+      fields: Prisma.AgentDraftFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentDraftFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentDraftFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentDraftFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentDraftFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>
+        }
+        findMany: {
+          args: Prisma.AgentDraftFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>[]
+        }
+        create: {
+          args: Prisma.AgentDraftCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>
+        }
+        createMany: {
+          args: Prisma.AgentDraftCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AgentDraftCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>[]
+        }
+        delete: {
+          args: Prisma.AgentDraftDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>
+        }
+        update: {
+          args: Prisma.AgentDraftUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentDraftDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentDraftUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AgentDraftUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>[]
+        }
+        upsert: {
+          args: Prisma.AgentDraftUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDraftPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentDraftAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentDraft>
+        }
+        groupBy: {
+          args: Prisma.AgentDraftGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentDraftGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentDraftCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentDraftCountAggregateOutputType> | number
         }
       }
     }
@@ -1805,6 +1880,20 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const AgentDraftScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  platform: 'platform',
+  targetUrl: 'targetUrl',
+  content: 'content',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentDraftScalarFieldEnum = (typeof AgentDraftScalarFieldEnum)[keyof typeof AgentDraftScalarFieldEnum]
+
+
 export const OtpScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -2379,6 +2468,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  agentDraft?: Prisma.AgentDraftOmit
   otp?: Prisma.OtpOmit
   passwordReset?: Prisma.PasswordResetOmit
   workflow?: Prisma.WorkflowOmit

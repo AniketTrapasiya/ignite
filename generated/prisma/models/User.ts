@@ -210,6 +210,7 @@ export type UserWhereInput = {
   engineRuns?: Prisma.EngineRunListRelationFilter
   workflowExecutions?: Prisma.WorkflowExecutionListRelationFilter
   skillGoals?: Prisma.SkillGoalListRelationFilter
+  agentDrafts?: Prisma.AgentDraftListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -232,6 +233,7 @@ export type UserOrderByWithRelationInput = {
   engineRuns?: Prisma.EngineRunOrderByRelationAggregateInput
   workflowExecutions?: Prisma.WorkflowExecutionOrderByRelationAggregateInput
   skillGoals?: Prisma.SkillGoalOrderByRelationAggregateInput
+  agentDrafts?: Prisma.AgentDraftOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -257,6 +259,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   engineRuns?: Prisma.EngineRunListRelationFilter
   workflowExecutions?: Prisma.WorkflowExecutionListRelationFilter
   skillGoals?: Prisma.SkillGoalListRelationFilter
+  agentDrafts?: Prisma.AgentDraftListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -305,6 +308,7 @@ export type UserCreateInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -327,6 +331,7 @@ export type UserUncheckedCreateInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -349,6 +354,7 @@ export type UserUpdateInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -371,6 +377,7 @@ export type UserUncheckedUpdateInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -448,6 +455,20 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutAgentDraftsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAgentDraftsInput, Prisma.UserUncheckedCreateWithoutAgentDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAgentDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAgentDraftsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAgentDraftsInput, Prisma.UserUncheckedCreateWithoutAgentDraftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAgentDraftsInput
+  upsert?: Prisma.UserUpsertWithoutAgentDraftsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAgentDraftsInput, Prisma.UserUpdateWithoutAgentDraftsInput>, Prisma.UserUncheckedUpdateWithoutAgentDraftsInput>
 }
 
 export type UserCreateNestedOneWithoutOtpsInput = {
@@ -618,6 +639,110 @@ export type UserUpdateOneRequiredWithoutSkillGoalsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSkillGoalsInput, Prisma.UserUpdateWithoutSkillGoalsInput>, Prisma.UserUncheckedUpdateWithoutSkillGoalsInput>
 }
 
+export type UserCreateWithoutAgentDraftsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  agents?: Prisma.AgentCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  aiCredentials?: Prisma.AICredentialCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  otps?: Prisma.OtpCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  workflows?: Prisma.WorkflowCreateNestedManyWithoutUserInput
+  memories?: Prisma.EngineMemoryCreateNestedManyWithoutUserInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutUserInput
+  engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
+  workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
+  skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAgentDraftsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  agents?: Prisma.AgentUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  aiCredentials?: Prisma.AICredentialUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  otps?: Prisma.OtpUncheckedCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  workflows?: Prisma.WorkflowUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.EngineMemoryUncheckedCreateNestedManyWithoutUserInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutUserInput
+  engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
+  workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
+  skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAgentDraftsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAgentDraftsInput, Prisma.UserUncheckedCreateWithoutAgentDraftsInput>
+}
+
+export type UserUpsertWithoutAgentDraftsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAgentDraftsInput, Prisma.UserUncheckedUpdateWithoutAgentDraftsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAgentDraftsInput, Prisma.UserUncheckedCreateWithoutAgentDraftsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAgentDraftsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAgentDraftsInput, Prisma.UserUncheckedUpdateWithoutAgentDraftsInput>
+}
+
+export type UserUpdateWithoutAgentDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  agents?: Prisma.AgentUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  aiCredentials?: Prisma.AICredentialUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  otps?: Prisma.OtpUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  workflows?: Prisma.WorkflowUpdateManyWithoutUserNestedInput
+  memories?: Prisma.EngineMemoryUpdateManyWithoutUserNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutUserNestedInput
+  engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
+  workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
+  skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAgentDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  agents?: Prisma.AgentUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  aiCredentials?: Prisma.AICredentialUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  otps?: Prisma.OtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  workflows?: Prisma.WorkflowUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.EngineMemoryUncheckedUpdateManyWithoutUserNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutUserNestedInput
+  engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
+  workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
+  skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateWithoutOtpsInput = {
   id?: string
   email: string
@@ -637,6 +762,7 @@ export type UserCreateWithoutOtpsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOtpsInput = {
@@ -658,6 +784,7 @@ export type UserUncheckedCreateWithoutOtpsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOtpsInput = {
@@ -695,6 +822,7 @@ export type UserUpdateWithoutOtpsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOtpsInput = {
@@ -716,6 +844,7 @@ export type UserUncheckedUpdateWithoutOtpsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetsInput = {
@@ -737,6 +866,7 @@ export type UserCreateWithoutPasswordResetsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetsInput = {
@@ -758,6 +888,7 @@ export type UserUncheckedCreateWithoutPasswordResetsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetsInput = {
@@ -795,6 +926,7 @@ export type UserUpdateWithoutPasswordResetsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetsInput = {
@@ -816,6 +948,7 @@ export type UserUncheckedUpdateWithoutPasswordResetsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkflowsInput = {
@@ -837,6 +970,7 @@ export type UserCreateWithoutWorkflowsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkflowsInput = {
@@ -858,6 +992,7 @@ export type UserUncheckedCreateWithoutWorkflowsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkflowsInput = {
@@ -895,6 +1030,7 @@ export type UserUpdateWithoutWorkflowsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkflowsInput = {
@@ -916,6 +1052,7 @@ export type UserUncheckedUpdateWithoutWorkflowsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkflowExecutionsInput = {
@@ -937,6 +1074,7 @@ export type UserCreateWithoutWorkflowExecutionsInput = {
   integrations?: Prisma.IntegrationCreateNestedManyWithoutUserInput
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkflowExecutionsInput = {
@@ -958,6 +1096,7 @@ export type UserUncheckedCreateWithoutWorkflowExecutionsInput = {
   integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutUserInput
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkflowExecutionsInput = {
@@ -995,6 +1134,7 @@ export type UserUpdateWithoutWorkflowExecutionsInput = {
   integrations?: Prisma.IntegrationUpdateManyWithoutUserNestedInput
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkflowExecutionsInput = {
@@ -1016,6 +1156,7 @@ export type UserUncheckedUpdateWithoutWorkflowExecutionsInput = {
   integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutUserNestedInput
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMemoriesInput = {
@@ -1037,6 +1178,7 @@ export type UserCreateWithoutMemoriesInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMemoriesInput = {
@@ -1058,6 +1200,7 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMemoriesInput = {
@@ -1095,6 +1238,7 @@ export type UserUpdateWithoutMemoriesInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMemoriesInput = {
@@ -1116,6 +1260,7 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutIntegrationsInput = {
@@ -1137,6 +1282,7 @@ export type UserCreateWithoutIntegrationsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutIntegrationsInput = {
@@ -1158,6 +1304,7 @@ export type UserUncheckedCreateWithoutIntegrationsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutIntegrationsInput = {
@@ -1195,6 +1342,7 @@ export type UserUpdateWithoutIntegrationsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutIntegrationsInput = {
@@ -1216,6 +1364,7 @@ export type UserUncheckedUpdateWithoutIntegrationsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEngineRunsInput = {
@@ -1237,6 +1386,7 @@ export type UserCreateWithoutEngineRunsInput = {
   integrations?: Prisma.IntegrationCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEngineRunsInput = {
@@ -1258,6 +1408,7 @@ export type UserUncheckedCreateWithoutEngineRunsInput = {
   integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEngineRunsInput = {
@@ -1295,6 +1446,7 @@ export type UserUpdateWithoutEngineRunsInput = {
   integrations?: Prisma.IntegrationUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEngineRunsInput = {
@@ -1316,6 +1468,7 @@ export type UserUncheckedUpdateWithoutEngineRunsInput = {
   integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAgentsInput = {
@@ -1337,6 +1490,7 @@ export type UserCreateWithoutAgentsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAgentsInput = {
@@ -1358,6 +1512,7 @@ export type UserUncheckedCreateWithoutAgentsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAgentsInput = {
@@ -1395,6 +1550,7 @@ export type UserUpdateWithoutAgentsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAgentsInput = {
@@ -1416,6 +1572,7 @@ export type UserUncheckedUpdateWithoutAgentsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1437,6 +1594,7 @@ export type UserCreateWithoutNotificationsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1458,6 +1616,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1495,6 +1654,7 @@ export type UserUpdateWithoutNotificationsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1516,6 +1676,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiCredentialsInput = {
@@ -1537,6 +1698,7 @@ export type UserCreateWithoutAiCredentialsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiCredentialsInput = {
@@ -1558,6 +1720,7 @@ export type UserUncheckedCreateWithoutAiCredentialsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiCredentialsInput = {
@@ -1595,6 +1758,7 @@ export type UserUpdateWithoutAiCredentialsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiCredentialsInput = {
@@ -1616,6 +1780,7 @@ export type UserUncheckedUpdateWithoutAiCredentialsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatSessionsInput = {
@@ -1637,6 +1802,7 @@ export type UserCreateWithoutChatSessionsInput = {
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatSessionsInput = {
@@ -1658,6 +1824,7 @@ export type UserUncheckedCreateWithoutChatSessionsInput = {
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
   skillGoals?: Prisma.SkillGoalUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatSessionsInput = {
@@ -1695,6 +1862,7 @@ export type UserUpdateWithoutChatSessionsInput = {
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatSessionsInput = {
@@ -1716,6 +1884,7 @@ export type UserUncheckedUpdateWithoutChatSessionsInput = {
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
   skillGoals?: Prisma.SkillGoalUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSkillGoalsInput = {
@@ -1737,6 +1906,7 @@ export type UserCreateWithoutSkillGoalsInput = {
   integrations?: Prisma.IntegrationCreateNestedManyWithoutUserInput
   engineRuns?: Prisma.EngineRunCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSkillGoalsInput = {
@@ -1758,6 +1928,7 @@ export type UserUncheckedCreateWithoutSkillGoalsInput = {
   integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutUserInput
   engineRuns?: Prisma.EngineRunUncheckedCreateNestedManyWithoutUserInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedCreateNestedManyWithoutUserInput
+  agentDrafts?: Prisma.AgentDraftUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSkillGoalsInput = {
@@ -1795,6 +1966,7 @@ export type UserUpdateWithoutSkillGoalsInput = {
   integrations?: Prisma.IntegrationUpdateManyWithoutUserNestedInput
   engineRuns?: Prisma.EngineRunUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillGoalsInput = {
@@ -1816,6 +1988,7 @@ export type UserUncheckedUpdateWithoutSkillGoalsInput = {
   integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutUserNestedInput
   engineRuns?: Prisma.EngineRunUncheckedUpdateManyWithoutUserNestedInput
   workflowExecutions?: Prisma.WorkflowExecutionUncheckedUpdateManyWithoutUserNestedInput
+  agentDrafts?: Prisma.AgentDraftUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1836,6 +2009,7 @@ export type UserCountOutputType = {
   engineRuns: number
   workflowExecutions: number
   skillGoals: number
+  agentDrafts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1851,6 +2025,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   engineRuns?: boolean | UserCountOutputTypeCountEngineRunsArgs
   workflowExecutions?: boolean | UserCountOutputTypeCountWorkflowExecutionsArgs
   skillGoals?: boolean | UserCountOutputTypeCountSkillGoalsArgs
+  agentDrafts?: boolean | UserCountOutputTypeCountAgentDraftsArgs
 }
 
 /**
@@ -1947,6 +2122,13 @@ export type UserCountOutputTypeCountSkillGoalsArgs<ExtArgs extends runtime.Types
   where?: Prisma.SkillGoalWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAgentDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AgentDraftWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1968,6 +2150,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   engineRuns?: boolean | Prisma.User$engineRunsArgs<ExtArgs>
   workflowExecutions?: boolean | Prisma.User$workflowExecutionsArgs<ExtArgs>
   skillGoals?: boolean | Prisma.User$skillGoalsArgs<ExtArgs>
+  agentDrafts?: boolean | Prisma.User$agentDraftsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2015,6 +2198,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   engineRuns?: boolean | Prisma.User$engineRunsArgs<ExtArgs>
   workflowExecutions?: boolean | Prisma.User$workflowExecutionsArgs<ExtArgs>
   skillGoals?: boolean | Prisma.User$skillGoalsArgs<ExtArgs>
+  agentDrafts?: boolean | Prisma.User$agentDraftsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2035,6 +2219,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     engineRuns: Prisma.$EngineRunPayload<ExtArgs>[]
     workflowExecutions: Prisma.$WorkflowExecutionPayload<ExtArgs>[]
     skillGoals: Prisma.$SkillGoalPayload<ExtArgs>[]
+    agentDrafts: Prisma.$AgentDraftPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2450,6 +2635,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   engineRuns<T extends Prisma.User$engineRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$engineRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EngineRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workflowExecutions<T extends Prisma.User$workflowExecutionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workflowExecutionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkflowExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   skillGoals<T extends Prisma.User$skillGoalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$skillGoalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillGoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  agentDrafts<T extends Prisma.User$agentDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$agentDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3164,6 +3350,30 @@ export type User$skillGoalsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.SkillGoalScalarFieldEnum | Prisma.SkillGoalScalarFieldEnum[]
+}
+
+/**
+ * User.agentDrafts
+ */
+export type User$agentDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentDraft
+   */
+  select?: Prisma.AgentDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentDraft
+   */
+  omit?: Prisma.AgentDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentDraftInclude<ExtArgs> | null
+  where?: Prisma.AgentDraftWhereInput
+  orderBy?: Prisma.AgentDraftOrderByWithRelationInput | Prisma.AgentDraftOrderByWithRelationInput[]
+  cursor?: Prisma.AgentDraftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AgentDraftScalarFieldEnum | Prisma.AgentDraftScalarFieldEnum[]
 }
 
 /**

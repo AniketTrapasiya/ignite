@@ -1,5 +1,4 @@
-import fs from 'fs';
-import path from 'path';
+import { prisma } from '@/lib/prisma';
 
 export interface PendingPost {
   id: string;
@@ -10,50 +9,56 @@ export interface PendingPost {
   timestamp: number;
 }
 
-const DB_PATH = path.join(process.cwd(), 'pending_posts.json');
-
-// Initialize local cache file if it doesn't exist
-if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify([]));
-}
-
 export const savePendingPost = async (post: Omit<PendingPost, 'id' | 'timestamp'>): Promise<string> => {
-  const id = `post_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-  const fullPost: PendingPost = { ...post, id, timestamp: Date.now() };
+  const result = await prisma.agentDraft.create({
+    data: {
+      userId: post.userId,
+      platform: post.platform,
+      targetUrl: post.targetUrl,
+      content: post.content,
+    }
+  });
 
-  const data = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  data.push(fullPost);
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-
-  return id;
+  return result.id;
 };
 
-export const getLatestPendingPost = async (userIdStr: string): Promise<PendingPost | null> => {
-  let data = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  data = data.filter((p: PendingPost) => p.userId === userIdStr);
-  if (data.length === 0) return null;
-  return data[data.length - 1];
+export const getLatestPendingPost = async (userId: string): Promise<PendingPost | null> => {
+  const post = await prisma.agentDraft.findFirst({
+    where: { userId, status: 'pending' },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  if (!post) return null;
+  return {
+    ...post,
+    platform: post.platform as 'linkedin' | 'twitter',
+    timestamp: post.createdAt.getTime()
+  };
 };
 
 export const getAllPendingPosts = async (userIdStr?: string): Promise<PendingPost[]> => {
-  let data = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  if (userIdStr) {
-    data = data.filter((p: PendingPost) => p.userId === userIdStr);
-  }
-  return data;
+  const posts = await prisma.agentDraft.findMany({
+    where: userIdStr ? { userId: userIdStr, status: 'pending' } : { status: 'pending' },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  return posts.map(p => ({
+    ...p,
+    platform: p.platform as 'linkedin' | 'twitter',
+    timestamp: p.createdAt.getTime()
+  }));
 };
 
 export const updatePendingPost = async (id: string, newContent: string) => {
-  let data = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  const idx = data.findIndex((p: PendingPost) => p.id === id);
-  if (idx !== -1) {
-    data[idx].content = newContent;
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-  }
+  await prisma.agentDraft.update({
+    where: { id },
+    data: { content: newContent }
+  });
 };
 
 export const clearPendingPost = async (id: string) => {
-  let data = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  data = data.filter((p: PendingPost) => p.id !== id);
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+  await prisma.agentDraft.update({
+    where: { id },
+    data: { status: 'rejected' } // Or delete it if preferred
+  });
 };

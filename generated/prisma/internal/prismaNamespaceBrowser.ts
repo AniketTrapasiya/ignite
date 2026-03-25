@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  AgentDraft: 'AgentDraft',
   Otp: 'Otp',
   PasswordReset: 'PasswordReset',
   Workflow: 'Workflow',
@@ -98,6 +99,20 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const AgentDraftScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  platform: 'platform',
+  targetUrl: 'targetUrl',
+  content: 'content',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentDraftScalarFieldEnum = (typeof AgentDraftScalarFieldEnum)[keyof typeof AgentDraftScalarFieldEnum]
 
 
 export const OtpScalarFieldEnum = {

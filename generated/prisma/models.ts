@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/AgentDraft'
 export type * from './models/Otp'
 export type * from './models/PasswordReset'
 export type * from './models/Workflow'
